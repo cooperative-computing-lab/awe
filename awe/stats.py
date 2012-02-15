@@ -37,15 +37,16 @@ class ExtendableArray(object):
     A numpy.array that can be efficiently appended to
     """
 
-    def __init__(self, initial=0., size=500, factor=2):
+    def __init__(self, typ=np.zeros, size=500, factor=2):
 
-        self._vals   = self._initialize(initial, size)
-        self._initial = initial
+        self._type    = typ
+        self._size0   = size
         self._count   = 0
-        self._factor = factor
+        self._factor  = factor
+        self._vals    = self._initialize()
 
-    def _initialize(self, initial, size):
-        return initial * np.ones(size)
+    def _initialize(self):
+        return self._type(self._size0)
 
     def get(self):
         return self.vals[:self._count]
