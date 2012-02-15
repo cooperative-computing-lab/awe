@@ -37,11 +37,11 @@ class ExtendableArray(object):
     A numpy.array that can be efficiently appended to
     """
 
-    def __init__(self, initial=0., size=500, factor=0.5):
+    def __init__(self, initial=0., size=500, factor=2):
 
         self._vals   = self._initialize(initial, size)
         self._initial = initial
-        self._count   = -1
+        self._count   = 0
         self._factor = factor
 
     def _initialize(self, initial, size):
@@ -51,32 +51,31 @@ class ExtendableArray(object):
         return self.vals[:self._count]
 
     def _realloc(self):
-        awe.log('DEBUG: ExtendableArray._realloc')
-        x     = len(self._vals)
-        alloc = x + x * self._factor
-        vals2 = self._initialize(self._initial, alloc)
-        vals2[:self._count] = self._vals[:self._count]
-        self._vals = vals2
+
+        if self._count == len(self._vals):
+
+            x     = len(self._vals)
+            alloc = x * self._factor
+            vals2 = self._initialize(self._initial, alloc)
+            vals2[:self._count] = self._vals[:self._count]
+            self._vals = vals2
 
 
     def append(self, *values):
-        if self._count == len(self._vals):
-            self._realloc()
 
-        i = self._count + 1
+        i = self._count
         j = i + len(values)
-        awe.log('DEBUG: ExtendableArray.append: i=%d, j=%j' % (i,j))
         self._vals[i:j] = np.array(values)
-        self._count = len(values)
+        self._count += len(values)
 
     def __len__(self):
         return self._count
 
     def __str__(self):
-        return str(self._vals)
+        return str(self._vals[:self._count])
 
     def __repr__(self):
-        return repr(self._vals)
+        return repr(self._vals[:self._count])
             
 
 class Statistics(object):
