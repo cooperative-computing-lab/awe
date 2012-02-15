@@ -141,6 +141,7 @@ class AWE(object):
         self.stats      = awe.stats.AWEStats()
 
 
+    @awe.trace()
     def _submit(self):
 
         for i in xrange(len(self.walkers)):
@@ -149,16 +150,19 @@ class AWE(object):
             self.wq.submit(task)
 
 
+    @awe.trace()
     def _recv(self):
 
         self.stats.time_barrier('start')
-        while not self.wq.empty:
+        awe.log('DEBUG: WQ empty?: %s' % self.wq.empty())
+        while not self.wq.empty():
             awe.log('Waiting for result')
             walker     = self.wq.recv()
             walkers[k] = walker
         self.stats.time_barrier('stop')
 
 
+    @awe.trace()
     def _resample(self):
 
         self.stats.time_resample('start')
@@ -166,6 +170,7 @@ class AWE(object):
         self.stats.time_resample('stop')
             
 
+    @awe.trace()
     def run(self):
 
         for iteration in xrange(self.iterations):

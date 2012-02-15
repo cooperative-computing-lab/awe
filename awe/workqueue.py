@@ -96,12 +96,19 @@ class WorkQueue(object):
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
 
-    empty = property(lambda self: self.wq.empty)
+    def empty(self):
+        return self.wq.empty()
 
     def __del__(self):
         import os
         os.rmdir(self.tmpdir)
 
+
+    @awe.trace()
+    def update_wq_stats(self):
+        self.stats.wq(self.wq)
+
+    @awe.trace()
     def new_task(self, params):
         cmd = self.cfg.executable
         task = WQ.Task('./' + cmd)
@@ -127,13 +134,16 @@ class WorkQueue(object):
 
         return task
 
+    @awe.trace()
     def submit(self, task):
         return self.wq.submit(task)
 
+    @awe.trace()
     def wait(self, *args, **kws):
         return self.wq.wait(*args, **kws)
 
 
+    @awe.trace()
     def _load_result_file(task):
 
         path = task.output_files[0]
@@ -158,9 +168,12 @@ class WorkQueue(object):
         return walker
 
 
+    @awe.trace()
     def recv(self):
 
         while True:
+
+            awe.log('DEBUG waiting for task')
             task = self.wait(self.cfg.waittime)
             self.update_wq_stats()
 

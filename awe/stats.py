@@ -160,17 +160,17 @@ class WQStats(object):
         self.total_workers_joined   = Statistics()
         self.total_workers_removed  = Statistics()
         self.total_bytes_sent       = Statistics()
-        self.total_bytes_recieved   = Statistics()
+        self.total_bytes_received   = Statistics()
         self.total_send_time        = Statistics()
         self.total_receive_time     = Statistics()
 
 
-    def task(task):
+    @awe.trace()
+    def task(self, task):
         """
         Update the running statistics with a task result
         """
-        times = time.time() * np.ones(len(times))
-        self._task_times.append(*times)
+        self._task_times.append(time.time())
 
         self.computation_time       .update(task.computation_time)
         self.total_bytes_transfered .update(task.total_bytes_transfered)
@@ -178,10 +178,12 @@ class WQStats(object):
         self.task_run_time          .update(task.finish_time - task.start_time)
         self.task_life_time         .update(taslk.finish_time - task.submit_time)
 
-    def wq(q):
+    @awe.trace()
+    def wq(self, wq):
 
-        times = time.time() * np.ones(len(times))
-        self._wq_times.append(*times)
+        self._wq_times.append(time.time())
+
+        q = wq.stats
 
         self.workers_ready          .update(q.workers_ready)
         self.workers_busy           .update(q.workers_busy)
@@ -194,7 +196,7 @@ class WQStats(object):
         self.total_workers_joined   .update(q.total_workers_joined)
         self.total_workers_removed  .update(q.total_workers_removed)
         self.total_bytes_sent       .update(q.total_bytes_sent)
-        self.total_bytes_recieved   .update(q.total_bytes_recieved)
+        self.total_bytes_received   .update(q.total_bytes_received)
         self.total_send_time        .update(q.total_send_time)
         self.total_receive_time     .update(q.total_receive_time)
 

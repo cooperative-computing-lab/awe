@@ -1,5 +1,31 @@
 
 
+TRACE = False
+
+class trace(object):
+    def __init__(self, values=False):
+        self.print_values = values
+
+    def prettyargs(self, *args, **kws):
+        if self.print_values:
+            pretty = lambda a: repr(a)
+        else:
+            pretty = lambda a: str(type(a))
+
+        pargs = map(pretty, args)
+        pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in kws.items() ]
+
+        return ', '.join(pargs + pkws)
+
+    def __call__(self, fn):
+        def wrapped(*args, **kws):
+            global TRACE
+            if TRACE:
+                print 'TRACE calling %s(%s)' % (fn.func_name, self.prettyargs(*args, **kws))
+            return fn(*args, **kws)
+        return wrapped
+
+
 
 class StringStream(object):
 
