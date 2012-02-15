@@ -38,15 +38,13 @@ class Walker(object):
 
 class WalkerGroup(object):
 
-    def __init__(self, count=None, natoms=None, topology=None, walkers=None):
+    def __init__(self, count=None, topology=None, walkers=None):
 
-        assert type(count) is int
-        assert type(natoms) is int
-        assert type(topology) is mdtools.prody.AtomGroup
-        # TODO: assert type(walkers) is
+        assert type(count)                is int
+        assert type(topology)             is mdtools.prody.AtomGroup # from a PDB file
+        assert type(iter(walkers).next()) is Walker
 
         self._count    = count
-        self._natoms   = natoms
 
         self.topology  = topology
         self.positions = -1 * np.ones((count, natoms, 3))
@@ -58,6 +56,10 @@ class WalkerGroup(object):
 
         if walkers:
             map(self.add, walkers)
+
+
+    ### some read-only properties
+    natoms = property(lambda self: len(self.topology))
 
 
     def topology(self, pdb):
@@ -79,7 +81,7 @@ class WalkerGroup(object):
 
     def __setitem__(self, i, walker):
 
-        assert walker.natoms == self._natoms
+        assert walker.natoms == self.natoms
         assert i              < self._count
 
         self.positions[ix] = walker.coords
