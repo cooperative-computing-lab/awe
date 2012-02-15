@@ -1,19 +1,5 @@
 
 
-### workaround for now.
-##+ These are the names of the input/output filess to be materialized on the worker
-
-WORKER_PDB_NAME     = 'structure.pdb'
-WORKER_WEIGHTS_NAME = 'weights.dat'
-WORKER_COLOR_NAME   = 'color.dat'
-WORKER_CELL_NAME    = 'cell.dat'
-WORKER_RESULTS_NAME = 'results.tar'
-
-RESULT_POSITIONS    = 'structure2.pdb'
-RESULT_WEIGHTS      = 'weights2.dat'
-RESULT_COLOR        = 'color2.dat'
-RESULT_CELL         = 'cell2.dat'
-
 
 class StringStream(object):
 

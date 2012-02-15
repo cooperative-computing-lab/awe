@@ -7,6 +7,23 @@ import work_queue as WQ
 ### A process can only support a single WorkQueue instance
 _AWE_WORK_QUEUE = None
 
+
+### workaround for now.
+##+ These are the names of the input/output filess to be materialized on the worker
+
+WORKER_PDB_NAME     = 'structure.pdb'
+WORKER_WEIGHTS_NAME = 'weights.dat'
+WORKER_COLOR_NAME   = 'color.dat'
+WORKER_CELL_NAME    = 'cell.dat'
+WORKER_RESULTS_NAME = 'results.tar'
+
+RESULT_POSITIONS    = 'structure2.pdb'
+RESULT_WEIGHTS      = 'weights2.dat'
+RESULT_COLOR        = 'color2.dat'
+RESULT_CELL         = 'cell2.dat'
+
+
+
 class WorkQueueException       (Exception): pass
 class WorkQueueWorkerException (Exception): pass
 
@@ -95,10 +112,10 @@ class WorkQueue(object):
         task.specify_output_file(result, cache=False)
 
         ### convert the walker parameters for WQWorker
-        task.specify_buffer(params['weight'] , awe.io.WORKER_WEIGHTS_NAME , cache=False)
-        task.specify_buffer(params['color']  , awe.io.WORKER_COLOR_NAME   , cache=False)
-        task.specify_buffer(params['cell']   , awe.io.WORKER_CELL_NAME    , cache=False)
-        task.specify_buffer(params['pdb']    , awe.io.WORKER_PDB_NAME     , cache=False)
+        task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
+        task.specify_buffer(params['color']  , WORKER_COLOR_NAME   , cache=False)
+        task.specify_buffer(params['cell']   , WORKER_CELL_NAME    , cache=False)
+        task.specify_buffer(params['pdb']    , WORKER_PDB_NAME     , cache=False)
         task.specify_tag   (params['id'])
 
 
@@ -116,10 +133,10 @@ class WorkQueue(object):
         path = task.output_files[0]
         with tarfile.open(path) as tar:
 
-            pdbstring    = tar.getmember(awe.io.RESULT_POSITIONS ).tobuf()
-            weightstring = tar.getmember(awe.io.RESULT_WEIGHTS   ).tobuf()
-            colorstring  = tar.getmember(awe.io.RESULT_COLOR     ).tobuf()
-            cellstring   = tar.getmember(awe.io.RESULT_CELL      ).tobuf()
+            pdbstring    = tar.getmember(RESULT_POSITIONS ).tobuf()
+            weightstring = tar.getmember(RESULT_WEIGHTS   ).tobuf()
+            colorstring  = tar.getmember(RESULT_COLOR     ).tobuf()
+            cellstring   = tar.getmember(RESULT_CELL      ).tobuf()
 
             ss           = awe.io.StringStream(pdbstring)
 
