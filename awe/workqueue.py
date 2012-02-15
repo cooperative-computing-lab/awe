@@ -7,7 +7,8 @@ import work_queue as WQ
 ### A process can only support a single WorkQueue instance
 _AWE_WORK_QUEUE = None
 
-class WorkQueueException(Exception): pass
+class WorkQueueException       (Exception): pass
+class WorkQueueWorkerException (Exception): pass
 
 class Config(object):
     """
@@ -141,5 +142,11 @@ class WorkQueue(object):
         while True:
             task = self.wait(self.cfg.waittime)
             self.update_wq_stats()
+
             if task:
+
+                if not task.return_status == 0:
+                    raise WorkQueueWorkerException, \
+                        task.output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
+
                 return self._load_result_file(task)
