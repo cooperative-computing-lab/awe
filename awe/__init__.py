@@ -1,3 +1,3 @@
 
-import awe, aweclasses, io, stats, workqueue
+import aweclasses, io, stats, workqueue
 from io import log
