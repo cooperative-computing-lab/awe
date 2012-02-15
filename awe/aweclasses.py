@@ -21,7 +21,7 @@ class Walker(object):
 
     def __init__(self, coords=None, weight=0., color=None, cell=None, wid=-1):
 
-        assert type(pdb)    is np.array
+        assert type(coords) is np.array
         assert type(weight) is float
         assert type(color)  is Color
         assert type(cell)   is int
@@ -38,11 +38,11 @@ class Walker(object):
 
 class WalkerGroup(object):
 
-    def __init__(self, count=None, topology=None, walkers=None):
+    def __init__(self, count=None, topology=None, walkers=list()):
 
-        assert type(count)                is int
-        assert type(topology)             is mdtools.prody.AtomGroup # from a PDB file
-        assert type(iter(walkers).next()) is Walker
+        assert type(count)                                      is int
+        assert type(topology)                                   is mdtools.prody.AtomGroup # from a PDB file
+        assert len(walkers) == 0 or  type(iter(walkers).next()) is Walker
 
         self._count    = count
 
@@ -54,8 +54,7 @@ class WalkerGroup(object):
 
         self._ix       = 0
 
-        if walkers:
-            map(self.add, walkers)
+        map(self.add, walkers)
 
 
     ### some read-only properties
@@ -91,10 +90,11 @@ class WalkerGroup(object):
 
 
     def __getitem__(self, k):
-        w = Walker(coords = self.positions    [k],
-                   weight = self.weights      [k],
-                   color  = Color(self.colors [k]),
-                   cell   = self.cells        [k])
+        w = Walker(coords = self.positions    [k]  ,
+                   weight = self.weights      [k]  ,
+                   color  = Color(self.colors [k]) ,
+                   cell   = self.cells        [k]  ,
+                   wid    = k                      )
         return w
 
     def get_pdb(self, k):
@@ -110,7 +110,8 @@ class WalkerGroup(object):
         return {'pdb'    : pdb                    ,
                 'weight' : str( self.weights [k]) ,
                 'color'  :      self.colors  [k]  ,
-                'cell'   : str( self.cells   [k]) }
+                'cell'   : str( self.cells   [k]) ,
+                'id'     : str(k)                 }
 
 
 
