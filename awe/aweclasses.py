@@ -138,8 +138,8 @@ class AWE(object):
     def _submit(self):
 
         for i in xrange(len(self.walkers)):
-            task = self.wq.new_task(self.walkers, i)
-
+            params = self.walkers.get_task_params(i)
+            task   = self.wq.new_task(params)
             self.wq.submit(task)
 
 

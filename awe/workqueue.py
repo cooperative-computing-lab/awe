@@ -76,11 +76,9 @@ class WorkQueue(object):
 
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
-    def new_task(self, walkers, walkerid):
+    def new_task(self, params):
         cmd = self.cfg.executable
         task = WQ.Task('./' + cmd)
-
-        task.specify_tag(str(walkerid))
 
         ### executable
         awe.log('Executable: %s' % self.cfg.executable)
@@ -96,12 +94,12 @@ class WorkQueue(object):
         awe.log('Execting result: %s' % result)
         task.specify_output_file(result, cache=False)
 
-        ### convert the walker parameters to WQWorker files
-        ps = self.walkers.get_task_params(i)
-        task.specify_buffer(ps['pdb']    , awe.io.WORKER_PDB_NAME     , cache=False)
-        task.specify_buffer(ps['weight'] , awe.io.WORKER_WEIGHTS_NAME , cache=False)
-        task.specify_buffer(ps['color']  , awe.io.WORKER_COLOR_NAME   , cache=False)
-        task.specify_buffer(ps['cell']   , awe.io.WORKER_CELL_NAME    , cache=False)
+        ### convert the walker parameters for WQWorker
+        task.specify_buffer(params['weight'] , awe.io.WORKER_WEIGHTS_NAME , cache=False)
+        task.specify_buffer(params['color']  , awe.io.WORKER_COLOR_NAME   , cache=False)
+        task.specify_buffer(params['cell']   , awe.io.WORKER_CELL_NAME    , cache=False)
+        task.specify_buffer(params['pdb']    , awe.io.WORKER_PDB_NAME     , cache=False)
+        task.specify_tag   (params['id'])
 
 
         return task
