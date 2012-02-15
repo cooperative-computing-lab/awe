@@ -201,20 +201,20 @@ class AWEStats(object):
 
     def __init__(self):
 
-        self.iteration_timer  = Timer()
-        self.iteration_times  = ExtendableArray()
-        self.iteration_values = ExtendableArray()
+        self.iteration_timer = Timer()
+        self.iteration_times = ExtendableArray()
+        self.iteration_stats = Statistics()
 
-        self.resample_timer   = Timer()
-        self.resample_times   = ExtendableArray()
-        self.resample_values  = ExtendableArray()
+        self.resample_timer  = Timer()
+        self.resample_times  = ExtendableArray()
+        self.resample_stats  = Statistics()
 
-        self.barrier_timer    = Timer()
-        self.barrier_times    = ExtendableArray()
-        self.barrier_values   = ExtendableArray()
+        self.barrier_timer   = Timer()
+        self.barrier_times   = ExtendableArray()
+        self.barrier_stats   = Statistics()
 
 
-    def timeit(self, state, timer, times, values):
+    def timeit(self, state, timer, times, stat):
         """
         *state* = {start|stop}
         """
@@ -224,15 +224,15 @@ class AWEStats(object):
         elif state.lower() == 'stop':
             timer.stop()
             times.append(time.time())
-            values.append(timer.elapsed())
+            stat.update(timer.elapsed())
         else:
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
-        self.timeit(state, self.iteration_timer, self.iteration_times, self.iteration_values)
+        self.timeit(state, self.iteration_timer, self.iteration_times, self.iteration_stats)
 
     def time_resample(self, state):
-        self.timeit(state, self.resample_timer, self.resample_times, self.resample_values)
+        self.timeit(state, self.resample_timer, self.resample_times, self.resample_stats)
 
     def time_barrier(self, state):
-        self.timeit(state, self.barrer_timer, self.barrer_times, self.barrer_values)
+        self.timeit(state, self.barrer_timer, self.barrer_times, self.barrer_stats)
