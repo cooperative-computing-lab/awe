@@ -69,6 +69,14 @@ class ExtendableArray(object):
         self._vals[i:j] = np.array(values)
         self._count += len(values)
 
+    def __getitem__(self, i):
+        assert i <= self._count
+        return self._vals[i]
+
+    def __setitem__(self, k, v):
+        assert k <= self._count
+        self._vals[k] = v
+
     def __len__(self):
         return self._count
 
