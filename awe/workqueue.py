@@ -3,6 +3,8 @@ import awe
 
 import work_queue as WQ
 
+import os, tempfile
+
 
 ### A process can only support a single WorkQueue instance
 _AWE_WORK_QUEUE = None
@@ -15,7 +17,7 @@ WORKER_PDB_NAME     = 'structure.pdb'
 WORKER_WEIGHTS_NAME = 'weights.dat'
 WORKER_COLOR_NAME   = 'color.dat'
 WORKER_CELL_NAME    = 'cell.dat'
-WORKER_RESULTS_NAME = 'results.tar'
+WORKER_RESULTS_NAME = 'results-%s.tar'
 
 RESULT_POSITIONS    = 'structure2.pdb'
 RESULT_WEIGHTS      = 'weights2.dat'
@@ -38,10 +40,10 @@ class Config(object):
         self.port      = WQ.WORK_QUEUE_RANDOM_PORT
         self.schedule  = WQ.WORK_QUEUE_SCHEDULE_FCFS
         self.exclusive = True
-        self.catalogue = True
+        self.catalog = True
         self.debug     = 'all'
         self.shutdown  = False
-        self.fastabort = 0
+        self.fastabort = -1
 
         self.waittime  = 10 # in seconds
 
@@ -50,7 +52,7 @@ class Config(object):
         self._cache = list()
 
     executable = property(lambda self: self._executable)
-    cache      = property(lambda self: self._cache)
+    getcache   = property(lambda self: self._cache)
 
     def execute(self, path):
         self._executable = path
@@ -70,7 +72,7 @@ class Config(object):
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
                               shutdown  = self.shutdown,
-                              catalogue = self.catalogue,
+                              catalog = self.catalog,
                               exclusive = self.exclusive)
             wq.specify_algorithm(self.schedule)
 
@@ -93,23 +95,23 @@ class WorkQueue(object):
 
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
+
+    empty = property(lambda self: self.wq.empty)
+
+    def __del__(self):
+        import os
+        os.rmdir(self.tmpdir)
+
     def new_task(self, params):
         cmd = self.cfg.executable
         task = WQ.Task('./' + cmd)
 
         ### executable
-        awe.log('Executable: %s' % self.cfg.executable)
         task.specify_file(self.cfg.executable)
 
         ### cached files
-        for path in self.cfg.cache:
-            awe.log('Caching %s' % path)
+        for path in self.cfg.getcache:
             task.specify_file(path)
-
-        ### result file:
-        result = os.path.join(self.tmpdir, awe.io.WORKER_RESULTS_NAME % task.tag)
-        awe.log('Execting result: %s' % result)
-        task.specify_output_file(result, cache=False)
 
         ### convert the walker parameters for WQWorker
         task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
@@ -117,6 +119,10 @@ class WorkQueue(object):
         task.specify_buffer(params['cell']   , WORKER_CELL_NAME    , cache=False)
         task.specify_buffer(params['pdb']    , WORKER_PDB_NAME     , cache=False)
         task.specify_tag   (params['id'])
+
+        ### result file:
+        result = os.path.join(self.tmpdir, WORKER_RESULTS_NAME % task.tag)
+        task.specify_output_file(result, cache=False)
 
 
         return task

@@ -26,5 +26,5 @@ class DoNothing(IResampler):
     the identity function
     """
 
-    def __call__(self walkers):
+    def __call__(self, walkers):
         return walkers

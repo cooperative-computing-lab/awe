@@ -21,10 +21,10 @@ class Walker(object):
 
     def __init__(self, coords=None, weight=0., color=None, cell=None, wid=-1):
 
-        assert type(coords) is np.array
+        assert type(coords) is np.ndarray, 'Got %s but expected %s' % (type(coords), np.array)
         assert type(weight) is float
         assert type(color)  is Color
-        assert type(cell)   is int
+        # assert type(cell)   is int
         assert type(wid)    is int
 
         self.coords = coords
@@ -33,7 +33,7 @@ class Walker(object):
         self.cell   = cell
         self.id     = wid
 
-    natoms = property(lambda self: len(self._coords))
+    natoms = property(lambda self: len(self.coords))
 
 
 class WalkerGroup(object):
@@ -47,7 +47,7 @@ class WalkerGroup(object):
         self._count    = count
 
         self.topology  = topology
-        self.positions = -1 * np.ones((count, natoms, 3))
+        self.positions = -1 * np.ones((count, self.natoms, 3))
         self.weights   =      np.ones(count)
         self.colors    =      np.empty(count, dtype=str)
         self.cells     =      np.zeros(count, dtype=int)
@@ -76,17 +76,22 @@ class WalkerGroup(object):
         self[i] = walker
 
         if ix is None:
-            self._ix          += 1
+            self._ix    += 1
+
+        assert self._ix <= self._count
+
+    def __len__(self):
+        return self._count
 
     def __setitem__(self, i, walker):
 
         assert walker.natoms == self.natoms
         assert i              < self._count
 
-        self.positions[ix] = walker.coords
-        self.weights  [ix] = walker.weight
-        self.colors   [ix] = str(walker.color)
-        self.cells    [ix] = walker.cell
+        self.positions[i] = walker.coords
+        self.weights  [i] = walker.weight
+        self.colors   [i] = str(walker.color)
+        self.cells    [i] = walker.cell
 
 
     def __getitem__(self, k):
@@ -105,7 +110,8 @@ class WalkerGroup(object):
     def get_task_params(self, k):
 
         ss  = awe.io.StringStream()
-        pdb = mdtools.prody.writePDBStream(ss, self.get_pdb(k))
+        mdtools.prody.writePDBStream(ss, self.get_pdb(k))
+        pdb = ss.read()
 
         return {'pdb'    : pdb                    ,
                 'weight' : str( self.weights [k]) ,
@@ -164,10 +170,10 @@ class AWE(object):
 
         for iteration in xrange(self.iterations):
 
-            self.stats.time_itr('start')
+            self.stats.time_iter('start')
 
             self._submit()
             self._recv()     ## barrier
             self._resample()
 
-            self.stats.time_itr('stop')
+            self.stats.time_iter('stop')

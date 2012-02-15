@@ -3,6 +3,8 @@ import awe
 
 import numpy as np
 
+import time
+
 
 class Timer(object):
     def __init__(self):
@@ -235,4 +237,4 @@ class AWEStats(object):
         self.timeit(state, self.resample_timer, self.resample_times, self.resample_stats)
 
     def time_barrier(self, state):
-        self.timeit(state, self.barrer_timer, self.barrer_times, self.barrer_stats)
+        self.timeit(state, self.barrier_timer, self.barrier_times, self.barrier_stats)
