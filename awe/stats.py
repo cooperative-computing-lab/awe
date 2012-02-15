@@ -80,6 +80,12 @@ class ExtendableArray(object):
     def __len__(self):
         return self._count
 
+    def __contains__(self, v):
+        return v in self._vals[:self._count]
+
+    def __iter__(self):
+        return iter(self._vals[:self._count])
+
     def __str__(self):
         return str(self._vals[:self._count])
 
