@@ -1,9 +1,11 @@
 
 import awe
 
+import mdtools
+
 import work_queue as WQ
 
-import os, tempfile
+import os, tarfile, tempfile
 
 
 ### A process can only support a single WorkQueue instance
@@ -17,13 +19,13 @@ WORKER_PDB_NAME     = 'structure.pdb'
 WORKER_WEIGHTS_NAME = 'weights.dat'
 WORKER_COLOR_NAME   = 'color.dat'
 WORKER_CELL_NAME    = 'cell.dat'
-WORKER_RESULTS_NAME = 'results-%s.tar'
+WORKER_RESULTS_NAME = 'results.tar'
 
 RESULT_POSITIONS    = 'structure2.pdb'
 RESULT_WEIGHTS      = 'weights2.dat'
 RESULT_COLOR        = 'color2.dat'
 RESULT_CELL         = 'cell2.dat'
-
+RESULT_NAME         = 'results-%s.tar'
 
 
 class WorkQueueException       (Exception): pass
@@ -41,7 +43,7 @@ class Config(object):
         self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
         self.exclusive = True
         self.catalog   = True
-        self.debug     = 'all'
+        self.debug     = ''
         self.shutdown  = False
         self.fastabort = -1
 
@@ -132,8 +134,8 @@ class WorkQueue(object):
         task.specify_tag   (params['id'])
 
         ### result file:
-        result = os.path.join(self.tmpdir, WORKER_RESULTS_NAME % task.tag)
-        task.specify_output_file(result, cache=False)
+        result = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
+        task.specify_output_file(result, remote_name = WORKER_RESULTS_NAME, cache=False)
 
 
         return task
@@ -148,21 +150,22 @@ class WorkQueue(object):
 
 
     @awe.trace()
-    def _load_result_file(task):
+    def _load_result_file(self, task):
 
-        path = task.output_files[0]
+        path = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
         with tarfile.open(path) as tar:
 
-            pdbstring    = tar.getmember(RESULT_POSITIONS ).tobuf()
-            weightstring = tar.getmember(RESULT_WEIGHTS   ).tobuf()
-            colorstring  = tar.getmember(RESULT_COLOR     ).tobuf()
-            cellstring   = tar.getmember(RESULT_CELL      ).tobuf()
+            pdbstring    = tar.extractfile(RESULT_POSITIONS ).read()
+            weightstring = tar.extractfile(RESULT_WEIGHTS   ).read()
+            colorstring  = tar.extractfile(RESULT_COLOR     ).read()
+            cellstring   = tar.extractfile(RESULT_CELL      ).read()
 
             ss           = awe.io.StringStream(pdbstring)
+            pdb          = mdtools.prody.parsePDBStream(ss)
 
             walker       = awe.aweclasses.Walker(
-                coords   = mdtools.prody.parsePDBStream(ss).getCoords(),
-                weights  = float(weightstring),
+                coords   = pdb.getCoords(),
+                weight   = float(weightstring),
                 color    = awe.aweclasses.Color(colorstring),
                 cell     = int(cellstring),
                 wid      = int(task.tag)

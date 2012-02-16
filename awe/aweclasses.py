@@ -157,8 +157,8 @@ class AWE(object):
         awe.log('DEBUG: WQ empty?: %s' % self.wq.empty)
         while not self.wq.empty:
             awe.log('Waiting for result')
-            walker     = self.wq.recv()
-            walkers[k] = walker
+            walker          = self.wq.recv()
+            self.walkers[walker.id] = walker
         self.stats.time_barrier('stop')
 
 

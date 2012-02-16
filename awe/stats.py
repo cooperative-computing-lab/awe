@@ -139,30 +139,30 @@ class WQStats(object):
     def __init__(self):
 
 
-        self._task_times            = ExtendableArray()  # keep track of the times values are added
-        self._wq_times              = ExtendableArray()
+        self._task_times             = ExtendableArray()  # keep track of the times values are added
+        self._wq_times               = ExtendableArray()
 
         ### task stats
-        self.computation_time       = Statistics()
-        self.total_bytes_transfered = Statistics()
-        self.total_transfer_time    = Statistics()
-        self.task_run_time          = Statistics()       # WQ Task.finish_time - Task.start_time
-        self.task_life_time         = Statistics()       # WQ Task.finish_time - Task.submit_time
+        self.computation_time        = Statistics()
+        self.total_bytes_transferred = Statistics()
+        self.total_transfer_time     = Statistics()
+        self.task_run_time           = Statistics()       # WQ Task.finish_time - Task.start_time
+        self.task_life_time          = Statistics()       # WQ Task.finish_time - Task.submit_time
 
         ### wq stats
-        self.workers_ready          = Statistics()
-        self.workers_busy           = Statistics()
-        self.tasks_running          = Statistics()
-        self.tasks_waiting          = Statistics()
-        self.tasks_complete         = Statistics()
-        self.total_tasks_dispatched = Statistics()
-        self.total_tasks_complete   = Statistics()
-        self.total_workers_joined   = Statistics()
-        self.total_workers_removed  = Statistics()
-        self.total_bytes_sent       = Statistics()
-        self.total_bytes_received   = Statistics()
-        self.total_send_time        = Statistics()
-        self.total_receive_time     = Statistics()
+        self.workers_ready           = Statistics()
+        self.workers_busy            = Statistics()
+        self.tasks_running           = Statistics()
+        self.tasks_waiting           = Statistics()
+        self.tasks_complete          = Statistics()
+        self.total_tasks_dispatched  = Statistics()
+        self.total_tasks_complete    = Statistics()
+        self.total_workers_joined    = Statistics()
+        self.total_workers_removed   = Statistics()
+        self.total_bytes_sent        = Statistics()
+        self.total_bytes_received    = Statistics()
+        self.total_send_time         = Statistics()
+        self.total_receive_time      = Statistics()
 
 
     @awe.trace()
@@ -172,11 +172,12 @@ class WQStats(object):
         """
         self._task_times.append(time.time())
 
-        self.computation_time       .update(task.computation_time)
-        self.total_bytes_transfered .update(task.total_bytes_transfered)
-        self.total_transfer_time    .update(task.total_transfer_time)
-        self.task_run_time          .update(task.finish_time - task.start_time)
-        self.task_life_time         .update(taslk.finish_time - task.submit_time)
+
+        self.computation_time        .update(task.computation_time)
+        self.total_bytes_transferred .update(task.total_bytes_transferred)
+        self.total_transfer_time     .update(task.total_transfer_time)
+        self.task_run_time           .update(task.finish_time - task.start_time)
+        self.task_life_time          .update(task.finish_time - task.submit_time)
 
     @awe.trace()
     def wq(self, wq):
@@ -206,15 +207,15 @@ class Timings(object):
     def __init__(self):
         self.timer = Timer()
         self.times = ExtendableArray()
-        self.stats = Statistics
+        self.stats = Statistics()
 
     def start(self):
         self.timer.start()
 
     def stop(self):
-        timer.stop()
-        times.append(time.time())
-        stats.update(timer.elapsed())
+        self.timer.stop()
+        self.times.append(time.time())
+        self.stats.update(self.timer.elapsed())
 
 
 class AWEStats(object):

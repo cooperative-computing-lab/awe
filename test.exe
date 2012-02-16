@@ -3,6 +3,11 @@
 
 echo "Hello"
 
+cp -v structure.pdb structure2.pdb
+cp -v weights.dat weights2.dat
+cp -v color.dat color2.dat
+cp -v cell.dat cell2.dat
 
+tar cvf results.tar structure2.pdb weights2.dat color2.dat cell2.dat
 
 exit 0

@@ -21,7 +21,7 @@ walkers.add(w)
 resample = awe.resample.DoNothing()
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 1,
+                               iterations = 3,
                                resample   = resample)
 
 adaptive.run()
