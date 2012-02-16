@@ -38,9 +38,9 @@ class Config(object):
 
         self.name      = 'awe'
         self.port      = WQ.WORK_QUEUE_RANDOM_PORT
-        self.schedule  = WQ.WORK_QUEUE_SCHEDULE_FCFS
+        self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
         self.exclusive = True
-        self.catalog = True
+        self.catalog   = True
         self.debug     = 'all'
         self.shutdown  = False
         self.fastabort = -1
@@ -49,17 +49,18 @@ class Config(object):
 
 
         self._executable = None
-        self._cache = list()
+        self._cache = set()
 
     executable = property(lambda self: self._executable)
     getcache   = property(lambda self: self._cache)
 
     def execute(self, path):
         self._executable = path
+        self.cache(path)
 
     def cache(self, *files):
         for path in files:
-            self._cache.append(path)
+            self._cache.add(path)
 
     def _mk_wq(self):
         global _AWE_WORK_QUEUE
@@ -72,7 +73,7 @@ class Config(object):
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
                               shutdown  = self.shutdown,
-                              catalog = self.catalog,
+                              catalog   = self.catalog,
                               exclusive = self.exclusive)
             wq.specify_algorithm(self.schedule)
 

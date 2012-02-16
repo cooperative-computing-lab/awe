@@ -3,11 +3,10 @@
 import awe
 import mdtools
 
-awe.io.TRACE = True
+awe.io.TRACE = False
 
 cfg      = awe.workqueue.Config()
 cfg.execute('test.exe')
-cfg.cache('test.exe')
 
 pdb     = mdtools.prody.parsePDB('topology.pdb')
 walkers = awe.aweclasses.WalkerGroup( count    = 1,
