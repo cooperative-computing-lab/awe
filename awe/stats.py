@@ -201,42 +201,47 @@ class WQStats(object):
         self.total_receive_time     .update(q.total_receive_time)
 
 
+class Timings(object):
+
+    def __init__(self):
+        self.timer = Timer()
+        self.times = ExtendableArray()
+        self.stats = Statistics
+
+    def start(self):
+        self.timer.start()
+
+    def stop(self):
+        timer.stop()
+        times.append(time.time())
+        stats.update(timer.elapsed())
+
+
 class AWEStats(object):
 
     def __init__(self):
 
-        self.iteration_timer = Timer()
-        self.iteration_times = ExtendableArray()
-        self.iteration_stats = Statistics()
+        self.iteration = Timings()
+        self.resample  = Timings()
+        self.barrier   = Timings()
 
-        self.resample_timer  = Timer()
-        self.resample_times  = ExtendableArray()
-        self.resample_stats  = Statistics()
-
-        self.barrier_timer   = Timer()
-        self.barrier_times   = ExtendableArray()
-        self.barrier_stats   = Statistics()
-
-
-    def timeit(self, state, timer, times, stat):
+    def timeit(self, state, timings):
         """
         *state* = {start|stop}
         """
 
         if state.lower() == 'start':
-            timer.start()
+            timings.start()
         elif state.lower() == 'stop':
-            timer.stop()
-            times.append(time.time())
-            stat.update(timer.elapsed())
+            timings.stop()
         else:
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
-        self.timeit(state, self.iteration_timer, self.iteration_times, self.iteration_stats)
+        self.timeit(state, self.iteration)
 
     def time_resample(self, state):
-        self.timeit(state, self.resample_timer, self.resample_times, self.resample_stats)
+        self.timeit(state, self.resample)
 
     def time_barrier(self, state):
-        self.timeit(state, self.barrier_timer, self.barrier_times, self.barrier_stats)
+        self.timeit(state, self.barrier)

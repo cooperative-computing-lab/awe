@@ -97,8 +97,7 @@ class WorkQueue(object):
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
 
-    def empty(self):
-        return self.wq.empty()
+    empty = property(lambda self: self.wq.empty())
 
     def __del__(self):
         import os
@@ -108,6 +107,10 @@ class WorkQueue(object):
     @awe.trace()
     def update_wq_stats(self):
         self.stats.wq(self.wq)
+
+    @awe.trace()
+    def update_task_stats(self, task):
+        self.stats.task(task)
 
     @awe.trace()
     def new_task(self, params):
@@ -184,4 +187,5 @@ class WorkQueue(object):
                     raise WorkQueueWorkerException, \
                         task.output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
+                self.update_task_stats(task)
                 return self._load_result_file(task)
