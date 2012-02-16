@@ -28,7 +28,7 @@ class IResampler(object):
 
 
 
-class DoNothing(IResampler):
+class Identity(IResampler):
 
     """
     the identity function

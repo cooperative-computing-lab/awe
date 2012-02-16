@@ -18,7 +18,7 @@ w       = awe.aweclasses.Walker(      coords = pdb.getCoords(),
                                       cell   = 0 )
 walkers.add(w)
 
-resample = awe.resample.DoNothing()
+resample = awe.resample.Identity()
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
                                iterations = 3,
