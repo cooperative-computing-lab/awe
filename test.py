@@ -14,7 +14,7 @@ walkers = awe.aweclasses.WalkerGroup( count    = 1,
 
 w       = awe.aweclasses.Walker(      coords = pdb.getCoords(),
                                       weight = 0.,
-                                      color  = awe.aweclasses.Color('red'),
+                                      color  = 0,
                                       cell   = 0 )
 walkers.add(w)
 

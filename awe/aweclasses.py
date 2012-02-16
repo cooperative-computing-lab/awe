@@ -7,15 +7,6 @@ import numpy as np
 
 
 
-class Color(object):
-    def __init__(self, name):
-        self._name = name
-    def __str__(self):
-        return self._name
-    def __repr__(self):
-        return 'Color(%s)' % self._name
-
-
 
 class Walker(object):
 
@@ -23,8 +14,8 @@ class Walker(object):
 
         assert type(coords) is np.ndarray, 'Got %s but expected %s' % (type(coords), np.array)
         assert type(weight) is float
-        assert type(color)  is Color
-        # assert type(cell)   is int
+        assert type(color)  is int
+        assert type(cell)   is int
         assert type(wid)    is int
 
         self.coords = coords
@@ -49,7 +40,7 @@ class WalkerGroup(object):
         self.topology  = topology
         self.positions = -1 * np.ones((count, self.natoms, 3))
         self.weights   =      np.ones(count)
-        self.colors    =      np.empty(count, dtype=str)
+        self.colors    =      np.empty(count, dtype=int)
         self.cells     =      np.zeros(count, dtype=int)
 
         self._ix       = 0
@@ -90,16 +81,16 @@ class WalkerGroup(object):
 
         self.positions[i] = walker.coords
         self.weights  [i] = walker.weight
-        self.colors   [i] = str(walker.color)
+        self.colors   [i] = walker.color
         self.cells    [i] = walker.cell
 
 
     def __getitem__(self, k):
-        w = Walker(coords = self.positions    [k]  ,
-                   weight = self.weights      [k]  ,
-                   color  = Color(self.colors [k]) ,
-                   cell   = self.cells        [k]  ,
-                   wid    = k                      )
+        w = Walker(coords = self.positions [k] ,
+                   weight = self.weights   [k] ,
+                   color  = self.colors    [k] ,
+                   cell   = self.cells     [k] ,
+                   wid    = k                  )
         return w
 
     def get_pdb(self, k):
@@ -111,11 +102,10 @@ class WalkerGroup(object):
 
         ss  = awe.io.StringStream()
         mdtools.prody.writePDBStream(ss, self.get_pdb(k))
-        pdb = ss.read()
 
-        return {'pdb'    : pdb                    ,
+        return {'pdb'    : ss.read()              ,
                 'weight' : str( self.weights [k]) ,
-                'color'  :      self.colors  [k]  ,
+                'color'  : str( self.colors  [k]) ,
                 'cell'   : str( self.cells   [k]) ,
                 'id'     : str(k)                 }
 

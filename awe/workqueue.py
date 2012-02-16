@@ -166,7 +166,7 @@ class WorkQueue(object):
             walker       = awe.aweclasses.Walker(
                 coords   = pdb.getCoords(),
                 weight   = float(weightstring),
-                color    = awe.aweclasses.Color(colorstring),
+                color    = int(colorstring),
                 cell     = int(cellstring),
                 wid      = int(task.tag)
                 )
