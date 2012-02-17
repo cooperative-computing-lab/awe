@@ -10,13 +10,8 @@ import numpy as np
 
 class Walker(object):
 
+    @awe.typecheck(coords=np.ndarray, wid=int)
     def __init__(self, coords=None, weight=0., color=None, cell=None, wid=-1):
-
-        assert type(coords) is np.ndarray, 'Got %s but expected %s' % (type(coords), np.array)
-        assert type(weight) is float
-        assert type(color)  is int
-        assert type(cell)   is int
-        assert type(wid)    is int
 
         self.coords = coords
         self.weight = weight
@@ -26,13 +21,24 @@ class Walker(object):
 
     natoms = property(lambda self: len(self.coords))
 
+    def __str__(self):
+        return \
+            'Walker : weight=%(weight)r, color=%(color)r, cell=%(cell)r, wid=%(wid)r)' % \
+            {'weight' : self.weight, 'color' : self.color, 'cell' : self.cell, 'wid' : self.id}
+
+
+    def __repr__(self):
+        return \
+            'Walker(coords=%(coords)r, weight=%(weight)r, color=%(color)r, cell=%(cell)r, wid=%(wid)r)' % \
+            {'coords' : self.coords, 'weight' : self.weight, 'color' : self.color,
+             'cell' : self.cell, 'wid' : self.id}
+
 
 class WalkerGroup(object):
 
+    @awe.typecheck(count=int, topology=mdtools.prody.AtomGroup)
     def __init__(self, count=None, topology=None, walkers=list()):
 
-        assert type(count)                                      is int
-        assert type(topology)                                   is mdtools.prody.AtomGroup # from a PDB file
         assert len(walkers) == 0 or  type(iter(walkers).next()) is Walker
 
         self._count    = count
@@ -144,10 +150,8 @@ class AWE(object):
     def _recv(self):
 
         self.stats.time_barrier('start')
-        awe.log('DEBUG: WQ empty?: %s' % self.wq.empty)
         while not self.wq.empty:
-            awe.log('Waiting for result')
-            walker          = self.wq.recv()
+            walker                  = self.wq.recv()
             self.walkers[walker.id] = walker
         self.stats.time_barrier('stop')
 

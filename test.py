@@ -3,25 +3,33 @@
 import awe
 import mdtools
 
+import numpy as np
+
 awe.io.TRACE = False
 
 cfg      = awe.workqueue.Config()
-cfg.execute('test.exe')
+cfg.execute('test.exe2')
 
 pdb     = mdtools.prody.parsePDB('topology.pdb')
-walkers = awe.aweclasses.WalkerGroup( count    = 1,
+walkers = awe.aweclasses.WalkerGroup( count    = 2,
                                       topology = pdb )
 
 w       = awe.aweclasses.Walker(      coords = pdb.getCoords(),
-                                      weight = 0.,
+                                      weight = np.random.random(),
                                       color  = 0,
                                       cell   = 0 )
 walkers.add(w)
 
-resample = awe.resample.Identity()
+w       = awe.aweclasses.Walker(      coords = pdb.getCoords(),
+                                      weight = np.random.random(),
+                                      color  = 0,
+                                      cell   = 1 )
+walkers.add(w)
+
+resample = awe.resample.Simple(2)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 3,
+                               iterations = 2,
                                resample   = resample)
 
 adaptive.run()

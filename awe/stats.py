@@ -143,7 +143,7 @@ class WQStats(object):
         self._wq_times               = ExtendableArray()
 
         ### task stats
-        self.computation_time        = Statistics()
+        self.cmd_execution_time      = Statistics()
         self.total_bytes_transferred = Statistics()
         self.total_transfer_time     = Statistics()
         self.task_run_time           = Statistics()       # WQ Task.finish_time - Task.start_time
@@ -173,7 +173,7 @@ class WQStats(object):
         self._task_times.append(time.time())
 
 
-        self.computation_time        .update(task.computation_time)
+        self.cmd_execution_time      .update(task.cmd_execution_time)
         self.total_bytes_transferred .update(task.total_bytes_transferred)
         self.total_transfer_time     .update(task.total_transfer_time)
         self.task_run_time           .update(task.finish_time - task.start_time)

@@ -190,5 +190,5 @@ class WorkQueue(object):
                     raise WorkQueueWorkerException, \
                         task.output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
-                self.update_task_stats(task)
+                # self.update_task_stats(task)
                 return self._load_result_file(task)
