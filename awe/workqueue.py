@@ -81,7 +81,7 @@ class Config(object):
         self.catalog   = True
         self.debug     = ''
         self.shutdown  = False
-        self.fastabort = -1
+        self.fastabort = 3
 
         self.waittime  = 10 # in seconds
 
