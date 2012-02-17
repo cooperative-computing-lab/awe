@@ -6,6 +6,7 @@ import mdtools
 import numpy as np
 
 awe.io.TRACE = False
+mdtools.prody.setVerbosity('warning')
 
 cfg = awe.workqueue.Config()
 cfg.execute('testinput/execute-task.sh')
@@ -18,14 +19,15 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 nwalkers = 910
-walkers  = awe.aweclasses.WalkerGroup( count    = nwalkers,
+nstates = 100
+walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
 for i in xrange(nwalkers):
     pdb    = mdtools.prody.parsePDB('teststartpdbs/state%d.pdb'  % i)
-    weight = float(open(      'teststartpdbs/weight%d.txt' % i).read().strip())
+    weight = float(open(            'teststartpdbs/weight%d.txt' % i).read().strip())
     color  = 0
-    cell   = i
+    cell   = i % nstates
     w      = awe.aweclasses.Walker(coords = pdb.getCoords(),
                                    weight = weight,
                                    color  = color,
@@ -34,10 +36,11 @@ for i in xrange(nwalkers):
     walkers.add(w)
 
 
-resample = awe.resample.Simple(20)
+resample = awe.resample.SimpleWeightsPlotter(20, plotfile='/tmp/test.png')
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 2,
+                               iterations = 10,
                                resample   = resample)
 
 adaptive.run()
+resample.plot()
