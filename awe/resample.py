@@ -56,16 +56,16 @@ class Simple(IResampler):
         from   numpy import floor, argsort, random, sum
         import numpy as np
 
-        list0          = np.arange(len(walkers)) ## walker indices
-        weights        = walkers.weights         ## walker weights
-        ntargetwalkers = self.targetwalkers      ## target number of walkers
-
-
-        list1          = list()                  ## new list of walkers
-        newweights     = list()                  ## weights of new walkers
-        nwalkerlist1   = 0                       ## number of walkers in list 1
-
         for cell in set(walkers.cells):
+
+            list0          = np.arange(len(walkers)) ## walker indices
+            weights        = walkers.weights         ## walker weights
+            ntargetwalkers = self.targetwalkers      ## target number of walkers
+
+            list1          = list()                  ## new list of walkers
+            newweights     = list()                  ## weights of new walkers
+            nwalkerlist1   = 0                       ## number of walkers in list 1
+
 
             awe.log('Processing cell %s' % cell)
 
@@ -73,10 +73,8 @@ class Simple(IResampler):
             ixs = np.where(walkers.cells == cell)
             wi  = weights[ixs]
             ind = argsort(-wi)
-            awe.log('\tsorted indexes %s' % ind)
 
             ### sort the walkers in descending order based on their weights
-            awe.log('\tlist0: %s' % list0)
             list0 = list(list0[ind])
 
             W     = sum(wi)
