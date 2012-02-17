@@ -241,3 +241,5 @@ class WorkQueue(object):
                 except Exception, ex:
                     raise WorkQueueException, \
                         output + '\n\nMaster failed:\n %s' % ex
+
+                return walker
