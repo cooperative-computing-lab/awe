@@ -125,3 +125,42 @@ class Simple(IResampler):
 
         walkers.weights = weights
         return walkers
+
+
+class SimpleWeightsPlotter(Simple):
+    def __init__(self, nwalkers, plotfile='weights.png'):
+        Simple.__init__(self, nwalkers)
+        self._plotfile = plotfile
+        self._weights  = list()
+
+    @property
+    def plotfile(self):
+        return self._plotfile
+
+    def __getitem__(self, i):
+        return self._weights[i]
+
+    def __len__(self):
+        return len(self._weights)
+
+
+    def resample(self, walkers):
+        self._weights.append(walkers.weights.copy())
+        self.plot()
+        return Simple.resample(self, walkers)
+
+    def plot(self):
+        print 'Plotting'
+        import matplotlib.pylab as plt
+        import numpy as np
+
+        for i in xrange(len(self)):
+            ws = self[i]
+            xs = i * np.ones(len(ws), dtype=int)
+            plt.scatter(xs, ws)
+
+        plt.ylabel('Weights')
+        plt.xlabel('Iteration')
+
+        plt.savefig(self.plotfile)
+        print 'Saved image to', self.plotfile
