@@ -57,7 +57,6 @@ class WQFile(object):
         return self._cached
 
     def add_to_task(self, task):
-        awe.log('DEBUG: specifying file: %s' % self)
         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
 
     def __str__(self):
@@ -220,11 +219,13 @@ class WorkQueue(object):
 
         while True:
 
-            awe.log('DEBUG waiting for task')
+            print time.asctime(), 'waiting for task'
             task = self.wait(self.cfg.waittime)
             self.update_wq_stats()
 
             if task:
+
+                print time.asctime(), 'recived task', task.tag
 
                 output = ('\n' + task.output).split('\n')
                 output = '\n\t'.join(output)
