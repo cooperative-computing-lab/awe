@@ -31,6 +31,43 @@ RESULT_NAME         = 'results-%s.tar'
 class WorkQueueException       (Exception): pass
 class WorkQueueWorkerException (Exception): pass
 
+class WQFile(object):
+    def __init__(self, masterpath, base=True, cached=True):
+        self._masterpath = masterpath
+        self._base       = base
+        self._cached     = cached
+
+    @property
+    def masterpath(self):
+        return self._masterpath
+
+    @property
+    def remotepath(self):
+        if self.isbase:
+            return os.path.basename(self.masterpath)
+        else:
+            return self.masterpath
+
+    @property
+    def isbase(self):
+        return self._base
+
+    @property
+    def cached(self):
+        return self._cached
+
+    def add_to_task(self, task):
+        awe.log('DEBUG: specifying file: %s' % self)
+        task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
+
+    def __str__(self):
+        return 'WQFile: masterpath=%s remotepath=%s cached=%s' % (self.masterpath, self.remotepath, self.cached)
+
+    def __repr__(self):
+        return 'WQFile(%r, base=%r, cached=%r' % (self._masterpath, self._base, self._cached)
+
+
+
 class Config(object):
     """
     Class for configuring a WorkQueue instance
