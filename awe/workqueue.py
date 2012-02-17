@@ -186,9 +186,17 @@ class WorkQueue(object):
 
             if task:
 
+                output = ('\n' + task.output).split('\n')
+                output = '\n\t'.join(output)
+
                 if not task.return_status == 0:
                     raise WorkQueueWorkerException, \
-                        task.output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
+                        output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
                 # self.update_task_stats(task)
-                return self._load_result_file(task)
+
+                try:
+                    walker = self._load_result_file(task)
+                except Exception, ex:
+                    raise WorkQueueException, \
+                        output + '\n\nMaster failed:\n %s' % ex
