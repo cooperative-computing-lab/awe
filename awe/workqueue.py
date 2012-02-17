@@ -94,12 +94,15 @@ class Config(object):
     getcache   = property(lambda self: self._cache)
 
     def execute(self, path):
-        self._executable = path
-        self.cache(path)
+        f = WQFile(path)
+        self._executable = f
+        self.cache(f.masterpath)
 
-    def cache(self, *files):
+    def cache(self, *files, **kws):
+        base = kws.get('base', True)
         for path in files:
-            self._cache.add(path)
+            wqf = WQFile(path, base=base, cached=True)
+            self._cache.add(wqf)
 
     def _mk_wq(self):
         global _AWE_WORK_QUEUE
@@ -153,15 +156,15 @@ class WorkQueue(object):
 
     @awe.trace()
     def new_task(self, params):
-        cmd = self.cfg.executable
+        cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
 
         ### executable
-        task.specify_file(self.cfg.executable)
+        self.cfg.executable.add_to_task(task)
 
         ### cached files
-        for path in self.cfg.getcache:
-            task.specify_file(path)
+        for wqf in self.cfg.getcache:
+            wqf.add_to_task(task)
 
         ### convert the walker parameters for WQWorker
         task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
