@@ -5,7 +5,7 @@ import mdtools
 
 import work_queue as WQ
 
-import os, tarfile, tempfile
+import os, tarfile, tempfile, time, shutil
 
 
 ### A process can only support a single WorkQueue instance
@@ -142,8 +142,8 @@ class WorkQueue(object):
     empty = property(lambda self: self.wq.empty())
 
     def __del__(self):
-        import os
-        os.rmdir(self.tmpdir)
+        import shutil
+        shutil.rmtree(self.tmpdir)
 
 
     @awe.trace()
