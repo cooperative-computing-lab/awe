@@ -64,19 +64,14 @@ class Simple(IResampler):
 
             ### initialize the list of weights for walkers in the current cell
             ixs       = np.where(walkergroup.cells == cell)
-            ixs       = ixs[0]
             weights   = walkergroup.weights[ixs]
             print '\tixs:', ixs
+            print '\tweights:', weights
 
             ### sort the walkers in descending order based on their weights
             ##+ this ensures only walkers whose weight > targetWeight are split
-            ixs = ixs[argsort(-weights)]
-            mywalkers = list(ixs)
-            weights   = walkergroup.weights.copy()
-
+            mywalkers = list(argsort(-weights))
             print '\tmywalkers:', mywalkers
-            print '\tweights:', weights[mywalkers]
-            
 
             ### setup total weight and target weights
             W     = sum(weights)
@@ -99,13 +94,11 @@ class Simple(IResampler):
 
                     ### split
                     if (Wx + self.eps > tw):
-                        print 'a'
                         ### determine number copies of current walker needed
                         r = int(np.floor( (Wx+self.eps) / tw ))
 
                         ### split: insert r copies of walkers in list1
                         for item in itertools.repeat(x, r):
-                            print 'b'
                             w = awe.aweclasses.Walker(coords = currentWalker.coords,
                                                       weight = tw,
                                                       color  = currentWalker.color,
@@ -115,7 +108,6 @@ class Simple(IResampler):
                         ### ???
                         activewalk += r
                         if activewalk < self.targetwalkers and Wx-r*tw+self.eps > 0.0:
-                            print 'c'
                             w = awe.aweclasses.Walker(coords = currentWalker.coords,
                                                       weight = Wx - r * tw,
                                                       color  = currentWalker.color,
@@ -124,15 +116,12 @@ class Simple(IResampler):
                             newwalkers.append(w)
 
                         if len(mywalkers) > 0:
-                            print 'd'
                             x = mywalkers.pop()
                         else: break
 
                     ### merge
                     else:
-                        print 'e'
                         if len(mywalkers) > 0:
-                            print 'f'
                             y = mywalkers.pop()
                             Wy = weights[y]
                             Wxy = Wx + Wy
@@ -180,7 +169,8 @@ class SimpleWeightsPlotter(Simple):
         for i in xrange(len(self)):
             ws = self[i]
             xs = i * np.ones(len(ws), dtype=int)
-            plt.scatter(xs, ws, alpha=0.75, color=plt.cm.jet(1.*i/len(self)))
+            for x, w in zip(xs, ws):
+                plt.scatter(x, w, alpha=0.75, color=plt.cm.jet(1.*i/len(xs)))
 
         plt.ylabel('Weights')
         plt.xlabel('Iteration')
