@@ -10,7 +10,7 @@ import numpy as np
 
 class Walker(object):
 
-    @awe.typecheck(coords=np.ndarray, wid=int)
+    @awe.typecheck(coords=np.ndarray)
     def __init__(self, coords=None, weight=0., color=None, cell=None, wid=-1):
 
         self.coords = coords
@@ -44,10 +44,10 @@ class WalkerGroup(object):
         self._count    = count
 
         self.topology  = topology
-        self.positions = -1 * np.ones((count, self.natoms, 3))
-        self.weights   =      np.ones(count)
-        self.colors    =      np.empty(count, dtype=int)
-        self.cells     =      np.zeros(count, dtype=int)
+        self.positions = np.zeros((count, self.natoms, 3))
+        self.weights   = np.ones(count)
+        self.colors    = np.zeros(count, dtype=int)
+        self.cells     = np.zeros(count, dtype=int)
 
         self._ix       = 0
 
@@ -79,6 +79,10 @@ class WalkerGroup(object):
 
     def __len__(self):
         return self._count
+
+    def __iter__(self):
+        for i in xrange(self._ix):
+            yield self[i]
 
     def __setitem__(self, i, walker):
 

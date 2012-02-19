@@ -37,7 +37,7 @@ for i in xrange(nwalkers):
     walkers.add(w)
 
 
-resample = awe.resample.SimpleRMSDPlotter(nwalkers, 'testinput/state0.pdb', plotfile='/tmp/test.png')
+resample = awe.resample.SimpleWeightsPlotter(nwalkers, plotfile='/tmp/test.png')
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
                                iterations = 3,

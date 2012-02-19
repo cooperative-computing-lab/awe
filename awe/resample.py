@@ -2,6 +2,9 @@
 import awe
 import mdtools
 
+import numpy as np
+import itertools
+
 
 class IResampler(object):
 
@@ -42,90 +45,109 @@ class Identity(IResampler):
 
 class Simple(IResampler):
 
-    """
-    Implementation based on Eric Darve and Ernest Ryu's paper:
-    "Computing reaction rates in bio-molecular systems using discrete macro-states"
-    """
-
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 
-    def resample(self, walkers):
+        ## required because of roundoff errors
+        self.eps           = np.finfo(np.double).eps
 
-        awe.log('RESAMPLE weights: %s' % walkers.weights)
+    def resample(self, walkergroup):
 
-        from   numpy import floor, argsort, random, sum
-        import numpy as np
+        print 'Resampling'
 
-        for cell in set(walkers.cells):
+        from numpy import floor, argsort, random, sum
 
-            list0          = np.arange(len(walkers)) ## walker indices
-            weights        = walkers.weights         ## walker weights
-            ntargetwalkers = self.targetwalkers      ## target number of walkers
+        newwalkers = list()
 
-            list1          = list()                  ## new list of walkers
-            newweights     = list()                  ## weights of new walkers
-            nwalkerlist1   = 0                       ## number of walkers in list 1
-
-
-            awe.log('Processing cell %s' % cell)
+        for cell in set(walkergroup.cells):
+            print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
-            ixs = np.where(walkers.cells == cell)
-            wi  = weights[ixs]
-            ind = argsort(-wi)
+            ixs       = np.where(walkergroup.cells == cell)
+            ixs       = ixs[0]
+            weights   = walkergroup.weights[ixs]
+            print '\tixs:', ixs
 
             ### sort the walkers in descending order based on their weights
-            list0 = list(list0[ind])
+            ##+ this ensures only walkers whose weight > targetWeight are split
+            ixs = ixs[argsort(-weights)]
+            mywalkers = list(ixs)
+            weights   = walkergroup.weights.copy()
 
-            W     = sum(wi)
-            tw    = W / ntargetwalkers
+            print '\tmywalkers:', mywalkers
+            print '\tweights:', weights[mywalkers]
+            
 
-            ### we assume that there is at least on walker in the cell
-            x     = list0.pop()
+            ### setup total weight and target weights
+            W     = sum(weights)
+            tw    = W / self.targetwalkers
+            print '\tW', W, 'tw', tw
 
-            while True: ## exit using a break
+            ### TODO
+            activewalk = 0
 
-                Wx = weights[x]
-                if (Wx > tw or len(list0) == 0):
+            if len(mywalkers) > 0:
 
-                    ## min, max required because of round-off errors
-                    print 'Wx', Wx, 'tw', tw
-                    r = max(1, int( floor(Wx/tw) ))
-                    r = min(r, ntargetwalkers - nwalkerlist1)
+                ### x,y are walker indices
+                x = mywalkers.pop()
+                print'\twalker x:', x
+                currentWalker = walkergroup[x]
 
-                    ### update the number of walkers in list1
-                    nwalkerlist1 += r
+                while True:
 
-                    ### insert r copies of walkers in list1
-                    for item in xrange(x, r):
-                        list1.append(item)
-                        newweights.append(tw)
+                    Wx = weights[x]
 
-                    if nwalkerlist1 < ntargetwalkers and Wx - r*tw > 0.0:
-                        list0.append(x)
-                        weights[x] = Wx - r*tw
+                    ### split
+                    if (Wx + self.eps > tw):
+                        print 'a'
+                        ### determine number copies of current walker needed
+                        r = int(np.floor( (Wx+self.eps) / tw ))
 
-                    if len(list0) > 0:
-                        x = list0.pop()
+                        ### split: insert r copies of walkers in list1
+                        for item in itertools.repeat(x, r):
+                            print 'b'
+                            w = awe.aweclasses.Walker(coords = currentWalker.coords,
+                                                      weight = tw,
+                                                      color  = currentWalker.color,
+                                                      cell   = cell)
+                            newwalkers.append(w)
+
+                        ### ???
+                        activewalk += r
+                        if activewalk < self.targetwalkers and Wx-r*tw+self.eps > 0.0:
+                            print 'c'
+                            w = awe.aweclasses.Walker(coords = currentWalker.coords,
+                                                      weight = Wx - r * tw,
+                                                      color  = currentWalker.color,
+                                                      cell   = cell)
+                            mywalkers.append(x)
+                            newwalkers.append(w)
+
+                        if len(mywalkers) > 0:
+                            print 'd'
+                            x = mywalkers.pop()
+                        else: break
+
+                    ### merge
                     else:
-                        break
+                        print 'e'
+                        if len(mywalkers) > 0:
+                            print 'f'
+                            y = mywalkers.pop()
+                            Wy = weights[y]
+                            Wxy = Wx + Wy
+                            p = np.random.random()
+                            if p < Wy / Wxy:
+                                x = y
+                            weights[x] = Wxy
 
-                else:
+        newgroup = awe.aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
+        for w in newwalkers:
+            newgroup.add(w)
 
-                    y   = list0.pop()
-                    Wy  = weights[y]
-                    Wxy = Wx + Wy
-
-                    ## randomly select a walker
-                    p   = random.random()
-                    if p < Wy / Wxy:
-                        x = y
-
-                    weights[x] = Wxy
-
-        walkers.weights = weights
-        return walkers
+        ### normalize weights
+        newgroup.weights /= np.sum(newgroup.weights)
+        return newgroup
 
 
 class SimpleWeightsPlotter(Simple):
@@ -158,7 +180,7 @@ class SimpleWeightsPlotter(Simple):
         for i in xrange(len(self)):
             ws = self[i]
             xs = i * np.ones(len(ws), dtype=int)
-            plt.scatter(xs, ws)
+            plt.scatter(xs, ws, alpha=0.75, color=plt.cm.jet(1.*i/len(self)))
 
         plt.ylabel('Weights')
         plt.xlabel('Iteration')
