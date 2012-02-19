@@ -22,9 +22,9 @@ WORKER_CELL_NAME    = 'cell.dat'
 WORKER_RESULTS_NAME = 'results.tar'
 
 RESULT_POSITIONS    = 'structure2.pdb'
-RESULT_WEIGHTS      = 'weights2.dat'
-RESULT_COLOR        = 'color2.dat'
-RESULT_CELL         = 'cell2.dat'
+RESULT_WEIGHTS      = 'weights.dat'
+RESULT_COLOR        = 'color.dat'
+RESULT_CELL         = 'cell.dat'
 RESULT_NAME         = 'results-%s.tar'
 
 
