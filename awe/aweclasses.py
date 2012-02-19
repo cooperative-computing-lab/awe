@@ -103,6 +103,18 @@ class WalkerGroup(object):
                    wid    = k                  )
         return w
 
+    def getslice(self, slice):
+
+        g           = WalkerGroup(count=len(slice), topology=self.topology)
+        g.positions = self.positions[slice]
+        g.weights   = self.weights[slice]
+        g.colors    = self.colors[slice]
+        g.cells     = self.cells[slice]
+        g._count    = len(g.weights)
+        g._ix       = g._count
+
+        return g
+
     def get_pdb(self, k):
         pdb = self.topology.copy()
         pdb.setCoords(self.positions[k])
