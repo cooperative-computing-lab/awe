@@ -18,7 +18,8 @@ cfg.cache('testinput/Gens.lh5')
 cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
-nwalkers = 910
+
+nwalkers = 20
 nstates = 100
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
@@ -36,10 +37,10 @@ for i in xrange(nwalkers):
     walkers.add(w)
 
 
-resample = awe.resample.SimpleWeightsPlotter(20, plotfile='/tmp/test.png')
+resample = awe.resample.SimpleRMSDPlotter(nwalkers, 'testinput/state0.pdb', plotfile='/tmp/test.png')
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 10,
+                               iterations = 3,
                                resample   = resample)
 
 adaptive.run()
