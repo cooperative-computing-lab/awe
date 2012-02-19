@@ -1,5 +1,6 @@
 
 import awe
+import mdtools
 
 
 class IResampler(object):
@@ -164,3 +165,45 @@ class SimpleWeightsPlotter(Simple):
 
         plt.savefig(self.plotfile)
         print 'Saved image to', self.plotfile
+
+
+class SimpleRMSDPlotter(Simple):
+    def __init__(self, nwalkers, ref, sel='name CA', plotfile='rmsds.png'):
+
+        Simple.__init__(self, nwalkers)
+        self.plotfile = plotfile
+        self.rmsds    = list()
+        self.sel      = sel
+        self.ref      = mdtools.pdb.load(ref)
+        self.ref.setunits('nanometers')
+
+    def resample(self, walkers):
+        coords = walkers.positions
+        ref    = self.ref.atomcoords
+
+        print 'Computing RMSD'
+        rmsd = mdtools.analysis.Analysis.rmsd(ref, *coords)
+        self.rmsds.append(rmsd)
+        print self.rmsds
+        self.plot()
+
+        print 'Resampling'
+        return Simple.resample(self, walkers)
+
+
+    def plot(self):
+        print 'Plotting'
+        import matplotlib.pylab as plt
+        import numpy as np
+
+        plt.jet()
+
+        for i in xrange(len(self.rmsds)):
+            rs = self.rmsds[i]
+            xs = np.arange(len(rs), dtype=int)
+            plt.scatter(xs, rs, alpha=0.5, color=plt.cm.jet(1.*i/len(self.rmsds)))
+        plt.xlabel('Walker')
+        plt.ylabel('RMSD')
+
+        print 'Saving plot to', self.plotfile
+        plt.savefig(self.plotfile)
