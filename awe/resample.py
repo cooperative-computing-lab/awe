@@ -44,6 +44,11 @@ class Identity(IResampler):
 
 class OneColor(IResampler):
 
+    """
+    A single/no color algorithm based on Eric Darve and Ernest Ryu's:
+      "Computing reaction rates in bio-molecular systems using discrete macro-states"
+    """
+
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 

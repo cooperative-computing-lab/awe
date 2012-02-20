@@ -10,6 +10,20 @@ import time
 
 class Walker(object):
 
+    """
+    Capture the state of a single walker.
+    This include the starting and ending coordinates, the cell, the
+    weight, and optional color.
+
+    Relevant fields are:
+
+      *start*  : numpy.ndarray (natoms, 3) : starting coordinates
+      *end*    : numpy.ndarray (natoms, 3) : ending coordinates
+      *weight* : float
+      *color*  : int
+      *cell*   : int
+    """
+
     def __init__(self, start=None, end=None, weight=0., color=0, cell=None, wid=-1):
 
         assert not (start is None and end is None)
@@ -44,6 +58,25 @@ class Walker(object):
 
 class WalkerGroup(object):
 
+    """
+    Efficiently store the state between iterations of the AWE
+    algorithms.  This class implements the __get/setitem__ methods
+    which accept and return Walker instances.
+
+    This is the data structure that is passed to the resampling
+    algorithm, which needs to return a new WalkerGroup instance.
+
+
+    Relevant fields are:
+
+      *startcoords* : numpy.ndarray (count, natoms, 3)
+      *endcoords*   : numpy.ndarray (count, natoms, 3)
+      *weights*     : numpy.ndarray (count)
+      *colors*      : numpy.ndarray (count)
+      *cells*       : numpy.ndarray (count)
+
+    """
+
     @awe.typecheck(count=int, topology=mdtools.prody.AtomGroup)
     def __init__(self, count=None, topology=None, walkers=list()):
 
@@ -69,11 +102,17 @@ class WalkerGroup(object):
 
     @awe.typecheck(mdtools.prody.AtomGroup)
     def topology(self, pdb):
+        """
+        Set the topology
+        """
 
         self.topology = pdb
 
     @awe.typecheck(Walker)
     def add(self, walker, ix=None):
+        """
+        Add a Walker to this group
+        """
 
         assert type(walker) is Walker
 
@@ -94,7 +133,11 @@ class WalkerGroup(object):
         for i in xrange(self._ix):
             yield self[i]
 
+
     def __setitem__(self, i, walker):
+        """
+        Set a Walker *walker* at the *i*th position
+        """
 
         assert not (walker.start is None and walker.end is None)
         assert walker.natoms == self.natoms
@@ -112,6 +155,10 @@ class WalkerGroup(object):
 
 
     def __getitem__(self, k):
+        """
+        Get the *i*th walker. Returns an instance of Walker.
+        """
+
         start = None if (self.startcoords[k] == 0).all() else self.startcoords[k]
         end   = None if (self.endcoords  [k] == 0).all() else self.endcoords  [k]
 
@@ -124,24 +171,35 @@ class WalkerGroup(object):
         return w
 
     def getslice(self, slice):
+        """
+        Use fancy slicing to select a subset of values from this walker group
+        Returns a new WalkerGroup
+        """
 
         g             = WalkerGroup(count=len(slice), topology=self.topology)
-        g.startcoords = self.startcoords [slice]
-        g.endcoords   = self.endcoords   [slice]
-        g.weights     = self.weights     [slice]
-        g.colors      = self.colors      [slice]
-        g.cells       = self.cells       [slice]
+        g.startcoords = self.startcoords [slice].copy()
+        g.endcoords   = self.endcoords   [slice].copy()
+        g.weights     = self.weights     [slice].copy()
+        g.colors      = self.colors      [slice].copy()
+        g.cells       = self.cells       [slice].copy()
         g._count      = len(g.weights)
         g._ix         = g._count
 
         return g
 
     def get_pdb(self, k):
+        """
+        Get a pdb (coordinates + topology) for the *k*th walker
+        Returns a mdtools.prody.AtomGroup instance
+        """
         pdb = self.topology.copy()
         pdb.setCoords(self.startcoords[k])
         return pdb
 
     def get_task_params(self, k):
+        """
+        Get a dictionary of the parameters suitable for creating a WorkQueue Task
+        """
 
         ss  = awe.io.StringStream()
         mdtools.prody.writePDBStream(ss, self.get_pdb(k))
@@ -157,17 +215,38 @@ class WalkerGroup(object):
 
 class AWE(object):
 
+    """
+    The main driver for the Adaptive Weighted Ensemble algorithm.
+    This class manages the marshaling of workers to/from workers,
+    updating the current WalkerGroup, and calling the resampleing
+    algorithm.
+
+    When constructing an AWE instance, required parameters include:
+
+      *wqconfig*   : an instance of awe.workqueue.Config
+      *walkers*    : an instance of awe.aweclasses.WalkerGroup
+      *iterations* : number of iterations to run
+      *resample*   : the implementation of the resampling algorithm, a subclass of awe.resample.IResampler
+
+
+    example:
+    >>> cfg        = awe.workqueue.Config()
+    >>> walkers    = awe.aweclasses.WalkerGroup(...)
+    >>> iterations = 42
+    >>> resample   = awe.resample.OneColor()
+    >>> adaptive   = awe.aweclasses.AWE(wqconfig=cfg, walkers=walkers, iterations=42, resample=resample)
+    >>> adaptive.run()
+    """
+
     @awe.typecheck(wqconfig=awe.workqueue.Config, walkers=WalkerGroup, iterations=int)
-    def __init__(self, wqconfig=None, cells=None, walkers=None, iterations=-1, resample=None):
+    def __init__(self, wqconfig=None, walkers=None, iterations=-1, resample=None):
 
         assert type(wqconfig) is awe.workqueue.Config
-        # TODO: assert type(cells) is
         assert type(walkers) is WalkerGroup
         assert type(iterations) is int
         # TODO: assert type(resample) is
 
         self.wq         = awe.workqueue.WorkQueue(wqconfig)
-        self.cells      = cells
         self.walkers    = walkers
         self.iterations = iterations
         self.resample   = resample
@@ -201,6 +280,9 @@ class AWE(object):
             
 
     def run(self):
+        """
+        Run the algorithm
+        """
 
         for iteration in xrange(self.iterations):
 
