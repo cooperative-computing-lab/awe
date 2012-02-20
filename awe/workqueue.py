@@ -217,7 +217,7 @@ class WorkQueue(object):
     @awe.trace()
     def recv(self):
 
-        print time.asctime(), 'waiting for task'
+        # print time.asctime(), 'waiting for task'
         while True:
 
             task = self.wait(self.cfg.waittime)

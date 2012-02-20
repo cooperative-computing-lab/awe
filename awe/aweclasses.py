@@ -5,7 +5,7 @@ import mdtools
 
 import numpy as np
 
-
+import time
 
 
 class Walker(object):
@@ -165,6 +165,7 @@ class AWE(object):
     @awe.trace()
     def _recv(self):
 
+        print time.asctime(), 'Recieving tasks'
         self.stats.time_barrier('start')
         while not self.wq.empty:
             walker                  = self.wq.recv()

@@ -215,7 +215,6 @@ class OneColor_PlotCellRMSD(OneColor,IPlotter):
                     print '\t', cell, rmsd
                     plt.scatter(cell, rmsd, alpha=0.5, color=plt.cm.jet(1.*iteration/len(self.rmsds)))
 
-        plt.ylim(ymin=0)
         plt.xlabel('Cell')
         plt.ylabel('Average RMSD')
         plt.savefig(self.plotfile)
