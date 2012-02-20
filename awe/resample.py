@@ -154,83 +154,68 @@ class OneColor(IResampler):
         return newgroup
 
 
-class SimpleWeightsPlotter(Simple):
-    def __init__(self, nwalkers, plotfile='weights.png'):
-        Simple.__init__(self, nwalkers)
-        self._plotfile = plotfile
-        self._weights  = list()
+class IPlotter(IResampler):
 
-    @property
-    def plotfile(self):
-        return self._plotfile
+    def __init__(self, **kws):
+        self.plotfile = kws.pop('plotfile', 'plot.png')
 
-    def __getitem__(self, i):
-        return self._weights[i]
-
-    def __len__(self):
-        return len(self._weights)
-
-
-    def resample(self, walkers):
-        self._weights.append(walkers.weights.copy())
-        self.plot()
-        return Simple.resample(self, walkers)
+    def compute(self, walkergroup):
+        raise NotImplementedError
 
     def plot(self):
-        print 'Plotting'
-        import matplotlib.pylab as plt
-        import numpy as np
+        raise NotImplementedError
 
-        for i in xrange(len(self)):
-            ws = self[i]
-            xs = i * np.ones(len(ws), dtype=int)
-            for x, w in zip(xs, ws):
-                plt.scatter(x, w, alpha=0.75, color=plt.cm.jet(1.*i/len(xs)))
-
-        plt.ylabel('Weights')
-        plt.xlabel('Iteration')
-
-        plt.savefig(self.plotfile)
-        print 'Saved image to', self.plotfile
-
-
-class SimpleRMSDPlotter(Simple):
-    def __init__(self, nwalkers, ref, sel='name CA', plotfile='rmsds.png'):
-
-        Simple.__init__(self, nwalkers)
-        self.plotfile = plotfile
-        self.rmsds    = list()
-        self.sel      = sel
-        self.ref      = mdtools.pdb.load(ref)
-        self.ref.setunits('nanometers')
-
-    def resample(self, walkers):
-        coords = walkers.positions
-        ref    = self.ref.atomcoords
-
-        print 'Computing RMSD'
-        rmsd = mdtools.analysis.Analysis.rmsd(ref, *coords)
-        self.rmsds.append(rmsd)
-        print self.rmsds
+    def __call__(self, walkers):
+        ws = IResampler.__call__(self, walkers)
+        self.compute(ws)
         self.plot()
+        return ws
 
-        print 'Resampling'
-        return Simple.resample(self, walkers)
 
+class OneColor_PlotCellRMSD(OneColor,IPlotter):
+
+    def __init__(self, nwalkers, **kws):
+        OneColor.__init__(self, nwalkers)
+        IPlotter.__init__(self, **kws)
+
+        ref = kws.pop('ref')
+        ref = mdtools.pdb.load(ref)
+        ref.setunits('nanometers')
+
+        self.ref   = ref.atomcoords
+        self.rmsds = list()
+
+    def compute(self, walkers):
+
+        print 'Computing RMSDS'
+
+        rmsds = list()
+        for cell in set(walkers.cells):
+
+            print '\tcell', cell
+
+            ixs = np.where(walkers.cells == cell)
+            coords = walkers.positions[ixs]
+            rmsd = mdtools.analysis.Analysis.rmsd(self.ref, *coords)
+            rmsd = np.mean(rmsd)
+            rmsds.append((cell,rmsd))
+
+        self.rmsds.append(rmsds)
 
     def plot(self):
-        print 'Plotting'
         import matplotlib.pylab as plt
-        import numpy as np
 
-        plt.jet()
+        print 'Plotting'
 
-        for i in xrange(len(self.rmsds)):
-            rs = self.rmsds[i]
-            xs = np.arange(len(rs), dtype=int)
-            plt.scatter(xs, rs, alpha=0.5, color=plt.cm.jet(1.*i/len(self.rmsds)))
-        plt.xlabel('Walker')
-        plt.ylabel('RMSD')
+        for iteration, group in enumerate(self.rmsds):
 
-        print 'Saving plot to', self.plotfile
+            for cell, rmsd in group:
+                print '\t', cell, rmsd
+                plt.scatter(cell, rmsd, alpha=0.5, color=plt.cm.jet(1.*iteration/len(self.rmsds)))
+
+        plt.xlabel('Cell')
+        plt.ylabel('Average RMSD')
         plt.savefig(self.plotfile)
+
+        print 'Saved figure to', self.plotfile
+
