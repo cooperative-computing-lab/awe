@@ -105,6 +105,8 @@ class OneColor(IResampler):
 
                 ### split
                 if Wx > tw or len(mywalkers) == 0:
+
+                    ### choose number of times to split
                     ### work around round-off errors
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
@@ -145,6 +147,7 @@ class OneColor(IResampler):
                     weights[x] = Wxy
 
 
+        ### setup the WalkerGroup to return
         newgroup = awe.aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
         for w in newwalkers:
             newgroup.add(w)
