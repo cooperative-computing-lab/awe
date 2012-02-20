@@ -10,7 +10,7 @@ import time
 
 class Walker(object):
 
-    def __init__(self, start=None, end=None, weight=0., color=None, cell=None, wid=-1):
+    def __init__(self, start=None, end=None, weight=0., color=0, cell=None, wid=-1):
 
         assert not (start is None and end is None)
 
