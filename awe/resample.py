@@ -184,6 +184,7 @@ class OneColor_PlotCellRMSD(OneColor,IPlotter):
 
         self.ref   = ref.atomcoords
         self.rmsds = list()
+        self.cellmod = kws.pop('cellmod', 10)
 
     def compute(self, walkers):
 
@@ -210,8 +211,9 @@ class OneColor_PlotCellRMSD(OneColor,IPlotter):
         for iteration, group in enumerate(self.rmsds):
 
             for cell, rmsd in group:
-                print '\t', cell, rmsd
-                plt.scatter(cell, rmsd, alpha=0.5, color=plt.cm.jet(1.*iteration/len(self.rmsds)))
+                if cell % self.cellmod == 0:
+                    print '\t', cell, rmsd
+                    plt.scatter(cell, rmsd, alpha=0.5, color=plt.cm.jet(1.*iteration/len(self.rmsds)))
 
         plt.xlabel('Cell')
         plt.ylabel('Average RMSD')
