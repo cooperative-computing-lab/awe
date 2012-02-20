@@ -10,16 +10,24 @@ import time
 
 class Walker(object):
 
-    @awe.typecheck(coords=np.ndarray)
-    def __init__(self, coords=None, weight=0., color=None, cell=None, wid=-1):
+    def __init__(self, start=None, end=None, weight=0., color=None, cell=None, wid=-1):
 
-        self.coords = coords
+        assert not (start is None and end is None)
+
+        self.start  = start
+        self.end    = end
         self.weight = weight
         self.color  = color
         self.cell   = cell
         self.id     = wid
 
-    natoms = property(lambda self: len(self.coords))
+    @property
+    def natoms(self):
+        if self.start is not None:
+            return len(self.start)
+        elif self.end is not None:
+            return len(self.end)
+        else: raise ValueError, 'Both *start* and *end* should not be None'
 
     def __str__(self):
         return \
@@ -29,9 +37,9 @@ class Walker(object):
 
     def __repr__(self):
         return \
-            'Walker(coords=%(coords)r, weight=%(weight)r, color=%(color)r, cell=%(cell)r, wid=%(wid)r)' % \
-            {'coords' : self.coords, 'weight' : self.weight, 'color' : self.color,
-             'cell' : self.cell, 'wid' : self.id}
+            'Walker(start=%(start)r, end=%(end)r, weight=%(weight)r, color=%(color)r, cell=%(cell)r, wid=%(wid)r)' \
+            % {'start' : self.start, 'end' : self.end, 'weight' : self.weight, 'color' : self.color,
+               'cell' : self.cell, 'wid' : self.id}
 
 
 class WalkerGroup(object):
@@ -41,15 +49,16 @@ class WalkerGroup(object):
 
         assert len(walkers) == 0 or  type(iter(walkers).next()) is Walker
 
-        self._count    = count
+        self._count      = count
 
-        self.topology  = topology
-        self.positions = np.zeros((count, self.natoms, 3))
-        self.weights   = np.ones(count)
-        self.colors    = np.zeros(count, dtype=int)
-        self.cells     = np.zeros(count, dtype=int)
+        self.topology    = topology
+        self.startcoords = np.zeros((count, self.natoms, 3))
+        self.endcoords   = np.zeros((count, self.natoms, 3))
+        self.weights     = np.ones(count)
+        self.colors      = np.zeros(count, dtype=int)
+        self.cells       = np.zeros(count, dtype=int)
 
-        self._ix       = 0
+        self._ix         = 0
 
         map(self.add, walkers)
 
@@ -86,38 +95,49 @@ class WalkerGroup(object):
 
     def __setitem__(self, i, walker):
 
+        assert not (walker.start is None and walker.end is None)
         assert walker.natoms == self.natoms
         assert i              < self._count
 
-        self.positions[i] = walker.coords
-        self.weights  [i] = walker.weight
-        self.colors   [i] = walker.color
-        self.cells    [i] = walker.cell
+        if walker.start is not None:
+            self.startcoords[i] = walker.start
+
+        if walker.end is not None:
+            self.endcoords[i]   = walker.end
+
+        self.weights  [i]       = walker.weight
+        self.colors   [i]       = walker.color
+        self.cells    [i]       = walker.cell
 
 
     def __getitem__(self, k):
-        w = Walker(coords = self.positions [k] ,
-                   weight = self.weights   [k] ,
-                   color  = self.colors    [k] ,
-                   cell   = self.cells     [k] ,
-                   wid    = k                  )
+        start = None if (self.startcoords[k] == 0).all() else self.startcoords[k]
+        end   = None if (self.endcoords  [k] == 0).all() else self.endcoords  [k]
+
+        w = Walker(start  = start            ,
+                   end    = end              ,
+                   weight = self.weights [k] ,
+                   color  = self.colors  [k] ,
+                   cell   = self.cells   [k] ,
+                   wid    = k                )
         return w
 
     def getslice(self, slice):
 
-        g           = WalkerGroup(count=len(slice), topology=self.topology)
-        g.positions = self.positions[slice]
-        g.weights   = self.weights[slice]
-        g.colors    = self.colors[slice]
-        g.cells     = self.cells[slice]
-        g._count    = len(g.weights)
-        g._ix       = g._count
+        g             = WalkerGroup(count=len(slice), topology=self.topology)
+        g.startcoords = self.startcoords [slice]
+        g.endcoords   = self.endcoords   [slice]
+        g.weights     = self.weights     [slice]
+        g.colors      = self.colors      [slice]
+        g.cells       = self.cells       [slice]
+        g._count      = len(g.weights)
+        g._ix         = g._count
 
         return g
 
     def get_pdb(self, k):
         pdb = self.topology.copy()
-        pdb.setCoords(self.positions[k])
+        pdb.setCoords(self.startcoords[k])
         return pdb
 
     def get_task_params(self, k):

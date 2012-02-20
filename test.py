@@ -21,8 +21,8 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-nwalkers = 10
-nstates  = 100
+nwalkers = 2
+nstates  = 10
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
@@ -35,7 +35,7 @@ for i in xrange(nstates):
         pdb     = mdtools.prody.parsePDB(pdbpath)
         color   = 0
         cell    = i
-        w       = awe.aweclasses.Walker(coords = pdb.getCoords(),
+        w       = awe.aweclasses.Walker(start  = pdb.getCoords(),
                                         weight = weight,
                                         color  = color,
                                         cell   = cell

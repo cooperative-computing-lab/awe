@@ -203,7 +203,7 @@ class WorkQueue(object):
             pdb          = mdtools.prody.parsePDBStream(ss)
 
             walker       = awe.aweclasses.Walker(
-                coords   = pdb.getCoords(),
+                end      = pdb.getCoords(),
                 weight   = float(weightstring),
                 color    = int(colorstring),
                 cell     = int(cellstring),

@@ -114,7 +114,7 @@ class OneColor(IResampler):
                     ### split the current walker
                     print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = awe.aweclasses.Walker(coords = currentWalker.coords,
+                        w = awe.aweclasses.Walker(start  = currentWalker.start,
                                                   weight = tw,
                                                   color  = currentWalker.color,
                                                   cell   = cell)
@@ -196,7 +196,7 @@ class OneColor_PlotCellRMSD(OneColor,IPlotter):
             print '\tcell', cell
 
             ixs = np.where(walkers.cells == cell)
-            coords = walkers.positions[ixs]
+            coords = walkers.endcoords[ixs]
             rmsd = mdtools.analysis.Analysis.rmsd(self.ref, *coords)
             rmsd = np.mean(rmsd)
             rmsds.append((cell,rmsd))
