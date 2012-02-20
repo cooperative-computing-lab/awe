@@ -23,9 +23,8 @@ class IResampler(object):
 
         raise NotImplementedError
 
-    @awe.trace()
+    @awe.typecheck(awe.aweclasses.WalkerGroup)
     def __call__(self, walkers):
-        assert type(walkers) is awe.aweclasses.WalkerGroup
         ws2 = self.resample(walkers)
         assert type(ws2) is awe.aweclasses.WalkerGroup
         return ws2

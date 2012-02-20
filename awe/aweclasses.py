@@ -67,11 +67,12 @@ class WalkerGroup(object):
     natoms = property(lambda self: len(self.topology))
 
 
+    @awe.typecheck(mdtools.prody.AtomGroup)
     def topology(self, pdb):
 
-        assert type(pdb) is mdtools.prody.AtomGroup
         self.topology = pdb
 
+    @awe.typecheck(Walker)
     def add(self, walker, ix=None):
 
         assert type(walker) is Walker
@@ -156,6 +157,7 @@ class WalkerGroup(object):
 
 class AWE(object):
 
+    @awe.typecheck(wqconfig=awe.workqueue.Config, walkers=WalkerGroup, iterations=int)
     def __init__(self, wqconfig=None, cells=None, walkers=None, iterations=-1, resample=None):
 
         assert type(wqconfig) is awe.workqueue.Config
@@ -173,7 +175,6 @@ class AWE(object):
         self.stats      = awe.stats.AWEStats()
 
 
-    @awe.trace()
     def _submit(self):
 
         for i in xrange(len(self.walkers)):
@@ -182,7 +183,6 @@ class AWE(object):
             self.wq.submit(task)
 
 
-    @awe.trace()
     def _recv(self):
 
         print time.asctime(), 'Recieving tasks'
@@ -193,7 +193,6 @@ class AWE(object):
         self.stats.time_barrier('stop')
 
 
-    @awe.trace()
     def _resample(self):
 
         self.stats.time_resample('start')
@@ -201,7 +200,6 @@ class AWE(object):
         self.stats.time_resample('stop')
             
 
-    @awe.trace()
     def run(self):
 
         for iteration in xrange(self.iterations):

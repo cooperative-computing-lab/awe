@@ -32,6 +32,8 @@ class WorkQueueException       (Exception): pass
 class WorkQueueWorkerException (Exception): pass
 
 class WQFile(object):
+
+    @awe.typecheck(str, base=bool, cached=bool)
     def __init__(self, masterpath, base=True, cached=True):
         self._masterpath = masterpath
         self._base       = base
@@ -128,6 +130,8 @@ class Config(object):
 
 
 class WorkQueue(object):
+
+    @awe.typecheck(Config)
     def __init__(self, cfg):
 
         self.cfg    = cfg
@@ -145,15 +149,14 @@ class WorkQueue(object):
         shutil.rmtree(self.tmpdir)
 
 
-    @awe.trace()
     def update_wq_stats(self):
         self.stats.wq(self.wq)
 
-    @awe.trace()
+    @awe.typecheck(WQ.Task)
     def update_task_stats(self, task):
         self.stats.task(task)
 
-    @awe.trace()
+    @awe.typecheck(dict)
     def new_task(self, params):
         cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
@@ -179,16 +182,14 @@ class WorkQueue(object):
 
         return task
 
-    @awe.trace()
+    @awe.typecheck(WQ.Task)
     def submit(self, task):
         return self.wq.submit(task)
 
-    @awe.trace()
     def wait(self, *args, **kws):
         return self.wq.wait(*args, **kws)
 
-
-    @awe.trace()
+    @awe.typecheck(WQ.Task)
     def _load_result_file(self, task):
 
         path = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
@@ -214,7 +215,6 @@ class WorkQueue(object):
         return walker
 
 
-    @awe.trace()
     def recv(self):
 
         # print time.asctime(), 'waiting for task'

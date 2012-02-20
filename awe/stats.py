@@ -165,7 +165,7 @@ class WQStats(object):
         self.total_receive_time      = Statistics()
 
 
-    @awe.trace()
+    @awe.typecheck(awe.workqueue.WQ.Task)
     def task(self, task):
         """
         Update the running statistics with a task result
@@ -179,7 +179,8 @@ class WQStats(object):
         self.task_run_time           .update(task.finish_time - task.start_time)
         self.task_life_time          .update(task.finish_time - task.submit_time)
 
-    @awe.trace()
+
+    @awe.typecheck(awe.workqueue.WQ.WorkQueue)
     def wq(self, wq):
 
         self._wq_times.append(time.time())
@@ -226,7 +227,8 @@ class AWEStats(object):
         self.resample  = Timings()
         self.barrier   = Timings()
 
-    def timeit(self, state, timings):
+    @awe.typecheck(str, Timings)
+    def _timeit(self, state, timings):
         """
         *state* = {start|stop}
         """
@@ -239,10 +241,10 @@ class AWEStats(object):
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
-        self.timeit(state, self.iteration)
+        self._timeit(state, self.iteration)
 
     def time_resample(self, state):
-        self.timeit(state, self.resample)
+        self._timeit(state, self.resample)
 
     def time_barrier(self, state):
-        self.timeit(state, self.barrier)
+        self._timeit(state, self.barrier)
