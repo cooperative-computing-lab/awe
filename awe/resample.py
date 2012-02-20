@@ -65,79 +65,85 @@ class Simple(IResampler):
             ### initialize the list of weights for walkers in the current cell
             ixs        = np.where(walkergroup.cells == cell)
             oldwalkers = walkergroup.getslice(ixs)
-            weights    = oldwalkers.weights
+            weights    = oldwalkers.weights.copy()
             print '\tixs:', ixs
             print '\tweights:', weights
 
-            ### sort the walkers in descending order based on their weights
-            ##+ this ensures only walkers whose weight > targetWeight are split
+            ### sort the walkers in descending order based on their weights,
+            ##+ this ensures only walkers whose weight > targetWeight are split.
             mywalkers = list(argsort(-weights))
-
             print '\tmywalkers:', mywalkers
+
+            ### sanity check
+            testmaxw = float('inf')
+            for i in mywalkers:
+                myw = weights[i]
+                assert myw == oldwalkers[i].weight, 'Weights mismatch'
+                assert myw <= testmaxw, 'Weights non-monotonically decreasing'
+                testmaxw = myw
 
             ### setup cell weight and target weights
             W     = sum(weights)
             tw    = W / self.targetwalkers
             print '\tW', W, 'tw', tw
 
-            ### TODO
-            activewalk = 0
 
-            if len(mywalkers) > 0:
-                print 'a'
-                ### x,y are walker indices
-                x = mywalkers.pop()
-                print'\twalker x:', x
+            ### we assume that there is at least one walker in the cell
+            x = mywalkers.pop()
+
+            ### keep track of active walkers for splitting
+            activewalkers = 0
+
+            ### The algorithm terminates since the last walker removed
+            ##+ from 'mywalkers' when W == tw. The max number of
+            ##+ iterations is bounded by 'len(where(group.cell = cell) + targetwalkers'
+            while True: # exit using break
+
+                Wx = weights[x]
                 currentWalker = oldwalkers[x]
+                print '\tweight of', x, 'is', Wx
 
-                while True:
-                    print 'b'
+                ### split
+                if Wx > tw or len(mywalkers) == 0:
+                    ### work around round-off errors
+                    r = max(1, int(floor( Wx/tw )) )
+                    r = min(r, self.targetwalkers - activewalkers)
+                    activewalkers += r
+                    print '\tactive walkers', activewalkers
 
-                    Wx = weights[x]
+                    ### split the current walker
+                    print '\tsplitting', x, r, 'times'
+                    for _ in itertools.repeat(x, r):
+                        w = awe.aweclasses.Walker(coords = currentWalker.coords,
+                                                  weight = tw,
+                                                  color  = currentWalker.color,
+                                                  cell   = cell)
+                        newwalkers.append(w)
 
-                    ### split
-                    if (Wx + self.eps > tw):
-                        print 'c'
-                        ### determine number copies of current walker needed
-                        r = int(np.floor( (Wx+self.eps) / tw ))
 
-                        ### split: insert r copies of walkers in list1
-                        for item in itertools.repeat(x, r):
-                            print 'd'
-                            w = awe.aweclasses.Walker(coords = currentWalker.coords,
-                                                      weight = tw,
-                                                      color  = currentWalker.color,
-                                                      cell   = cell)
-                            newwalkers.append(w)
+                    ### update the weights for the current walker and mark
+                    ##+ for reconsideration
+                    if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
+                        mywalkers.append(x)
+                        weights[x] = Wx - r * tw
+                        print '\tupdated weights of', x
 
-                        ### ???
-                        activewalk += r
-                        if activewalk < self.targetwalkers and Wx-r*tw+self.eps > 0.0:
-                            print 'e'
-                            w = awe.aweclasses.Walker(coords = currentWalker.coords,
-                                                      weight = Wx - r * tw,
-                                                      color  = currentWalker.color,
-                                                      cell   = cell)
-                            mywalkers.append(x)
-                            newwalkers.append(w)
+                    ### continue the loop?
+                    if len(mywalkers) > 0:
+                        x = mywalkers.pop()
+                    else: break
 
-                        if len(mywalkers) > 0:
-                            print 'f'
-                            x = mywalkers.pop()
-                        else: break
+                ### merge
+                else:
+                    y = mywalkers.pop()
+                    print '\tmerging', x, y
+                    Wy = weights[y]
+                    Wxy = Wx + Wy
+                    p = np.random.random()
+                    if p < Wy / Wxy:
+                        x = y
+                    weights[x] = Wxy
 
-                    ### merge
-                    else:
-                        print 'g'
-                        if len(mywalkers) > 0:
-                            print 'h'
-                            y = mywalkers.pop()
-                            Wy = weights[y]
-                            Wxy = Wx + Wy
-                            p = np.random.random()
-                            if p < Wy / Wxy:
-                                x = y
-                            weights[x] = Wxy
 
         newgroup = awe.aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
         for w in newwalkers:
