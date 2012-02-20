@@ -43,7 +43,7 @@ class Identity(IResampler):
         return walkers
 
 
-class Simple(IResampler):
+class OneColor(IResampler):
 
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
