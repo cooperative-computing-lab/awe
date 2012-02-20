@@ -227,7 +227,8 @@ class WorkQueue(object):
 
                 print time.asctime(), 'recived task', task.tag
 
-                output = ('\n' + task.output).split('\n')
+                output = task.output or ''
+                output = ('\n' + output).split('\n')
                 output = '\n\t'.join(output)
 
                 if not task.return_status == 0:
