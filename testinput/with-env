@@ -1,0 +1,10 @@
+#!/bin/env bash
+
+ENVSCRIPT="$1"
+shift
+
+echo "[with-env] sourcing $ENVSCRIPT"
+source "$ENVSCRIPT"
+
+echo "[with-env] executing command: $@"
+eval "$@"
