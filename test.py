@@ -22,7 +22,7 @@ cfg.cache('testinput/state0.pdb')
 
 
 nwalkers = 10
-nstates  = 100
+nstates  = 10
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
@@ -43,11 +43,10 @@ for i in xrange(nstates):
         walkers.add(w)
 
 
-resample = awe.resample.OneColor_PlotCellRMSD(nwalkers, ref='testinput/state0.pdb', plotfile='/tmp/test.png')
+resample = awe.resample.OneColor(nwalkers)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 10,
+                               iterations = 2,
                                resample   = resample)
 
 adaptive.run()
-resample.plot()
