@@ -63,17 +63,19 @@ class Simple(IResampler):
             print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
-            ixs       = np.where(walkergroup.cells == cell)
-            weights   = walkergroup.weights[ixs]
+            ixs        = np.where(walkergroup.cells == cell)
+            oldwalkers = walkergroup.getslice(ixs)
+            weights    = oldwalkers.weights
             print '\tixs:', ixs
             print '\tweights:', weights
 
             ### sort the walkers in descending order based on their weights
             ##+ this ensures only walkers whose weight > targetWeight are split
             mywalkers = list(argsort(-weights))
+
             print '\tmywalkers:', mywalkers
 
-            ### setup total weight and target weights
+            ### setup cell weight and target weights
             W     = sum(weights)
             tw    = W / self.targetwalkers
             print '\tW', W, 'tw', tw
@@ -82,23 +84,26 @@ class Simple(IResampler):
             activewalk = 0
 
             if len(mywalkers) > 0:
-
+                print 'a'
                 ### x,y are walker indices
                 x = mywalkers.pop()
                 print'\twalker x:', x
-                currentWalker = walkergroup[x]
+                currentWalker = oldwalkers[x]
 
                 while True:
+                    print 'b'
 
                     Wx = weights[x]
 
                     ### split
                     if (Wx + self.eps > tw):
+                        print 'c'
                         ### determine number copies of current walker needed
                         r = int(np.floor( (Wx+self.eps) / tw ))
 
                         ### split: insert r copies of walkers in list1
                         for item in itertools.repeat(x, r):
+                            print 'd'
                             w = awe.aweclasses.Walker(coords = currentWalker.coords,
                                                       weight = tw,
                                                       color  = currentWalker.color,
@@ -108,6 +113,7 @@ class Simple(IResampler):
                         ### ???
                         activewalk += r
                         if activewalk < self.targetwalkers and Wx-r*tw+self.eps > 0.0:
+                            print 'e'
                             w = awe.aweclasses.Walker(coords = currentWalker.coords,
                                                       weight = Wx - r * tw,
                                                       color  = currentWalker.color,
@@ -116,12 +122,15 @@ class Simple(IResampler):
                             newwalkers.append(w)
 
                         if len(mywalkers) > 0:
+                            print 'f'
                             x = mywalkers.pop()
                         else: break
 
                     ### merge
                     else:
+                        print 'g'
                         if len(mywalkers) > 0:
+                            print 'h'
                             y = mywalkers.pop()
                             Wy = weights[y]
                             Wxy = Wx + Wy
