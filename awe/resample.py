@@ -48,9 +48,6 @@ class OneColor(IResampler):
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 
-        ## required because of roundoff errors
-        self.eps           = np.finfo(np.double).eps
-
     def resample(self, walkergroup):
 
         print 'Resampling'
@@ -152,8 +149,6 @@ class OneColor(IResampler):
         for w in newwalkers:
             newgroup.add(w)
 
-        ### normalize weights
-        newgroup.weights /= np.sum(newgroup.weights)
         return newgroup
 
 
