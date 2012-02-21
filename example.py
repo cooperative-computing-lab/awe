@@ -10,7 +10,7 @@ awe.io.TRACE = False
 mdtools.prody.setVerbosity('warning')
 
 cfg = awe.workqueue.Config()
-cfg.name = 'awe-badi'
+cfg.name = 'awe'
 cfg.fastabort = 4
 cfg.execute('testinput/execute-task.sh')
 cfg.cache('testinput/protomol.conf')
@@ -44,7 +44,7 @@ for i in xrange(nstates):
         walkers.add(w)
 
 
-resample = awe.resample.OneColor(nwalkers)
+resample = awe.resample.OneColor_SaveWeights(nwalkers)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
                                iterations = 2,

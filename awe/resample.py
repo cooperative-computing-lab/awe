@@ -174,3 +174,27 @@ class IPlotter(IResampler):
         self.plot()
         return ws
 
+
+class OneColor_SaveWeights(OneColor):
+
+    def __init__(self, nwalkers, datfile='weights.dat'):
+        OneColor.__init__(self, nwalkers)
+        self.datfile   = datfile
+        self.iteration = 0
+
+    def saveweights(self, weights, mode='a'):
+        print 'Saving weights to', self.datfile
+        with open(self.datfile, mode) as fd:
+            iteration = self.iteration * np.ones(len(weights))
+            vals = np.vstack( (iteration, weights) )
+            np.savetxt(fd, vals.T)
+
+    def resample(self, walkergroup):
+        if self.iteration == 0:
+            self.saveweights(walkergroup.weights, mode='w')
+
+        newstate         = OneColor.resample(self, walkergroup)
+        self.iteration  += 1
+        self.saveweights(newstate.weights)
+
+        return newstate
