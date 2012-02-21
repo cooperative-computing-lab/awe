@@ -118,7 +118,7 @@ class OneColor(IResampler):
                     ### split the current walker
                     print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = awe.aweclasses.Walker(start  = currentWalker.start,
+                        w = awe.aweclasses.Walker(start  = currentWalker.end,
                                                   weight = tw,
                                                   color  = currentWalker.color,
                                                   cell   = cell)
