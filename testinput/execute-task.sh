@@ -30,8 +30,11 @@ cp -v Gens.lh5 Data
 ./with-env env.sh ConvertAssignToText.py
 
 
-echo "[$me] result files"
-ls
+echo "[$me] updating cell assignment"
+tail -1 Data/discrete.traj > cell2.dat
+
+echo "[$me] checking if result files exist"
+ls structure2.pdb weight.dat color.dat cell2.dat
 
 echo "[$me] Compressing results"
 resultfile=results.tar

@@ -10,6 +10,7 @@ awe.io.TRACE = False
 mdtools.prody.setVerbosity('warning')
 
 cfg = awe.workqueue.Config()
+cfg.name = 'awe-badi'
 cfg.fastabort = 4
 cfg.execute('testinput/execute-task.sh')
 cfg.cache('testinput/protomol.conf')
