@@ -108,7 +108,8 @@ class OneColor(IResampler):
                 if Wx > tw or len(mywalkers) == 0:
 
                     ### choose number of times to split
-                    ### work around round-off errors
+                    ##+ r = floor( Wx / tw )
+                    ### min, max: work around round-off errors
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
                     activewalkers += r
