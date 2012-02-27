@@ -210,22 +210,20 @@ class WQStats(object):
         @param taskstats: path to save the task stats to
         """
 
-        print 'Saving WQ stats'
         with open(wqstats, 'w') as fd:
-            print '\t', 'WQ in', fd.name
             self._save_wq_stats(fd)
 
         with open(taskstats, 'w') as fd:
-            print '\t', 'Task in', fd.name
             self._save_task_stats(fd)
 
 
     def _save_attrs(self, fd, name, times, attrs):
-        data = dict()
-        data['%s_time' % name] = times
-        for a in attrs:
-            data[a] = getattr(self, a).values
         print 'Saving', name, 'data to', fd.name
+        data = dict()
+        data['program_runtime'] = times - times[0]
+        for a in attrs:
+            print '\t', a
+            data[a] = getattr(self, a).values
         np.savez(fd, **data)
 
     def _save_task_stats(self, fd):
