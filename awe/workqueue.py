@@ -84,6 +84,7 @@ class Config(object):
         self.debug     = ''
         self.shutdown  = False
         self.fastabort = 3
+        self.restarts  = 3
 
         self.waittime  = 10 # in seconds
 
@@ -141,8 +142,19 @@ class WorkQueue(object):
 
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
+        self.restarts = dict()
+
 
     empty = property(lambda self: self.wq.empty())
+
+    def save_stats(self, dirname):
+        if not os.path.exists(dirname):
+            print 'Creating directory', dirname
+            os.makedirs(dirname)
+
+        wqstats   = os.path.join(dirname, 'wqstats.npy')
+        taskstats = os.path.join(dirname, 'taskstats.npy')
+        self.stats.save(wqstats, taskstats)
 
     def __del__(self):
         import shutil
@@ -185,6 +197,19 @@ class WorkQueue(object):
     @awe.typecheck(WQ.Task)
     def submit(self, task):
         return self.wq.submit(task)
+
+    @awe.typecheck(WQ.Task)
+    def restart(self, task):
+        if task.tag not in self.restarts:
+            self.restarts[task.tag] = 0
+
+        if self.restarts[task.tag] < self.cfg.restarts:
+            print time.asctime(), 'restarting', task.tag
+            self.submit(task)
+            self.restarts[task.tag] += 1
+            return True
+        else:
+            return False
 
     def wait(self, *args, **kws):
         return self.wq.wait(*args, **kws)
@@ -231,16 +256,16 @@ class WorkQueue(object):
                 output = ('\n' + output).split('\n')
                 output = '\n\t'.join(output)
 
-                if not task.return_status == 0:
+                if not task.return_status == 0 and not self.restart(task):
                     raise WorkQueueWorkerException, \
                         output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
-                # self.update_task_stats(task)
+                self.update_task_stats(task)
 
                 try:
                     walker = self._load_result_file(task)
                 except Exception, ex:
                     raise WorkQueueException, \
-                        output + '\n\nMaster failed:\n %s' % ex
+                        output + '\n\nMaster failed: could not load resultfile:\n %s' % ex
 
                 return walker

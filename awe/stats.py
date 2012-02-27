@@ -51,7 +51,7 @@ class ExtendableArray(object):
         return self._type(self._size0)
 
     def get(self):
-        return self.vals[:self._count]
+        return self._vals[:self._count]
 
     def _realloc(self):
 
@@ -114,6 +114,10 @@ class Statistics(object):
     var  = property(lambda self: self._m2 / float(self._num))
     std  = property(lambda self: math.sqrt(self.var))
 
+    @property
+    def values(self):
+        return self._values.get()
+
     def update(self, *values):
 
         self._values.append(*values)
@@ -137,7 +141,6 @@ class WQStats(object):
     """
 
     def __init__(self):
-
 
         self._task_times             = ExtendableArray()  # keep track of the times values are added
         self._wq_times               = ExtendableArray()
@@ -176,9 +179,7 @@ class WQStats(object):
         self.cmd_execution_time      .update(task.cmd_execution_time)
         self.total_bytes_transferred .update(task.total_bytes_transferred)
         self.total_transfer_time     .update(task.total_transfer_time)
-        self.task_run_time           .update(task.finish_time - task.start_time)
         self.task_life_time          .update(task.finish_time - task.submit_time)
-
 
     @awe.typecheck(awe.workqueue.WQ.WorkQueue)
     def wq(self, wq):
@@ -202,6 +203,42 @@ class WQStats(object):
         self.total_send_time        .update(q.total_send_time)
         self.total_receive_time     .update(q.total_receive_time)
 
+    def save(self, wqstats, taskstats):
+        """
+        @param wqstats: path to save the wq stats to
+        @param taskstats: path to save the task stats to
+        """
+
+        with open(wqstats, 'w') as fd:
+            self._save_wq_stats(fd)
+
+        with open(taskstats, 'w') as fd:
+            self._save_task_stats(fd)
+
+
+    def _save_attrs(self, fd, name, times, attrs):
+        print 'Saving', name, 'data to', fd.name
+        data = dict()
+        data['program_runtime'] = times - times[0]
+        for a in attrs:
+            print '\t', a
+            data[a] = getattr(self, a).values
+        np.savez(fd, **data)
+
+    def _save_task_stats(self, fd):
+        attrs = 'cmd_execution_time total_bytes_transferred total_transfer_time task_life_time'.split()
+
+        self._save_attrs(fd, 'task', self._task_times.get(), attrs)
+
+    def _save_wq_stats(self, fd):
+        attrs =  'workers_ready workers_busy tasks_running tasks_waiting tasks_complete'.split()
+        attrs += 'total_tasks_dispatched total_tasks_complete total_workers_joined'.split()
+        attrs += 'total_workers_removed total_bytes_sent total_bytes_received'.split()
+        attrs += 'total_send_time total_receive_time'.split()
+
+        self._save_attrs(fd, 'wq', self._wq_times.get(), attrs)
+
+
 
 class Timings(object):
 
@@ -210,6 +247,10 @@ class Timings(object):
         self.times = ExtendableArray()
         self.stats = Statistics()
 
+    @property
+    def data(self):
+        return self.times.get(), self.stats.values
+
     def start(self):
         self.timer.start()
 
@@ -217,6 +258,25 @@ class Timings(object):
         self.timer.stop()
         self.times.append(time.time())
         self.stats.update(self.timer.elapsed())
+
+
+    def _save(self, fd, name):
+        ts, vs = self.times.get(), self.stats.values
+        vals = np.vstack( (ts, vs) )
+        kws = {name : name}
+        np.savez(fd, **kws)
+
+
+    def save(self, target, name, mode='a'):
+        """
+        @param target: file handle or string
+        """
+
+        if type(target) is str:
+            with open(target, mode) as fd:
+                self._save(fd, name)
+        else:
+            self._save(target, name)
 
 
 class AWEStats(object):
@@ -248,3 +308,25 @@ class AWEStats(object):
 
     def time_barrier(self, state):
         self._timeit(state, self.barrier)
+
+    def save(self, path):
+        print 'Saving to', path
+        with open(path, 'w') as fd:
+            data = dict()
+
+            print '\t','iteration data'
+            ts, vs = self.iteration.data
+            data['iteration_time'] = ts
+            data['iteration_values'] = vs
+
+            print '\t','resample data'
+            ts, vs = self.resample.data
+            data['resample_time'] = ts
+            data['resample_values'] = vs
+
+            print '\t','barrier data'
+            ts, vs = self.barrier.data
+            data['barrier_time'] = ts
+            data['barrier_values'] = vs
+
+            np.savez(fd, **data)

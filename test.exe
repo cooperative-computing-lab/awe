@@ -2,12 +2,25 @@
 
 
 echo "Hello"
+echo
 
+echo "ls"
+ls
+echo
+
+echo "copying"
 cp -v structure.pdb structure2.pdb
-cp -v weights.dat weights2.dat
+cp -v weight.dat weight2.dat
 cp -v color.dat color2.dat
 cp -v cell.dat cell2.dat
+echo
 
-tar cvf results.tar structure2.pdb weights2.dat color2.dat cell2.dat
+echo "compressing"
+tar cvf results.tar structure2.pdb *.dat
+echo
+
+# t=$(echo "$RANDOM % 20" | bc)
+# echo "sleeping for $t seconds"
+# sleep $t
 
 exit 0

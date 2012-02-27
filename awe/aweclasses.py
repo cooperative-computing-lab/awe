@@ -5,7 +5,7 @@ import mdtools
 
 import numpy as np
 
-import time
+import os, time
 
 
 class Walker(object):
@@ -24,7 +24,7 @@ class Walker(object):
       *cell*   : int
     """
 
-    def __init__(self, start=None, end=None, weight=0., color=0, cell=None, wid=-1):
+    def __init__(self, start=None, end=None, weight=1., color=0, cell=None, wid=-1):
 
         assert not (start is None and end is None)
 
@@ -252,6 +252,17 @@ class AWE(object):
         self.resample   = resample
 
         self.stats      = awe.stats.AWEStats()
+        self.statsdir   = 'stats'
+
+
+    def save_stats(self, dirname):
+        if not os.path.exists(dirname):
+            print 'Creating directory', dirname
+            os.makedirs(dirname)
+
+        awestats = os.path.join(dirname, 'awestats.npy')
+        self.stats.save(awestats)
+        self.wq.save_stats(dirname)
 
 
     def _submit(self):
@@ -284,12 +295,19 @@ class AWE(object):
         Run the algorithm
         """
 
-        for iteration in xrange(self.iterations):
+        try:
+            for iteration in xrange(self.iterations):
 
-            self.stats.time_iter('start')
+                self.stats.time_iter('start')
 
-            self._submit()
-            self._recv()     ## barrier
-            self._resample()
+                self._submit()
+                self._recv()     ## barrier
+                self._resample()
 
-            self.stats.time_iter('stop')
+                self.stats.time_iter('stop')
+
+        except KeyboardInterrupt:
+            pass
+
+        finally:
+            self.save_stats(self.statsdir)
