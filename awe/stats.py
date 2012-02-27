@@ -142,7 +142,6 @@ class WQStats(object):
 
     def __init__(self):
 
-
         self._task_times             = ExtendableArray()  # keep track of the times values are added
         self._wq_times               = ExtendableArray()
 

@@ -252,6 +252,7 @@ class AWE(object):
         self.resample   = resample
 
         self.stats      = awe.stats.AWEStats()
+        self.statsdir   = 'stats'
 
 
     def save_stats(self, dirname):
@@ -294,12 +295,19 @@ class AWE(object):
         Run the algorithm
         """
 
-        for iteration in xrange(self.iterations):
+        try:
+            for iteration in xrange(self.iterations):
 
-            self.stats.time_iter('start')
+                self.stats.time_iter('start')
 
-            self._submit()
-            self._recv()     ## barrier
-            self._resample()
+                self._submit()
+                self._recv()     ## barrier
+                self._resample()
 
-            self.stats.time_iter('stop')
+                self.stats.time_iter('stop')
+
+        except KeyboardInterrupt:
+            pass
+
+        finally:
+            self.save_stats(self.statsdir)

@@ -6,12 +6,16 @@ import mdtools
 import numpy as np
 import os
 
-awe.io.TRACE = False
-mdtools.prody.setVerbosity('warning')
+mdtools.prody.setVerbosity('error')
+
+timer = awe.stats.Timer()
 
 cfg = awe.workqueue.Config()
 cfg.name = 'awe'
 cfg.fastabort = 4
+
+# cfg.execute('test.exe')
+
 cfg.execute('testinput/execute-task.sh')
 cfg.cache('testinput/protomol.conf')
 cfg.cache('testinput/topol.tpr')
@@ -22,12 +26,13 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-nwalkers = 1
-nstates  = 10
+nwalkers = 10
+nstates  = 100
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
+timer.start()
 for i in xrange(nstates):
     weight = np.random.random()
     for j in xrange(nwalkers):
@@ -42,12 +47,20 @@ for i in xrange(nstates):
                                         cell   = cell
                                         )
         walkers.add(w)
+timer.stop()
+
+print 'Initialization overhead:', timer.elapsed(), 's'
 
 
-resample = awe.resample.Identity()
+resample = awe.resample.OneColor_SaveWeights(nwalkers)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
-                               iterations = 2,
+                               iterations = 10,
                                resample   = resample)
 
+
+timer.start()
 adaptive.run()
+timer.stop()
+
+print 'Run time:', time.elapsed(), 's'
