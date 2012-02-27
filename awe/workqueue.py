@@ -144,6 +144,15 @@ class WorkQueue(object):
 
     empty = property(lambda self: self.wq.empty())
 
+    def save_stats(self, dirname):
+        if not os.path.exists(dirname):
+            print 'Creating directory', dirname
+            os.makedirs(dirname)
+
+        wqstats   = os.path.join(dirname, 'wqstats.npy')
+        taskstats = os.path.join(dirname, 'taskstats.npy')
+        self.stats.save(wqstats, taskstats)
+
     def __del__(self):
         import shutil
         shutil.rmtree(self.tmpdir)
@@ -235,12 +244,12 @@ class WorkQueue(object):
                     raise WorkQueueWorkerException, \
                         output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
-                # self.update_task_stats(task)
+                self.update_task_stats(task)
 
                 try:
                     walker = self._load_result_file(task)
                 except Exception, ex:
                     raise WorkQueueException, \
-                        output + '\n\nMaster failed:\n %s' % ex
+                        output + '\n\nMaster failed: could not load resultfile:\n %s' % ex
 
                 return walker

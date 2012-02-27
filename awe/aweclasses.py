@@ -5,7 +5,7 @@ import mdtools
 
 import numpy as np
 
-import time
+import os, time
 
 
 class Walker(object):
@@ -252,6 +252,16 @@ class AWE(object):
         self.resample   = resample
 
         self.stats      = awe.stats.AWEStats()
+
+
+    def save_stats(self, dirname):
+        if not os.path.exists(dirname):
+            print 'Creating directory', dirname
+            os.makedirs(dirname)
+
+        awestats = os.path.join(dirname, 'awestats.npy')
+        self.stats.save(awestats)
+        self.wq.save_stats(dirname)
 
 
     def _submit(self):
