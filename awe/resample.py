@@ -39,6 +39,7 @@ class Identity(IResampler):
 
     @awe.trace()
     def resample(self, walkers):
+        print 'Resampling'
         return walkers
 
 

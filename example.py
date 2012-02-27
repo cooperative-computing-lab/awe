@@ -22,7 +22,7 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-nwalkers = 10
+nwalkers = 1
 nstates  = 10
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
@@ -44,7 +44,7 @@ for i in xrange(nstates):
         walkers.add(w)
 
 
-resample = awe.resample.OneColor_SaveWeights(nwalkers)
+resample = awe.resample.Identity()
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                walkers    = walkers,
                                iterations = 2,
