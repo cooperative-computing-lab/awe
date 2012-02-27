@@ -63,4 +63,4 @@ timer.start()
 adaptive.run()
 timer.stop()
 
-print 'Run time:', time.elapsed(), 's'
+print 'Run time:', timer.elapsed(), 's'
