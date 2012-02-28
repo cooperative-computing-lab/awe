@@ -33,6 +33,17 @@ class Timer(object):
         diff       = t1 - self.t0
         return multiplier * diff
 
+class NormTime(object):
+    """
+    Ensures that times start at 0
+    """
+
+    def __init__(self):
+        self._timer = Timer()
+        self._timer.start()
+
+    def time(self):
+        return self._timer.elapsed(units='s')
 
 class ExtendableArray(object):
     """
@@ -143,7 +154,10 @@ class WQStats(object):
     def __init__(self):
 
         self._task_times             = ExtendableArray()  # keep track of the times values are added
+        self._ttime                  = NormTime()
+
         self._wq_times               = ExtendableArray()
+        self._qtime                  = NormTime()
 
         ### task stats
         self.computation_time        = Statistics()
@@ -173,18 +187,19 @@ class WQStats(object):
         """
         Update the running statistics with a task result
         """
-        self._task_times.append(time.time())
+        self._task_times.append(awe.time.time())
 
-
-        self.computation_time        .update(task.computation_time)
         self.total_bytes_transferred .update(task.total_bytes_transferred)
-        self.total_transfer_time     .update(task.total_transfer_time)
-        self.task_life_time          .update(task.finish_time - task.submit_time)
+
+        # convert all times to seconds from microseconds
+        self.computation_time        .update( task.computation_time                / 10.**6)
+        self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
+        self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
 
     @awe.typecheck(awe.workqueue.WQ.WorkQueue)
     def wq(self, wq):
 
-        self._wq_times.append(time.time())
+        self._wq_times.append(awe.time.time())
 
         q = wq.stats
 
@@ -200,8 +215,10 @@ class WQStats(object):
         self.total_workers_removed  .update(q.total_workers_removed)
         self.total_bytes_sent       .update(q.total_bytes_sent)
         self.total_bytes_received   .update(q.total_bytes_received)
-        self.total_send_time        .update(q.total_send_time)
-        self.total_receive_time     .update(q.total_receive_time)
+
+        # convert all times to seconds from microseconds
+        self.total_send_time        .update(q.total_send_time    / 10.**6)
+        self.total_receive_time     .update(q.total_receive_time / 10.**6)
 
     def save(self, wqstats, taskstats):
         """
@@ -219,7 +236,7 @@ class WQStats(object):
     def _save_attrs(self, fd, name, times, attrs):
         print 'Saving', name, 'data to', fd.name
         data = dict()
-        data['program_runtime'] = times - times[0]
+        data['time'] = times
         for a in attrs:
             print '\t', a
             data[a] = getattr(self, a).values
