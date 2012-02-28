@@ -1,5 +1,6 @@
 
-import awe
+from util import typecheck
+import aweclasses
 import mdtools
 
 import numpy as np
@@ -23,10 +24,10 @@ class IResampler(object):
 
         raise NotImplementedError
 
-    @awe.typecheck(awe.aweclasses.WalkerGroup)
+    @typecheck(aweclasses.WalkerGroup)
     def __call__(self, walkers):
         ws2 = self.resample(walkers)
-        assert type(ws2) is awe.aweclasses.WalkerGroup
+        assert type(ws2) is aweclasses.WalkerGroup
         return ws2
 
 
@@ -37,7 +38,6 @@ class Identity(IResampler):
     the identity function
     """
 
-    @awe.trace()
     def resample(self, walkers):
         print 'Resampling'
         return walkers
@@ -119,10 +119,10 @@ class OneColor(IResampler):
                     ### split the current walker
                     print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = awe.aweclasses.Walker(start  = currentWalker.end,
-                                                  weight = tw,
-                                                  color  = currentWalker.color,
-                                                  cell   = cell)
+                        w = aweclasses.Walker(start  = currentWalker.end,
+                                              weight = tw,
+                                              color  = currentWalker.color,
+                                              cell   = cell)
                         newwalkers.append(w)
 
 
@@ -151,7 +151,7 @@ class OneColor(IResampler):
 
 
         ### setup the WalkerGroup to return
-        newgroup = awe.aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
+        newgroup = aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
         for w in newwalkers:
             newgroup.add(w)
 

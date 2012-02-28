@@ -1,9 +1,10 @@
 
-import awe
+import workqueue
+from util import typecheck
 
 import numpy as np
 
-import time
+import time as systime
 
 
 class Timer(object):
@@ -12,10 +13,10 @@ class Timer(object):
         self.t1 = float('inf')
 
     def start(self):
-        self.t0 = time.time()
+        self.t0 = systime.time()
 
     def stop(self):
-        self.t1 = time.time()
+        self.t1 = systime.time()
 
     def isrunning(self):
         return self.t0 > 0
@@ -182,12 +183,12 @@ class WQStats(object):
         self.total_receive_time      = Statistics()
 
 
-    @awe.typecheck(awe.workqueue.WQ.Task)
+    @typecheck(workqueue.WQ.Task)
     def task(self, task):
         """
         Update the running statistics with a task result
         """
-        self._task_times.append(awe.time.time())
+        self._task_times.append(time.time())
 
         self.total_bytes_transferred .update(task.total_bytes_transferred)
 
@@ -196,10 +197,10 @@ class WQStats(object):
         self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
         self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
 
-    @awe.typecheck(awe.workqueue.WQ.WorkQueue)
+    @typecheck(workqueue.WQ.WorkQueue)
     def wq(self, wq):
 
-        self._wq_times.append(awe.time.time())
+        self._wq_times.append(time.time())
 
         q = wq.stats
 
@@ -304,7 +305,7 @@ class AWEStats(object):
         self.resample  = Timings()
         self.barrier   = Timings()
 
-    @awe.typecheck(str, Timings)
+    @typecheck(str, Timings)
     def _timeit(self, state, timings):
         """
         *state* = {start|stop}
