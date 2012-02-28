@@ -298,6 +298,8 @@ class AWE(object):
         try:
             for iteration in xrange(self.iterations):
 
+                print time.asctime(), 'Iteration', iteration
+
                 self.stats.time_iter('start')
 
                 self._submit()
