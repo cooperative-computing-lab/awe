@@ -146,13 +146,13 @@ class WQStats(object):
         self._wq_times               = ExtendableArray()
 
         ### task stats
-        self.cmd_execution_time      = Statistics()
+        self.computation_time        = Statistics()
         self.total_bytes_transferred = Statistics()
         self.total_transfer_time     = Statistics()
-        self.task_run_time           = Statistics()       # WQ Task.finish_time - Task.start_time
         self.task_life_time          = Statistics()       # WQ Task.finish_time - Task.submit_time
 
         ### wq stats
+        self.workers_init            = Statistics()
         self.workers_ready           = Statistics()
         self.workers_busy            = Statistics()
         self.tasks_running           = Statistics()
@@ -176,7 +176,7 @@ class WQStats(object):
         self._task_times.append(time.time())
 
 
-        self.cmd_execution_time      .update(task.cmd_execution_time)
+        self.computation_time        .update(task.computation_time)
         self.total_bytes_transferred .update(task.total_bytes_transferred)
         self.total_transfer_time     .update(task.total_transfer_time)
         self.task_life_time          .update(task.finish_time - task.submit_time)
@@ -226,7 +226,7 @@ class WQStats(object):
         np.savez(fd, **data)
 
     def _save_task_stats(self, fd):
-        attrs = 'cmd_execution_time total_bytes_transferred total_transfer_time task_life_time'.split()
+        attrs = 'computation_time total_bytes_transferred total_transfer_time task_life_time'.split()
 
         self._save_attrs(fd, 'task', self._task_times.get(), attrs)
 
