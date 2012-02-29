@@ -27,7 +27,7 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 100
+iterations = 30
 nwalkers = 10
 nstates  = 100
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
