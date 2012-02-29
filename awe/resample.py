@@ -5,6 +5,7 @@ import mdtools
 
 import numpy as np
 import itertools
+import time
 
 
 class IResampler(object):
@@ -26,6 +27,7 @@ class IResampler(object):
 
     @typecheck(aweclasses.WalkerGroup)
     def __call__(self, walkers):
+        print time.asctime(), 'Resampling'
         ws2 = self.resample(walkers)
         assert type(ws2) is aweclasses.WalkerGroup
         return ws2
@@ -39,7 +41,6 @@ class Identity(IResampler):
     """
 
     def resample(self, walkers):
-        print 'Resampling'
         return walkers
 
 
@@ -55,26 +56,24 @@ class OneColor(IResampler):
 
     def resample(self, walkergroup):
 
-        print 'Resampling'
-
         from numpy import floor, argsort, random, sum
 
         newwalkers = list()
 
         for cell in set(walkergroup.cells):
-            print 'Processing cell', cell
+            # print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
             ixs        = np.where(walkergroup.cells == cell)
             oldwalkers = walkergroup.getslice(ixs)
             weights    = oldwalkers.weights.copy()
-            print '\tixs:', ixs
-            print '\tweights:', weights
+            # print '\tixs:', ixs
+            # print '\tweights:', weights
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
             mywalkers = list(argsort(-weights))
-            print '\tmywalkers:', mywalkers
+            # print '\tmywalkers:', mywalkers
 
             ### sanity check
             testmaxw = float('inf')
@@ -87,7 +86,7 @@ class OneColor(IResampler):
             ### setup cell weight and target weights
             W     = sum(weights)
             tw    = W / self.targetwalkers
-            print '\tW', W, 'tw', tw
+            # print '\tW', W, 'tw', tw
 
 
             ### we assume that there is at least one walker in the cell
@@ -103,7 +102,7 @@ class OneColor(IResampler):
 
                 Wx = weights[x]
                 currentWalker = oldwalkers[x]
-                print '\tweight of', x, 'is', Wx
+                # print '\tweight of', x, 'is', Wx
 
                 ### split
                 if Wx > tw or len(mywalkers) == 0:
@@ -114,10 +113,10 @@ class OneColor(IResampler):
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
                     activewalkers += r
-                    print '\tactive walkers', activewalkers
+                    # print '\tactive walkers', activewalkers
 
                     ### split the current walker
-                    print '\tsplitting', x, r, 'times'
+                    # print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
                         w = aweclasses.Walker(start  = currentWalker.end,
                                               weight = tw,
@@ -131,7 +130,7 @@ class OneColor(IResampler):
                     if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
                         mywalkers.append(x)
                         weights[x] = Wx - r * tw
-                        print '\tupdated weights of', x
+                        # print '\tupdated weights of', x
 
                     ### continue the loop?
                     if len(mywalkers) > 0:
@@ -141,7 +140,7 @@ class OneColor(IResampler):
                 ### merge
                 else:
                     y = mywalkers.pop()
-                    print '\tmerging', x, y
+                    # print '\tmerging', x, y
                     Wy = weights[y]
                     Wxy = Wx + Wy
                     p = np.random.random()
