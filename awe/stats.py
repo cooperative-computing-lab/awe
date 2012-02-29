@@ -38,8 +38,10 @@ class Timer(object):
         return multiplier * diff
 
 
+### use a single global timer for the system
 _TIMER = Timer()
 
+### simulate built-in *time* module
 class time:
 
     @staticmethod
