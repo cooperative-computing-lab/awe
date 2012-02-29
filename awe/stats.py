@@ -28,11 +28,34 @@ class Timer(object):
                       'd' : 60*60*24 }
         multiplier = mults[units]
         if self.t1 == float('inf'):
-            t1 = time.time()
+            t1 = systime.time()
         else:
             t1 = self.t1
         diff       = t1 - self.t0
         return multiplier * diff
+
+
+_TIMER = Timer()
+
+class time:
+
+    @staticmethod
+    def start():
+        global _TIMER
+        _TIMER.start()
+
+    @staticmethod
+    def time():
+        global _TIMER
+        t = _TIMER.elapsed(units='s')
+        return t
+
+
+    @staticmethod
+    def timer():
+        global _TIMER
+        return _TIMER
+
 
 class NormTime(object):
     """
