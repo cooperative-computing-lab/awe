@@ -262,6 +262,7 @@ class WQStats(object):
         print 'Saving', name, 'data to', fd.name
         data = dict()
         data['time'] = times
+        print '\t', 'time'
         for a in attrs:
             print '\t', a
             data[a] = getattr(self, a).values
