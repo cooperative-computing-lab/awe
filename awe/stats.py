@@ -62,18 +62,6 @@ class time:
         return _TIMER
 
 
-class NormTime(object):
-    """
-    Ensures that times start at 0
-    """
-
-    def __init__(self):
-        self._timer = Timer()
-        self._timer.start()
-
-    def time(self):
-        return self._timer.elapsed(units='s')
-
 class ExtendableArray(object):
     """
     A numpy.array that can be efficiently appended to
@@ -183,10 +171,7 @@ class WQStats(object):
     def __init__(self):
 
         self._task_times             = ExtendableArray()  # keep track of the times values are added
-        self._ttime                  = NormTime()
-
         self._wq_times               = ExtendableArray()
-        self._qtime                  = NormTime()
 
         ### task stats
         self.computation_time        = Statistics()
