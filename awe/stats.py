@@ -303,24 +303,6 @@ class Timings(object):
         self.stats.update(self.timer.elapsed())
 
 
-    def _save(self, fd, name):
-        ts, vs = self.times.get(), self.stats.values
-        vals = np.vstack( (ts, vs) )
-        kws = {name : name}
-        np.savez(fd, **kws)
-
-
-    def save(self, target, name, mode='a'):
-        """
-        @param target: file handle or string
-        """
-
-        if type(target) is str:
-            with open(target, mode) as fd:
-                self._save(fd, name)
-        else:
-            self._save(target, name)
-
 
 class AWEStats(object):
 
