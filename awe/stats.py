@@ -82,28 +82,39 @@ class ExtendableArray(object):
         return self._vals[:self._count]
 
     def _realloc(self):
+        """
+        Reallocates space if the current size and the underlying size are equal
+        """
 
         if self._count == len(self._vals):
 
             x     = len(self._vals)
             alloc = x * self._factor
-            vals2 = self._initialize(self._initial, alloc)
+            self._size0 = alloc
+            vals2 = self._initialize()
             vals2[:self._count] = self._vals[:self._count]
             self._vals = vals2
 
 
     def append(self, *values):
 
+        self._realloc()
         i = self._count
         j = i + len(values)
         self._vals[i:j] = np.array(values)
         self._count += len(values)
 
     def __getitem__(self, i):
-        assert i <= self._count
-        return self._vals[i]
+        if i < 0: k = self._count + i
+        else:     k = i
 
-    def __setitem__(self, k, v):
+        assert k <= self._count
+        return self._vals[k]
+
+    def __setitem__(self, i, v):
+        if i < 0: k = self._count + i
+        else:     k = i
+
         assert k <= self._count
         self._vals[k] = v
 
