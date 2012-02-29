@@ -8,27 +8,27 @@ import os
 
 mdtools.prody.setVerbosity('error')
 
-awe.stats.time.start()
-timer = awe.stats.time.timer()
+timer = awe.stats.Timer()
 
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
-cfg.fastabort = 4
+cfg.fastabort = 3
+cfg.restarts = 95
 
-cfg.execute('test.exe')
+# cfg.execute('test.exe')
 
-# cfg.execute('testinput/execute-task.sh')
-# cfg.cache('testinput/protomol.conf')
-# cfg.cache('testinput/topol.tpr')
-# cfg.cache('testinput/with-env')
-# cfg.cache('testinput/env.sh')
-# cfg.cache('testinput/Gens.lh5')
-# cfg.cache('testinput/AtomIndices.dat')
-# cfg.cache('testinput/state0.pdb')
+cfg.execute('testinput/execute-task.sh')
+cfg.cache('testinput/protomol.conf')
+cfg.cache('testinput/topol.tpr')
+cfg.cache('testinput/with-env')
+cfg.cache('testinput/env.sh')
+cfg.cache('testinput/Gens.lh5')
+cfg.cache('testinput/AtomIndices.dat')
+cfg.cache('testinput/state0.pdb')
 
 
-iterations = 20
-nwalkers = 1
+iterations = 100
+nwalkers = 10
 nstates  = 100
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
@@ -60,9 +60,9 @@ adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                iterations = iterations,
                                resample   = resample)
 
-
 timer.start()
 adaptive.run()
 timer.stop()
 
 print 'Run time:', timer.elapsed(), 's'
+print 'Total time:', awe.time.time(), 's'
