@@ -250,7 +250,7 @@ class WorkQueue(object):
 
             if task:
 
-                print time.asctime(), 'recived task', task.tag
+                # print time.asctime(), 'recived task', task.tag
 
                 output = task.output or ''
                 output = ('\n' + output).split('\n')

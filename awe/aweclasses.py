@@ -257,7 +257,6 @@ class AWE(object):
         self.statsdir   = 'stats'
 
 
-
     def save_stats(self, dirname):
         if not os.path.exists(dirname):
             print 'Creating directory', dirname
