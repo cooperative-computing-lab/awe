@@ -21,16 +21,19 @@ class Timer(object):
     def isrunning(self):
         return self.t0 > 0
 
-    def elapsed(self, units='s'):
+    def elapsed(self, current=True, units='s'):
         mults      = {'s' : 1,
                       'm' : 60,
                       'h' : 60*60,
                       'd' : 60*60*24 }
         multiplier = mults[units]
-        if self.t1 == float('inf'):
+
+        ### get the current time or from when 'Timer.stop()' was called
+        if current or self.t1 == float('inf'):
             t1 = systime.time()
         else:
             t1 = self.t1
+
         diff       = t1 - self.t0
         return multiplier * diff
 
