@@ -15,21 +15,21 @@ cfg.name = 'awe-badi'
 cfg.fastabort = 3
 cfg.restarts = 95
 
-# cfg.execute('test.exe')
+cfg.execute('test.exe')
 
-cfg.execute('testinput/execute-task.sh')
-cfg.cache('testinput/protomol.conf')
-cfg.cache('testinput/topol.tpr')
-cfg.cache('testinput/with-env')
-cfg.cache('testinput/env.sh')
-cfg.cache('testinput/Gens.lh5')
-cfg.cache('testinput/AtomIndices.dat')
-cfg.cache('testinput/state0.pdb')
+# cfg.execute('testinput/execute-task.sh')
+# cfg.cache('testinput/protomol.conf')
+# cfg.cache('testinput/topol.tpr')
+# cfg.cache('testinput/with-env')
+# cfg.cache('testinput/env.sh')
+# cfg.cache('testinput/Gens.lh5')
+# cfg.cache('testinput/AtomIndices.dat')
+# cfg.cache('testinput/state0.pdb')
 
 
 iterations = 30
-nwalkers = 10
-nstates  = 100
+nwalkers = 2
+nstates  = 10
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
