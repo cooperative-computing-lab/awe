@@ -182,19 +182,31 @@ class OneColor_SaveWeights(OneColor):
         self.datfile   = datfile
         self.iteration = 0
 
-    def saveweights(self, weights, mode='a'):
+    def saveweights(self, group, mode='a'):
         print 'Saving weights to', self.datfile
+
+        ### all the walkers in a cell have the same weight, so we only
+        ### need to save the (iteration, cell, weight) triples
+        cells   = np.array(list(set(group.cells)))
+        iters   = self.iteration * np.ones(len(cells))
+        weights = -1 * np.ones(len(cells))
+        for c in cells:
+            ixs        = np.where(group.cells == c)
+            walkers    = group.getslice(ixs)
+            w          = walkers.weights[0] ### assume at least one walker per cell
+            weights[c] = w
+        assert weights.min() >= 0
+        vals = np.vstack( (iters, cells, weights) )
+
         with open(self.datfile, mode) as fd:
-            iteration = self.iteration * np.ones(len(weights))
-            vals = np.vstack( (iteration, weights) )
             np.savetxt(fd, vals.T)
 
     def resample(self, walkergroup):
         if self.iteration == 0:
-            self.saveweights(walkergroup.weights, mode='w')
+            self.saveweights(walkergroup, mode='w')
 
-        newstate         = OneColor.resample(self, walkergroup)
+        newgroup         = OneColor.resample(self, walkergroup)
         self.iteration  += 1
-        self.saveweights(newstate.weights)
+        self.saveweights(newgroup)
 
         return newstate
