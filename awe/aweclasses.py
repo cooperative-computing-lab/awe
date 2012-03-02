@@ -1,5 +1,7 @@
 
-import awe
+import io, stats, workqueue
+from util import typecheck
+
 
 import mdtools
 
@@ -77,7 +79,7 @@ class WalkerGroup(object):
 
     """
 
-    @awe.typecheck(count=int, topology=mdtools.prody.AtomGroup)
+    @typecheck(count=int, topology=mdtools.prody.AtomGroup)
     def __init__(self, count=None, topology=None, walkers=list()):
 
         assert len(walkers) == 0 or  type(iter(walkers).next()) is Walker
@@ -100,7 +102,7 @@ class WalkerGroup(object):
     natoms = property(lambda self: len(self.topology))
 
 
-    @awe.typecheck(mdtools.prody.AtomGroup)
+    @typecheck(mdtools.prody.AtomGroup)
     def topology(self, pdb):
         """
         Set the topology
@@ -108,7 +110,7 @@ class WalkerGroup(object):
 
         self.topology = pdb
 
-    @awe.typecheck(Walker)
+    @typecheck(Walker)
     def add(self, walker, ix=None):
         """
         Add a Walker to this group
@@ -201,7 +203,7 @@ class WalkerGroup(object):
         Get a dictionary of the parameters suitable for creating a WorkQueue Task
         """
 
-        ss  = awe.io.StringStream()
+        ss  = io.StringStream()
         mdtools.prody.writePDBStream(ss, self.get_pdb(k))
 
         return {'pdb'    : ss.read()              ,
@@ -238,20 +240,20 @@ class AWE(object):
     >>> adaptive.run()
     """
 
-    @awe.typecheck(wqconfig=awe.workqueue.Config, walkers=WalkerGroup, iterations=int)
+    @typecheck(wqconfig=workqueue.Config, walkers=WalkerGroup, iterations=int)
     def __init__(self, wqconfig=None, walkers=None, iterations=-1, resample=None):
 
-        assert type(wqconfig) is awe.workqueue.Config
+        assert type(wqconfig) is workqueue.Config
         assert type(walkers) is WalkerGroup
         assert type(iterations) is int
         # TODO: assert type(resample) is
 
-        self.wq         = awe.workqueue.WorkQueue(wqconfig)
+        self.wq         = workqueue.WorkQueue(wqconfig)
         self.walkers    = walkers
         self.iterations = iterations
         self.resample   = resample
 
-        self.stats      = awe.stats.AWEStats()
+        self.stats      = stats.AWEStats()
         self.statsdir   = 'stats'
 
 
@@ -297,6 +299,8 @@ class AWE(object):
 
         try:
             for iteration in xrange(self.iterations):
+
+                print time.asctime(), 'Iteration', iteration
 
                 self.stats.time_iter('start')
 

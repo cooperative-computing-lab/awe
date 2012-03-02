@@ -250,7 +250,7 @@ class WorkQueue(object):
 
             if task:
 
-                print time.asctime(), 'recived task', task.tag
+                # print time.asctime(), 'recived task', task.tag
 
                 output = task.output or ''
                 output = ('\n' + output).split('\n')
@@ -265,7 +265,13 @@ class WorkQueue(object):
                 try:
                     walker = self._load_result_file(task)
                 except Exception, ex:
-                    raise WorkQueueException, \
-                        output + '\n\nMaster failed: could not load resultfile:\n %s' % ex
+
+                    ### sometimes a task fails, but still returns.
+                    ##+ attempt to restart these
+                    if not self.restart(task):
+                        raise WorkQueueException, \
+                            output + '\n\nMaster failed: could not load resultfile:\n %s' % ex
+                    else:
+                        continue
 
                 return walker

@@ -1,9 +1,10 @@
 
-import awe
+import workqueue
+from util import typecheck
 
 import numpy as np
 
-import time
+import time as systime
 
 
 class Timer(object):
@@ -12,26 +13,53 @@ class Timer(object):
         self.t1 = float('inf')
 
     def start(self):
-        self.t0 = time.time()
+        self.t0 = systime.time()
 
     def stop(self):
-        self.t1 = time.time()
+        self.t1 = systime.time()
 
     def isrunning(self):
         return self.t0 > 0
 
-    def elapsed(self, units='s'):
+    def elapsed(self, current=True, units='s'):
         mults      = {'s' : 1,
                       'm' : 60,
                       'h' : 60*60,
                       'd' : 60*60*24 }
         multiplier = mults[units]
-        if self.t1 == float('inf'):
-            t1 = time.time()
+
+        ### get the current time or from when 'Timer.stop()' was called
+        if current or self.t1 == float('inf'):
+            t1 = systime.time()
         else:
             t1 = self.t1
+
         diff       = t1 - self.t0
         return multiplier * diff
+
+
+### use a single global timer for the system
+_TIMER = Timer()
+
+### simulate built-in *time* module
+class time:
+
+    @staticmethod
+    def start():
+        global _TIMER
+        _TIMER.start()
+
+    @staticmethod
+    def time():
+        global _TIMER
+        t = _TIMER.elapsed(units='s')
+        return t
+
+
+    @staticmethod
+    def timer():
+        global _TIMER
+        return _TIMER
 
 
 class ExtendableArray(object):
@@ -54,28 +82,39 @@ class ExtendableArray(object):
         return self._vals[:self._count]
 
     def _realloc(self):
+        """
+        Reallocates space if the current size and the underlying size are equal
+        """
 
         if self._count == len(self._vals):
 
             x     = len(self._vals)
             alloc = x * self._factor
-            vals2 = self._initialize(self._initial, alloc)
+            self._size0 = alloc
+            vals2 = self._initialize()
             vals2[:self._count] = self._vals[:self._count]
             self._vals = vals2
 
 
     def append(self, *values):
 
+        self._realloc()
         i = self._count
         j = i + len(values)
         self._vals[i:j] = np.array(values)
         self._count += len(values)
 
     def __getitem__(self, i):
-        assert i <= self._count
-        return self._vals[i]
+        if i < 0: k = self._count + i
+        else:     k = i
 
-    def __setitem__(self, k, v):
+        assert k <= self._count
+        return self._vals[k]
+
+    def __setitem__(self, i, v):
+        if i < 0: k = self._count + i
+        else:     k = i
+
         assert k <= self._count
         self._vals[k] = v
 
@@ -146,13 +185,13 @@ class WQStats(object):
         self._wq_times               = ExtendableArray()
 
         ### task stats
-        self.cmd_execution_time      = Statistics()
+        self.computation_time        = Statistics()
         self.total_bytes_transferred = Statistics()
         self.total_transfer_time     = Statistics()
-        self.task_run_time           = Statistics()       # WQ Task.finish_time - Task.start_time
         self.task_life_time          = Statistics()       # WQ Task.finish_time - Task.submit_time
 
         ### wq stats
+        self.workers_init            = Statistics()
         self.workers_ready           = Statistics()
         self.workers_busy            = Statistics()
         self.tasks_running           = Statistics()
@@ -168,20 +207,21 @@ class WQStats(object):
         self.total_receive_time      = Statistics()
 
 
-    @awe.typecheck(awe.workqueue.WQ.Task)
+    @typecheck(workqueue.WQ.Task)
     def task(self, task):
         """
         Update the running statistics with a task result
         """
         self._task_times.append(time.time())
 
-
-        self.cmd_execution_time      .update(task.cmd_execution_time)
         self.total_bytes_transferred .update(task.total_bytes_transferred)
-        self.total_transfer_time     .update(task.total_transfer_time)
-        self.task_life_time          .update(task.finish_time - task.submit_time)
 
-    @awe.typecheck(awe.workqueue.WQ.WorkQueue)
+        # convert all times to seconds from microseconds
+        self.computation_time        .update( task.computation_time                / 10.**6)
+        self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
+        self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
+
+    @typecheck(workqueue.WQ.WorkQueue)
     def wq(self, wq):
 
         self._wq_times.append(time.time())
@@ -200,8 +240,10 @@ class WQStats(object):
         self.total_workers_removed  .update(q.total_workers_removed)
         self.total_bytes_sent       .update(q.total_bytes_sent)
         self.total_bytes_received   .update(q.total_bytes_received)
-        self.total_send_time        .update(q.total_send_time)
-        self.total_receive_time     .update(q.total_receive_time)
+
+        # convert all times to seconds from microseconds
+        self.total_send_time        .update(q.total_send_time    / 10.**6)
+        self.total_receive_time     .update(q.total_receive_time / 10.**6)
 
     def save(self, wqstats, taskstats):
         """
@@ -219,14 +261,15 @@ class WQStats(object):
     def _save_attrs(self, fd, name, times, attrs):
         print 'Saving', name, 'data to', fd.name
         data = dict()
-        data['program_runtime'] = times - times[0]
+        data['time'] = times
+        print '\t', 'time'
         for a in attrs:
             print '\t', a
             data[a] = getattr(self, a).values
         np.savez(fd, **data)
 
     def _save_task_stats(self, fd):
-        attrs = 'cmd_execution_time total_bytes_transferred total_transfer_time task_life_time'.split()
+        attrs = 'computation_time total_bytes_transferred total_transfer_time task_life_time'.split()
 
         self._save_attrs(fd, 'task', self._task_times.get(), attrs)
 
@@ -260,24 +303,6 @@ class Timings(object):
         self.stats.update(self.timer.elapsed())
 
 
-    def _save(self, fd, name):
-        ts, vs = self.times.get(), self.stats.values
-        vals = np.vstack( (ts, vs) )
-        kws = {name : name}
-        np.savez(fd, **kws)
-
-
-    def save(self, target, name, mode='a'):
-        """
-        @param target: file handle or string
-        """
-
-        if type(target) is str:
-            with open(target, mode) as fd:
-                self._save(fd, name)
-        else:
-            self._save(target, name)
-
 
 class AWEStats(object):
 
@@ -287,7 +312,7 @@ class AWEStats(object):
         self.resample  = Timings()
         self.barrier   = Timings()
 
-    @awe.typecheck(str, Timings)
+    @typecheck(str, Timings)
     def _timeit(self, state, timings):
         """
         *state* = {start|stop}
