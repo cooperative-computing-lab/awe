@@ -190,12 +190,13 @@ class OneColor_SaveWeights(OneColor):
         cells   = np.array(list(set(group.cells)))
         iters   = self.iteration * np.ones(len(cells))
         weights = -1 * np.ones(len(cells))
-        for c in cells:
+        for i, c in enumerate(cells):
             ixs        = np.where(group.cells == c)
             walkers    = group.getslice(ixs)
             w          = walkers.weights[0] ### assume at least one walker per cell
-            weights[c] = w
+            weights[i] = w
         assert weights.min() >= 0
+        assert weights.max() <= 1
         vals = np.vstack( (iters, cells, weights) )
 
         with open(self.datfile, mode) as fd:
@@ -209,4 +210,4 @@ class OneColor_SaveWeights(OneColor):
         self.iteration  += 1
         self.saveweights(newgroup)
 
-        return newstate
+        return newgroup
