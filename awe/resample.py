@@ -176,39 +176,41 @@ class IPlotter(IResampler):
         self.plot()
         return ws
 
+class SaveWeights(IResampler):
 
-class OneColor_SaveWeights(OneColor):
-
-    def __init__(self, nwalkers, datfile='weights.dat'):
-        OneColor.__init__(self, nwalkers)
-        self.datfile   = datfile
+    def __init__(self, resampler, datfile='weights.dat'):
+        self.resampler = resampler
+        self.datfile = datfile
         self.iteration = 0
 
-    def saveweights(self, group, mode='a'):
+    def saveweights(self, system, mode='a'):
         print 'Saving weights to', self.datfile
 
         ### all the walkers in a cell have the same weight, so we only
         ### need to save the (iteration, cell, weight) triples
-        cells   = np.array(list(set(group.cells)))
+        cells   = np.array(sorted(map(lambda c: c.id, system.cells)))
         iters   = self.iteration * np.ones(len(cells))
         weights = -1 * np.ones(len(cells))
-        for c in cells:
-            ixs        = np.where(group.cells == c)
-            walkers    = group.getslice(ixs)
-            w          = walkers.weights[0] ### assume at least one walker per cell
-            weights[c] = w
+        colors  = -1 * np.zeros(len(cells))
+        for cid in cells:
+            cell         = system.cell(cid)
+            weights[cid] = cell.weight
+            colors[cid]  = cell.color
         assert weights.min() >= 0
-        vals = np.vstack( (iters, cells, weights) )
+        assert colors.min()  >= 0
+        vals = np.vstack( (iters, cells, weights, colors) )
 
         with open(self.datfile, mode) as fd:
             np.savetxt(fd, vals.T)
 
-    def resample(self, walkergroup):
+    def resample(self, system):
         if self.iteration == 0:
-            self.saveweights(walkergroup, mode='w')
+            with open(self.datfile, 'w') as fd:
+                fd.write('# iteration cell weight color\n')
+            self.saveweights(system, mode='a')
 
-        newgroup         = OneColor.resample(self, walkergroup)
+        newsystem        = self.resampler.resample(system)
         self.iteration  += 1
-        self.saveweights(newgroup)
+        self.saveweights(newsystem)
 
-        return newstate
+        return newsystem
