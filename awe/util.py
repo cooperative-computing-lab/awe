@@ -43,7 +43,38 @@ class _typecheck(object):
                 raise TypeException, '%s:\n\n%s\n\t%s' % (fn, stack, ex)
 
             return fn(*args,**kws)
+
+        wrapped.func_name = fn.func_name
+        wrapped.func_doc = fn.func_doc
         return wrapped
+
+class returns(object):
+    def __init__(self, expected):
+        self._expected = expected
+
+    @property
+    def expected(self): return self._expected
+
+    def typecheck(self, value):
+        typ = type(value)
+        return typ is self.expected
+
+    def __call__(self, fn):
+        def wrapped(*args, **kws):
+            result = fn(*args, **kws)
+            if self.typecheck(result):
+                return result
+            else:
+                stack = traceback.extract_stack()
+                stack = ''.join(traceback.format_list(stack[:-1]))
+                stack = '\n\t'.join(('\t' + stack).split('\n'))
+                raise TypeError, 'Result of %s(*%s, **%s) should be %s but is %s' % \
+                    (fn, args, kws, self.expected, type(result))
+
+        wrapped.func_name = fn.func_name
+        wrapped.func_doc = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
+        return wrapped
+
 
 def typecheck(*args, **kws):
     tc = _typecheck(method=True)
@@ -55,3 +86,5 @@ def typecheckfn(*args, **kws):
     tc = _typecheck(method=False)
     tc.check(*args, **kws)
     return tc
+
+

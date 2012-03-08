@@ -13,7 +13,7 @@ timer = awe.stats.Timer()
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = 95
+cfg.restarts = 0
 
 cfg.execute('test.exe')
 
@@ -29,34 +29,34 @@ cfg.execute('test.exe')
 
 iterations = 30
 nwalkers = 2
-nstates  = 10
+nstates  = 5
 walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
                                       topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
+
+system = awe.System(topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
 
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 timer.start()
 for i in xrange(nstates):
-    weight = np.random.random()
+    cell = awe.Cell(i, color=np.random.randint(0, 2), weight=np.random.random())
+
     for j in xrange(nwalkers):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = mdtools.prody.parsePDB(pdbpath)
-        color   = 0
-        cell    = i
-        w       = awe.aweclasses.Walker(start  = pdb.getCoords(),
-                                        weight = weight,
-                                        color  = color,
-                                        cell   = cell
-                                        )
-        walkers.add(w)
+        w       = awe.aweclasses.Walker(pdb.getCoords())
+        cell.add_walker(w)
+
+    system.add_cell(cell)
+
 timer.stop()
 
 print 'Initialization overhead:', timer.elapsed(), 's'
 
 
-resample = awe.resample.OneColor_SaveWeights(nwalkers)
+resample = awe.resample.OneColor(nwalkers)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
-                               walkers    = walkers,
+                               system     = system,
                                iterations = iterations,
                                resample   = resample)
 

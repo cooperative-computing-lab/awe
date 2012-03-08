@@ -1,5 +1,5 @@
 
-from util import typecheck
+from util import typecheck, returns
 import aweclasses
 import mdtools
 
@@ -25,14 +25,24 @@ class IResampler(object):
 
         raise NotImplementedError
 
-    @typecheck(aweclasses.WalkerGroup)
-    def __call__(self, walkers):
+    @typecheck(aweclasses.System)
+    @returns(aweclasses.System)
+    def __call__(self, s1):
         print time.asctime(), 'Resampling'
-        ws2 = self.resample(walkers)
-        assert type(ws2) is aweclasses.WalkerGroup
-        return ws2
 
+        print 's1', s1
+        for c in s1.cells:
+            print '\t', c
+            print '\t\t', c.walkers
 
+        s2 = self.resample(s1)
+
+        print 's2', s2
+        for c in s2.cells:
+            print '\t', c
+            print '\t\t', c.walkers
+
+        return s2
 
 class Identity(IResampler):
 
@@ -54,21 +64,20 @@ class OneColor(IResampler):
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 
-    def resample(self, walkergroup):
+    def resample(self, system):
 
         from numpy import floor, argsort, random, sum
 
-        newwalkers = list()
+        newsystem = system.clone()
+        state = system.as_state()
 
-        for cell in set(walkergroup.cells):
+        for cell in system.cells:
             # print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
-            ixs        = np.where(walkergroup.cells == cell)
-            oldwalkers = walkergroup.getslice(ixs)
-            weights    = oldwalkers.weights.copy()
-            # print '\tixs:', ixs
-            # print '\tweights:', weights
+            localstate = state.slice_by(state.cells == cell.id)
+            weights    = localstate.weights
+            walkers    = localstate.walkers
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
@@ -79,7 +88,7 @@ class OneColor(IResampler):
             testmaxw = float('inf')
             for i in mywalkers:
                 myw = weights[i]
-                assert myw == oldwalkers[i].weight, 'Weights mismatch'
+                assert myw == weights[i], 'Weights mismatch'
                 assert myw <= testmaxw, 'Weights non-monotonically decreasing'
                 testmaxw = myw
 
@@ -88,6 +97,7 @@ class OneColor(IResampler):
             tw    = W / self.targetwalkers
             # print '\tW', W, 'tw', tw
 
+            newcell = aweclasses.Cell(cell.id, weight=tw, color=cell.color)
 
             ### we assume that there is at least one walker in the cell
             x = mywalkers.pop()
@@ -97,11 +107,11 @@ class OneColor(IResampler):
 
             ### The algorithm terminates since the last walker removed
             ##+ from 'mywalkers' when W == tw. The max number of
-            ##+ iterations is bounded by 'len(where(group.cell = cell) + targetwalkers'
+            ##+ iterations is bounded by 'len(where(system.cell == cell) + targetwalkers'
             while True: # exit using break
 
                 Wx = weights[x]
-                currentWalker = oldwalkers[x]
+                currentWalker = localstate.walker(x)
                 # print '\tweight of', x, 'is', Wx
 
                 ### split
@@ -118,12 +128,8 @@ class OneColor(IResampler):
                     ### split the current walker
                     # print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = aweclasses.Walker(start  = currentWalker.end,
-                                              weight = tw,
-                                              color  = currentWalker.color,
-                                              cell   = cell)
-                        newwalkers.append(w)
-
+                        w = aweclasses.Walker(start=currentWalker.end)
+                        newcell.add_walker(w)
 
                     ### update the weights for the current walker and mark
                     ##+ for reconsideration
@@ -148,13 +154,20 @@ class OneColor(IResampler):
                         x = y
                     weights[x] = Wxy
 
+            newsystem.add_cell(newcell)
 
-        ### setup the WalkerGroup to return
-        newgroup = aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
-        for w in newwalkers:
-            newgroup.add(w)
+        return newsystem
 
-        return newgroup
+class MultiColor(OneColor):
+
+    def resample(self, system):
+
+        newsystem = aweclasses.System(topology=system.topology)
+        for color in system.colors:
+            thiscolor  = system.filter_by_color(color)
+            resampled  = OneColor.resample(thiscolor)
+            newsystem += resampled
+        return newsystem
 
 
 class IPlotter(IResampler):

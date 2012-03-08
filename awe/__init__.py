@@ -8,7 +8,7 @@ import workqueue
 import io
 import resample
 
-from aweclasses import Walker, WalkerGroup, AWE
+from aweclasses import Walker, WalkerGroup, AWE, Cell, System
 from workqueue import Config
 from stats import time
 
