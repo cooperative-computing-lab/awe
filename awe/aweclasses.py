@@ -435,6 +435,9 @@ class Cell(object):
         return '<Cell: %d, weight=%s, color=%s, nwalkers=%s>' % \
             (self.id, self.weight, self.color, len(self.walkers))
 
+    def __repr__(self):
+        return str(self)
+
 
 
 class System(object):
@@ -490,6 +493,7 @@ class System(object):
 
     # @typecheck(Walker)
     def add_walker(self, walker):
+        assert walker.assignment >= 0, 'is: %s' % walker.assignment
         self.cell(walker.assignment).add_walker(walker)
 
     # @typecheck(int)

@@ -29,20 +29,8 @@ class IResampler(object):
     @returns(aweclasses.System)
     def __call__(self, s1):
         print time.asctime(), 'Resampling'
+        return self.resample(s1)
 
-        print 's1', s1
-        for c in s1.cells:
-            print '\t', c
-            print '\t\t', c.walkers
-
-        s2 = self.resample(s1)
-
-        print 's2', s2
-        for c in s2.cells:
-            print '\t', c
-            print '\t\t', c.walkers
-
-        return s2
 
 class Identity(IResampler):
 
@@ -164,6 +152,7 @@ class MultiColor(OneColor):
 
         newsystem = aweclasses.System(topology=system.topology)
         for color in system.colors:
+            print time.asctime(), 'Resampling color', color
             thiscolor  = system.filter_by_color(color)
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
