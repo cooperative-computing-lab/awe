@@ -84,7 +84,7 @@ class Config(object):
         self.debug     = ''
         self.shutdown  = False
         self.fastabort = 3
-        self.restarts  = 3
+        self.restarts  = 95 # until restarts are handled on a per-iteration basis
 
         self.waittime  = 10 # in seconds
 
@@ -204,7 +204,7 @@ class WorkQueue(object):
             self.restarts[task.tag] = 0
 
         if self.restarts[task.tag] < self.cfg.restarts:
-            print time.asctime(), 'restarting', task.tag
+            print time.asctime(), 'restarting', task.tag, '#%d' % (self.restarts[task.tag] + 1)
             self.submit(task)
             self.restarts[task.tag] += 1
             return True
