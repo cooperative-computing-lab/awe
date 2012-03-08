@@ -52,7 +52,7 @@ class Walker(object):
 
 
     def __str__(self):
-        return 'Walker : assignment=%(assignment)d' % {'assignment' : self.assignment}
+        return '<Walker: assignment=%(assignment)d>' % {'assignment' : self.assignment}
 
     def __repr__(self): return str(self)
 
@@ -86,7 +86,9 @@ class WalkerGroup(object):
     """
 
     # @typecheck(count=int, topology=mdtools.prody.AtomGroup)
-    def __init__(self, count=None, topology=None, walkers=list()):
+    def __init__(self, count=None, topology=None, walkers=None):
+
+        walkers = walkers or list()
 
         assert len(walkers) == 0 or  type(iter(walkers).next()) is Walker
 
@@ -398,11 +400,11 @@ class AWE(object):
 
 class Cell(object):
 
-    def __init__(self, cid, weight=1., color=0, walkers=list()):
+    def __init__(self, cid, weight=1., color=0, walkers=None):
         self._id      = cid
         self._weight  = weight
         self._color   = color
-        self._walkers = walkers
+        self._walkers = walkers or list()
 
     @property
     def id(self): return self._id
@@ -437,16 +439,27 @@ class Cell(object):
 
 class System(object):
 
-    def __init__(self, topology=None, cells=list()):
+    def __init__(self, topology=None, cells=None):
         self._topology = topology
-        self._cells    = cells
+        self._cells    = cells or list()
 
 
     def __str__(self):
-        return '<System: topology=%s, ncells=%s, cells=%s>' % (self.topology, len(self._cells), self._cells[1])
+        return '<System: topology=%s, ncells=%s, cells=%s>' % (self.topology, len(self._cells), self._cells)
 
     def __repr__(self):
         return 'System(topology=%r, cells=%r)' % (self._topology, self._cells)
+
+    def __iadd__(self, other):
+        for cell in other.cells:
+            if not self.has_cell(cell.id):
+                self.add_cell(cell)
+            else:
+                mycell = self.cell(cell.id)
+                for walker in cell.walkers:
+                    mycell.add_walker(walker)
+
+        return self
 
 
     @property
@@ -483,7 +496,7 @@ class System(object):
     # @returns(Cell)
     def cell(self, i):
         cs = filter(lambda c: c.id == i, self._cells)
-        assert len(cs) == 1
+        assert len(cs) == 1, 'actual: %s' % len(cs)
         return cs[0]
 
     # @typecheck(int)
@@ -512,7 +525,8 @@ class System(object):
         return cells
 
     # @returns(System)
-    def clone(self, cells=list()):
+    def clone(self, cells=None):
+        cells = cells or list()
         return System(topology=self.topology, cells=cells)
 
     # @returns(System)

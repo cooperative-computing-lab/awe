@@ -54,7 +54,7 @@ timer.stop()
 print 'Initialization overhead:', timer.elapsed(), 's'
 
 
-resample = awe.resample.OneColor(nwalkers)
+resample = awe.resample.MultiColor(nwalkers)
 adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
                                system     = system,
                                iterations = iterations,

@@ -165,7 +165,7 @@ class MultiColor(OneColor):
         newsystem = aweclasses.System(topology=system.topology)
         for color in system.colors:
             thiscolor  = system.filter_by_color(color)
-            resampled  = OneColor.resample(thiscolor)
+            resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
         return newsystem
 
