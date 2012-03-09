@@ -320,8 +320,8 @@ class AWE(object):
         except KeyboardInterrupt:
             pass
 
-        # finally:
-        #     self.save_stats(self.statsdir)
+        finally:
+            self.save_stats(self.statsdir)
 
 
     # @typecheck(int, int)
