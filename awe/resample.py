@@ -1,5 +1,5 @@
 
-from util import typecheck
+from util import typecheck, returns
 import aweclasses
 import mdtools
 
@@ -25,13 +25,11 @@ class IResampler(object):
 
         raise NotImplementedError
 
-    @typecheck(aweclasses.WalkerGroup)
-    def __call__(self, walkers):
+    @typecheck(aweclasses.System)
+    @returns(aweclasses.System)
+    def __call__(self, s1):
         print time.asctime(), 'Resampling'
-        ws2 = self.resample(walkers)
-        assert type(ws2) is aweclasses.WalkerGroup
-        return ws2
-
+        return self.resample(s1)
 
 
 class Identity(IResampler):
@@ -54,21 +52,20 @@ class OneColor(IResampler):
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 
-    def resample(self, walkergroup):
+    def resample(self, system):
 
         from numpy import floor, argsort, random, sum
 
-        newwalkers = list()
+        newsystem = system.clone()
+        state = system.as_state()
 
-        for cell in set(walkergroup.cells):
+        for cell in system.cells:
             # print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
-            ixs        = np.where(walkergroup.cells == cell)
-            oldwalkers = walkergroup.getslice(ixs)
-            weights    = oldwalkers.weights.copy()
-            # print '\tixs:', ixs
-            # print '\tweights:', weights
+            localstate = state.slice_by(state.cells == cell.id)
+            weights    = localstate.weights
+            walkers    = localstate.walkers
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
@@ -79,7 +76,7 @@ class OneColor(IResampler):
             testmaxw = float('inf')
             for i in mywalkers:
                 myw = weights[i]
-                assert myw == oldwalkers[i].weight, 'Weights mismatch'
+                assert myw == weights[i], 'Weights mismatch'
                 assert myw <= testmaxw, 'Weights non-monotonically decreasing'
                 testmaxw = myw
 
@@ -88,6 +85,7 @@ class OneColor(IResampler):
             tw    = W / self.targetwalkers
             # print '\tW', W, 'tw', tw
 
+            newcell = aweclasses.Cell(cell.id, weight=tw, color=cell.color)
 
             ### we assume that there is at least one walker in the cell
             x = mywalkers.pop()
@@ -97,11 +95,11 @@ class OneColor(IResampler):
 
             ### The algorithm terminates since the last walker removed
             ##+ from 'mywalkers' when W == tw. The max number of
-            ##+ iterations is bounded by 'len(where(group.cell = cell) + targetwalkers'
+            ##+ iterations is bounded by 'len(where(system.cell == cell) + targetwalkers'
             while True: # exit using break
 
                 Wx = weights[x]
-                currentWalker = oldwalkers[x]
+                currentWalker = localstate.walker(x)
                 # print '\tweight of', x, 'is', Wx
 
                 ### split
@@ -118,12 +116,8 @@ class OneColor(IResampler):
                     ### split the current walker
                     # print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = aweclasses.Walker(start  = currentWalker.end,
-                                              weight = tw,
-                                              color  = currentWalker.color,
-                                              cell   = cell)
-                        newwalkers.append(w)
-
+                        w = aweclasses.Walker(start=currentWalker.end)
+                        newcell.add_walker(w)
 
                     ### update the weights for the current walker and mark
                     ##+ for reconsideration
@@ -148,13 +142,21 @@ class OneColor(IResampler):
                         x = y
                     weights[x] = Wxy
 
+            newsystem.add_cell(newcell)
 
-        ### setup the WalkerGroup to return
-        newgroup = aweclasses.WalkerGroup(count=len(newwalkers), topology=walkergroup.topology)
-        for w in newwalkers:
-            newgroup.add(w)
+        return newsystem
 
-        return newgroup
+class MultiColor(OneColor):
+
+    def resample(self, system):
+
+        newsystem = aweclasses.System(topology=system.topology)
+        for color in system.colors:
+            print time.asctime(), 'Resampling color', color
+            thiscolor  = system.filter_by_color(color)
+            resampled  = OneColor.resample(self, thiscolor)
+            newsystem += resampled
+        return newsystem
 
 
 class IPlotter(IResampler):
@@ -174,40 +176,41 @@ class IPlotter(IResampler):
         self.plot()
         return ws
 
+class SaveWeights(IResampler):
 
-class OneColor_SaveWeights(OneColor):
-
-    def __init__(self, nwalkers, datfile='weights.dat'):
-        OneColor.__init__(self, nwalkers)
-        self.datfile   = datfile
+    def __init__(self, resampler, datfile='weights.dat'):
+        self.resampler = resampler
+        self.datfile = datfile
         self.iteration = 0
 
-    def saveweights(self, group, mode='a'):
+    def saveweights(self, system, mode='a'):
         print 'Saving weights to', self.datfile
 
         ### all the walkers in a cell have the same weight, so we only
         ### need to save the (iteration, cell, weight) triples
-        cells   = np.array(list(set(group.cells)))
+        cells   = np.array(sorted(map(lambda c: c.id, system.cells)))
         iters   = self.iteration * np.ones(len(cells))
         weights = -1 * np.ones(len(cells))
-        for i, c in enumerate(cells):
-            ixs        = np.where(group.cells == c)
-            walkers    = group.getslice(ixs)
-            w          = walkers.weights[0] ### assume at least one walker per cell
-            weights[i] = w
+        colors  = -1 * np.ones(len(cells))
+        for cid in cells:
+            cell         = system.cell(cid)
+            weights[cid] = cell.weight
+            colors[cid]  = cell.color
         assert weights.min() >= 0
-        assert weights.max() <= 1
-        vals = np.vstack( (iters, cells, weights) )
+        assert colors.min()  >= 0
+        vals = np.vstack( (iters, cells, weights, colors) )
 
         with open(self.datfile, mode) as fd:
             np.savetxt(fd, vals.T)
 
-    def resample(self, walkergroup):
+    def resample(self, system):
         if self.iteration == 0:
-            self.saveweights(walkergroup, mode='w')
+            with open(self.datfile, 'w') as fd:
+                fd.write('# iteration cell weight color\n')
+            self.saveweights(system, mode='a')
 
-        newgroup         = OneColor.resample(self, walkergroup)
+        newsystem        = self.resampler.resample(system)
         self.iteration  += 1
-        self.saveweights(newgroup)
+        self.saveweights(newsystem)
 
-        return newgroup
+        return newsystem

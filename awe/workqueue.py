@@ -5,7 +5,7 @@ import mdtools
 
 import work_queue as WQ
 
-import os, tarfile, tempfile, time, shutil
+import os, tarfile, tempfile, time, shutil, traceback
 
 
 ### A process can only support a single WorkQueue instance
@@ -15,7 +15,7 @@ _AWE_WORK_QUEUE = None
 ### workaround for now.
 ##+ These are the names of the input/output filess to be materialized on the worker
 
-WORKER_PDB_NAME     = 'structure.pdb'
+WORKER_POSITIONS_NAME     = 'structure.pdb'
 WORKER_WEIGHTS_NAME = 'weight.dat'
 WORKER_COLOR_NAME   = 'color.dat'
 WORKER_CELL_NAME    = 'cell.dat'
@@ -25,7 +25,7 @@ RESULT_POSITIONS    = 'structure2.pdb'
 RESULT_WEIGHTS      = 'weight.dat'
 RESULT_COLOR        = 'color.dat'
 RESULT_CELL         = 'cell2.dat'
-RESULT_NAME         = 'results-%s.tar'
+RESULT_NAME         = 'results.tar'
 
 
 class WorkQueueException       (Exception): pass
@@ -158,7 +158,7 @@ class WorkQueue(object):
 
     def __del__(self):
         import shutil
-        shutil.rmtree(self.tmpdir)
+        # shutil.rmtree(self.tmpdir)
 
 
     def update_wq_stats(self):
@@ -168,8 +168,7 @@ class WorkQueue(object):
     def update_task_stats(self, task):
         self.stats.task(task)
 
-    @awe.typecheck(dict)
-    def new_task(self, params):
+    def new_task(self):
         cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
 
@@ -180,16 +179,16 @@ class WorkQueue(object):
         for wqf in self.cfg.getcache:
             wqf.add_to_task(task)
 
-        ### convert the walker parameters for WQWorker
-        task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
-        task.specify_buffer(params['color']  , WORKER_COLOR_NAME   , cache=False)
-        task.specify_buffer(params['cell']   , WORKER_CELL_NAME    , cache=False)
-        task.specify_buffer(params['pdb']    , WORKER_PDB_NAME     , cache=False)
-        task.specify_tag   (params['id'])
+        # ### convert the walker parameters for WQWorker
+        # task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
+        # task.specify_buffer(params['color']  , WORKER_COLOR_NAME   , cache=False)
+        # task.specify_buffer(params['cell']   , WORKER_CELL_NAME    , cache=False)
+        # task.specify_buffer(params['pdb']    , WORKER_PDB_NAME     , cache=False)
+        # task.specify_tag   (params['id'])
 
-        ### result file:
-        result = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
-        task.specify_output_file(result, remote_name = WORKER_RESULTS_NAME, cache=False)
+        # ### result file:
+        # result = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
+        # task.specify_output_file(result, remote_name = WORKER_RESULTS_NAME, cache=False)
 
 
         return task
@@ -240,7 +239,7 @@ class WorkQueue(object):
         return walker
 
 
-    def recv(self):
+    def recv(self, marshall):
 
         # print time.asctime(), 'waiting for task'
         while True:
@@ -263,15 +262,16 @@ class WorkQueue(object):
                 self.update_task_stats(task)
 
                 try:
-                    walker = self._load_result_file(task)
+                    result = marshall(task)
                 except Exception, ex:
 
                     ### sometimes a task fails, but still returns.
                     ##+ attempt to restart these
                     if not self.restart(task):
                         raise WorkQueueException, \
-                            output + '\n\nMaster failed: could not load resultfile:\n %s' % ex
+                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s' % \
+                            (ex.__class__.__name__, ex)
                     else:
                         continue
 
-                return walker
+                return result
