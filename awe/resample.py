@@ -191,7 +191,7 @@ class SaveWeights(IResampler):
         cells   = np.array(sorted(map(lambda c: c.id, system.cells)))
         iters   = self.iteration * np.ones(len(cells))
         weights = -1 * np.ones(len(cells))
-        colors  = -1 * np.zeros(len(cells))
+        colors  = -1 * np.ones(len(cells))
         for cid in cells:
             cell         = system.cell(cid)
             weights[cid] = cell.weight
