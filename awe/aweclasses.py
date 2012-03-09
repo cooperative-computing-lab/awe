@@ -54,10 +54,6 @@ class Walker(object):
     def __repr__(self): return str(self)
 
 
-    # def __repr__(self):
-    #     return \
-    #         'Walker(start=%(start)r, end=%(end)r, assignment=%(assignment)r)' \
-    #         % {'start' : self.start, 'end' : self.end, 'assignment' : self.assignment}
 
 
 
