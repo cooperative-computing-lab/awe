@@ -8,61 +8,50 @@ import os
 
 mdtools.prody.setVerbosity('error')
 
-timer = awe.stats.Timer()
-
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = 95
-
-cfg.execute('test.exe')
-
-# cfg.execute('testinput/execute-task.sh')
-# cfg.cache('testinput/protomol.conf')
-# cfg.cache('testinput/topol.tpr')
-# cfg.cache('testinput/with-env')
-# cfg.cache('testinput/env.sh')
-# cfg.cache('testinput/Gens.lh5')
-# cfg.cache('testinput/AtomIndices.dat')
-# cfg.cache('testinput/state0.pdb')
+cfg.restarts = float('inf')
 
 
-iterations = 30
-nwalkers = 2
-nstates  = 10
-walkers  = awe.aweclasses.WalkerGroup(count    = nwalkers * nstates,
-                                      topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
+cfg.execute('testinput/execute-task.sh')
+cfg.cache('testinput/protomol.conf')
+cfg.cache('testinput/topol.tpr')
+cfg.cache('testinput/with-env')
+cfg.cache('testinput/env.sh')
+cfg.cache('testinput/Gens.lh5')
+cfg.cache('testinput/AtomIndices.dat')
+cfg.cache('testinput/state0.pdb')
 
+
+iterations = 3
+nwalkers   = 2
+nstates    = 100
+
+system = awe.System(topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
+
+print 'Loading cells and walkers'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
-timer.start()
 for i in xrange(nstates):
-    weight = np.random.random()
+    cell = awe.Cell(i, color=np.random.randint(0, 2), weight=np.random.random())
+
     for j in xrange(nwalkers):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = mdtools.prody.parsePDB(pdbpath)
-        color   = 0
-        cell    = i
-        w       = awe.aweclasses.Walker(start  = pdb.getCoords(),
-                                        weight = weight,
-                                        color  = color,
-                                        cell   = cell
-                                        )
-        walkers.add(w)
-timer.stop()
+        w       = awe.aweclasses.Walker(pdb.getCoords())
+        cell.add_walker(w)
 
-print 'Initialization overhead:', timer.elapsed(), 's'
+    system.add_cell(cell)
 
 
-resample = awe.resample.OneColor_SaveWeights(nwalkers)
-adaptive = awe.aweclasses.AWE( wqconfig   = cfg,
-                               walkers    = walkers,
-                               iterations = iterations,
-                               resample   = resample)
+resample = awe.resample.MultiColor(nwalkers)
+resample = awe.resample.SaveWeights(resample)
+adaptive = awe.AWE( wqconfig   = cfg,
+                    system     = system,
+                    iterations = iterations,
+                    resample   = resample)
 
-timer.start()
 adaptive.run()
-timer.stop()
 
-print 'Run time:', timer.elapsed(), 's'
-print 'Total time:', awe.time.time(), 's'
+print 'Run time:', awe.time.time(), 's'

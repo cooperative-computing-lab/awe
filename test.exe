@@ -8,14 +8,15 @@ echo "ls"
 ls
 echo
 
-echo "copying"
+echo "creating result files"
 cp -v structure.pdb structure2.pdb
-cp -v weight.dat weight2.dat
-cp -v color.dat color2.dat
-cp -v cell.dat cell2.dat
+echo '0' > cell2.dat
+# cp -v weight.dat weight2.dat
+# cp -v color.dat color2.dat
+# cp -v cell.dat cell2.dat
 echo
 
-echo "compressing"
+echo "compressing to results.tar"
 tar cvf results.tar structure2.pdb *.dat
 echo
 
