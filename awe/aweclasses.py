@@ -418,6 +418,9 @@ class Cell(object):
     @property
     def walkers(self): return self._walkers
 
+    @property
+    def population(self): return len(self._walkers)
+
     # @typecheck(Walker)
     def add_walker(self, w):
         self._walkers.append(w)
