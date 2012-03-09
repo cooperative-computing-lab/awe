@@ -67,18 +67,14 @@ class AWE(object):
     When constructing an AWE instance, required parameters include:
 
       *wqconfig*   : an instance of awe.workqueue.Config
-      *walkers*    : an instance of awe.aweclasses.WalkerGroup
+      *system*    : an instance of awe.aweclasses.System
       *iterations* : number of iterations to run
       *resample*   : the implementation of the resampling algorithm, a subclass of awe.resample.IResampler
 
+    Some relevant fields
 
-    example:
-    >>> cfg        = awe.workqueue.Config()
-    >>> walkers    = awe.aweclasses.WalkerGroup(...)
-    >>> iterations = 42
-    >>> resample   = awe.resample.OneColor()
-    >>> adaptive   = awe.aweclasses.AWE(wqconfig=cfg, walkers=walkers, iterations=42, resample=resample)
-    >>> adaptive.run()
+      *stats*    : the instance of awe.stats.AWEStats
+      *statsdir* : location to save runtime statistics
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
