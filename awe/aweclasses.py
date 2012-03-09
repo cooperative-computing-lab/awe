@@ -14,16 +14,13 @@ class Walker(object):
 
     """
     Capture the state of a single walker.
-    This include the starting and ending coordinates, the cell, the
-    weight, and optional color.
+    This include the starting and ending coordinates, and it's assignment
 
     Relevant fields are:
 
-      *start*  : numpy.ndarray (natoms, 3) : starting coordinates
-      *end*    : numpy.ndarray (natoms, 3) : ending coordinates
-      *weight* : float
-      *color*  : int
-      *cell*   : int
+      *start*      : starting coordinates
+      *end*        : ending coordinates
+      *assignment* : int
     """
 
     def __init__(self, start=None, end=None, assignment=0):
