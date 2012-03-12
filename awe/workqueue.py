@@ -232,8 +232,8 @@ class WorkQueue(object):
                     ##+ attempt to restart these
                     if not self.restart(task):
                         raise WorkQueueException, \
-                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s' % \
-                            (ex.__class__.__name__, ex)
+                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
+                            (ex.__class__.__name__, ex, traceback.format_exc())
                     else:
                         continue
 
