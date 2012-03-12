@@ -1,9 +1,7 @@
 
 import io, stats, workqueue
 from util import typecheck, returns
-
-
-import mdtools
+import structures
 
 import numpy as np
 
@@ -184,13 +182,9 @@ class AWE(object):
         walker = cell.walker(wid)
 
         ### create the pdb
-        ss     = io.StringStream()
-        top    = self.system.topology
-        if walker.start is None:
-            print 'walker.start is None', cid, wid # , walker.end
-        top.setCoords(walker.start)
-        mdtools.prody.writePDBStream(ss, top)
-        pdbdat = ss.read()
+        top        = self.system.topology
+        top.coords = walker.start
+        pdbdat     = str(top)
 
         ### send walker to worker
         task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME, cache=False)
@@ -199,28 +193,26 @@ class AWE(object):
         self.specify_task_output_file(task)
 
     def specify_task_output_file(self, task):
-        output = os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME)
+        output = os.path.join(self.wq.tmpdir, task.tag)
         task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME, cache=False)
 
     # @typecheck(workqueue.WQ.Task)
     # @returns(Walker)
     def marshal_from_task(self, result):
-        d = self.decode_from_task_tag(result.tag)
 
         import tarfile
-        with tarfile.open(d['outfile']) as tar:
+        with tarfile.open(result.tag) as tar:
 
             pdbstring  = tar.extractfile(workqueue.RESULT_POSITIONS).read()
             cellstring = tar.extractfile(workqueue.RESULT_CELL     ).read()
 
-            ss     = io.StringStream(pdbstring)
-            pdb    = mdtools.prody.parsePDBStream(ss)
-            coords = pdb.getCoords()
+            pdb    = structures.PDB(pdbstring)
+            coords = pdb.coords
             cellid = int(cellstring)
 
             walker = Walker(end=coords, assignment=cellid)
 
-        # os.unlink(d['outfile'])
+        os.unlink(result.tag)
         return walker
 
 
