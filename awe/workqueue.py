@@ -1,8 +1,6 @@
 
 import awe
 
-import mdtools
-
 import work_queue as WQ
 
 import os, tarfile, tempfile, time, shutil, traceback
@@ -179,18 +177,6 @@ class WorkQueue(object):
         for wqf in self.cfg.getcache:
             wqf.add_to_task(task)
 
-        # ### convert the walker parameters for WQWorker
-        # task.specify_buffer(params['weight'] , WORKER_WEIGHTS_NAME , cache=False)
-        # task.specify_buffer(params['color']  , WORKER_COLOR_NAME   , cache=False)
-        # task.specify_buffer(params['cell']   , WORKER_CELL_NAME    , cache=False)
-        # task.specify_buffer(params['pdb']    , WORKER_PDB_NAME     , cache=False)
-        # task.specify_tag   (params['id'])
-
-        # ### result file:
-        # result = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
-        # task.specify_output_file(result, remote_name = WORKER_RESULTS_NAME, cache=False)
-
-
         return task
 
     @awe.typecheck(WQ.Task)
@@ -212,31 +198,6 @@ class WorkQueue(object):
 
     def wait(self, *args, **kws):
         return self.wq.wait(*args, **kws)
-
-    @awe.typecheck(WQ.Task)
-    def _load_result_file(self, task):
-
-        path = os.path.join(self.tmpdir, RESULT_NAME % task.tag)
-        with tarfile.open(path) as tar:
-
-            pdbstring    = tar.extractfile(RESULT_POSITIONS ).read()
-            weightstring = tar.extractfile(RESULT_WEIGHTS   ).read()
-            colorstring  = tar.extractfile(RESULT_COLOR     ).read()
-            cellstring   = tar.extractfile(RESULT_CELL      ).read()
-
-            ss           = awe.io.StringStream(pdbstring)
-            pdb          = mdtools.prody.parsePDBStream(ss)
-
-            walker       = awe.aweclasses.Walker(
-                end      = pdb.getCoords(),
-                weight   = float(weightstring),
-                color    = int(colorstring),
-                cell     = int(cellstring),
-                wid      = int(task.tag)
-                )
-
-        os.unlink(path)
-        return walker
 
 
     def recv(self, marshall):
@@ -269,8 +230,8 @@ class WorkQueue(object):
                     ##+ attempt to restart these
                     if not self.restart(task):
                         raise WorkQueueException, \
-                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s' % \
-                            (ex.__class__.__name__, ex)
+                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
+                            (ex.__class__.__name__, ex, traceback.format_exc())
                     else:
                         continue
 

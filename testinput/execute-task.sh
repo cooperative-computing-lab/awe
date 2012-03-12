@@ -43,3 +43,7 @@ tar cfv $resultfile *.energy* *.pdb *.dat Data/discrete.traj Data/tCounts.UnSym.
 
 echo "[$me] Cleaning up"
 rm -rv Data output Trajectories ProjectInfo.h5
+
+
+echo "[$me] Returning files"
+ls $resultfile

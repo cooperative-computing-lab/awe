@@ -11,7 +11,7 @@ mdtools.prody.setVerbosity('error')
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = float('inf')
+cfg.restarts = 0
 
 
 cfg.execute('testinput/execute-task.sh')
@@ -28,7 +28,7 @@ iterations = 3
 nwalkers   = 2
 nstates    = 100
 
-system = awe.System(topology = mdtools.prody.parsePDB('testinput/state0.pdb'))
+system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
 print 'Loading cells and walkers'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
@@ -38,8 +38,8 @@ for i in xrange(nstates):
     for j in xrange(nwalkers):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
-        pdb     = mdtools.prody.parsePDB(pdbpath)
-        w       = awe.aweclasses.Walker(pdb.getCoords())
+        pdb     = awe.PDB(pdbpath)
+        w       = awe.aweclasses.Walker(pdb.coords)
         cell.add_walker(w)
 
     system.add_cell(cell)
