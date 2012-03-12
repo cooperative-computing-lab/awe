@@ -14,4 +14,7 @@ from workqueue import Config
 from stats import time
 from structures import PDB
 
+import prody
+prody.setVerbosity('error')
+
 stats.time.start()
