@@ -1,12 +1,9 @@
 
 
 import awe
-import mdtools
 
 import numpy as np
 import os
-
-mdtools.prody.setVerbosity('error')
 
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
