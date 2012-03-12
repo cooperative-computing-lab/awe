@@ -1,8 +1,6 @@
 
 import awe
 
-import mdtools
-
 import work_queue as WQ
 
 import os, tarfile, tempfile, time, shutil, traceback

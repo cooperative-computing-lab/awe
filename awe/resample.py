@@ -1,7 +1,6 @@
 
 from util import typecheck, returns
 import aweclasses
-import mdtools
 
 import numpy as np
 import itertools
