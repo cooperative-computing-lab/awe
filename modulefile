@@ -1,0 +1,29 @@
+#%Module
+
+
+set name "awe"
+set version "rc"
+set root "/afs/crc.nd.edu/user/c/cabdulwa/Public/apps/$name/$version"
+
+set py_major 2.7
+
+prereq python/2.7.1
+
+prereq cctools/3.4.2
+
+set mod0 "prody"
+set mods [split $mod0 " "]
+
+
+foreach mod $mods {
+    if { ! [ is-loaded $mod ] } {
+       system "echo loading $mod\n"
+       module load $mod
+    }
+}
+
+
+prepend-path PATH               $root/bin
+prepend-path PYTHONPATH         $root/lib/python$py_major/site-packages/
+
+unset root

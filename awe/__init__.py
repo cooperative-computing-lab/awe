@@ -1,3 +1,9 @@
+"""
+This file is part of AWE
+Copyright (C) 2012- University of Notre Dame
+This software is distributed under the GNU General Public License.
+See the file COPYING for details.
+"""
 
 from io import trace, log
 from util import typecheck, typecheckfn
