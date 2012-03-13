@@ -1,0 +1,51 @@
+
+
+* Description
+  AWE provides a framework for adaptive sampling of molecular dynamics using WorkQueue to execute tasks.
+  The framework decouples the resampling algorithm and the molecular dynamics from the task distribution.
+
+* Capabilities
+  - Any MD package (Gromacs, NAMD, ProtoMol, CHARMM, AMBER, ...)
+	Tasks that run on the worker are defined as scripts that are cached on each worker, so they are only sent once.
+  - Flexible resampling
+	The AWE framework defines an IResampler interface. We provide an implementation, but you are free do define your own.
+
+* Master Dependencies
+  - [[http://python.org/][Python 2.7]]
+  - [[http://numpy.scipy.org/][Numpy 1.5.1+]]
+  - [[http://www.csb.pitt.edu/prody/][ProDy 0.9.4+]]
+  - [[http://cse.nd.edu/~ccl/software/workqueue/][WorkQueue (CCTools 3.4.2)]]
+
+* Worker Dependencies
+  This depends on the MD package used (ie the input to Gromacs differs from that for NAMD), as well as the assignment protocol.
+  The example script uses ProtoMol in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
+
+1* Installation
+  This assumes the master dependencies have been installed.
+
+  #+BEGIN_SRC
+  $ python setup.py install --prefix <path/to/installation/directory>
+  #+END_SRC
+
+* Running
+  AWE is provided as a python library, therefore in order to run, you need to create the appropriate python objects and run a python script.
+  There are four major components:
+	1. The WorkQueue configuration
+	2. A System definition.
+	   This is done by defining Cells and adding Walkers to the cells.
+	3. An IResampler instance.
+	   Use one of the provided algorithms or define you own.
+	4. A global structure that then runs the algorithms.
+
+  The end result is that you run your script like so:
+  #+BEGIN_SRC
+  $ python myscript.py
+  #+END_SRC
+
+  Please see examples/example.py in order to get started.
+
+* Licensing
+  Please see the COPYING file.
+
+* Contributers
+  Please see the AUTHORS file.

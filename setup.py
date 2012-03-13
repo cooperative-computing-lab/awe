@@ -1,3 +1,10 @@
+"""
+This file is part of AWE
+Copyright (C) 2012- University of Notre Dame
+This software is distributed under the GNU General Public License.
+See the file COPYING for details.
+"""
+
 
 from distutils.core import setup
 
