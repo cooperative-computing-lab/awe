@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
 
-echo "Hello"
-echo
-
 echo "ls"
 ls
 echo
@@ -11,17 +8,11 @@ echo
 echo "creating result files"
 cp -v structure.pdb structure2.pdb
 echo '0' > cell2.dat
-# cp -v weight.dat weight2.dat
-# cp -v color.dat color2.dat
-# cp -v cell.dat cell2.dat
 echo
 
 echo "compressing to results.tar"
 tar cvf results.tar structure2.pdb *.dat
 echo
 
-# t=$(echo "$RANDOM % 20" | bc)
-# echo "sleeping for $t seconds"
-# sleep $t
 
 exit 0
