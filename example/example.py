@@ -10,7 +10,14 @@ cfg.name      = 'awe-example'
 cfg.fastabort = 2
 cfg.restarts  = 3
 
-cfg.execute ('workerfiles/execute-task.sh' )
+### Don't use this unless MSMBuilder is installed and accessible from the workers.
+### Double-check the workerfiles/env.sh script before using execute-task.sh
+# cfg.execute ('workerfiles/execute-task.sh' )
+
+### simulate a worker task
+cfg.execute ('workerfiles/work.sh' )
+
+### required files
 cfg.cache   ('workerfiles/protomol.conf'   )
 cfg.cache   ('workerfiles/topol.tpr'       )
 cfg.cache   ('workerfiles/with-env'        )
