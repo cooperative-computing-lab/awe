@@ -19,14 +19,44 @@ class PDB(object):
 
     def __init__(self, string=None, pdb=None):
         if string and os.path.exists(string):
-            self._pdb = prody.parsePDB(string)
+            self._pdb = PDB._from_file(string)
         elif string:
-            ss = io.StringStream(string)
-            self._pdb = prody.parsePDBStream(ss)
+            self._pdb = PDB._from_str(string)
         elif pdb is not None:
             self._pdb = pdb
         else:
             self._pdb = None
+
+    @staticmethod
+    @returns(prody.AtomGroup)
+    def _from_str(string):
+        ss = io.StringStream(string)
+        return prody.parsePDBStream(ss)
+
+    @staticmethod
+    @returns(prody.AtomGroup)
+    def _from_file(path):
+        return prody.parsePDB(path)
+
+    def __getstate__(self):
+        """
+        ProDy's AtomGroup cannot be pickled.
+        The workaround is to marshal it to/from a string representation.
+        Ugly, but it works.
+        """
+        pdbstring = str(self)
+        odict = self.__dict__.copy()
+        odict['_pdb'] = pdbstring
+        return odict
+
+    def __setstate__(self, odict):
+        """
+        Marshal the ProDy AtomGroup in from a string representation.
+        See __getstate__ (above) for rationale
+        """
+        pdbstring = odict['_pdb']
+        odict['_pdb'] = PDB._from_str(pdbstring)
+        self.__dict__.update(odict)
 
     def __str__(self):
         ss = io.StringStream()

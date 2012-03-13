@@ -7,11 +7,12 @@ See the file COPYING for details.
 
 import io, stats, workqueue
 from util import typecheck, returns
-import structures
+import structures, util
 
 import numpy as np
+import cPickle as pickle
 
-import os, time
+import os, time, shutil
 
 
 class Walker(object):
@@ -89,8 +90,21 @@ class AWE(object):
         self.iterations = iterations
         self.resample   = resample
 
+        self.iteration  = 0
+
         self.stats      = stats.AWEStats()
         self.statsdir   = 'stats'
+
+        self.checkpointfile = 'checkpoint'
+        self.checkpointfreq = 1
+
+
+    def checkpoint(self, path):
+
+        tmpfile = path + '.tmp'
+        with open(tmpfile, 'wb') as fd:
+            pickle.dump(self, fd)
+        shutil.move(tmpfile, path)
 
 
     def save_stats(self, dirname):
@@ -138,9 +152,13 @@ class AWE(object):
         """
 
         try:
-            for iteration in xrange(self.iterations):
+            while True:
 
-                print time.asctime(), 'Iteration', iteration
+                if self.iteration > self.iterations: break
+
+                self.iteration += 1
+
+                print time.asctime(), 'Iteration', self.iteration
 
                 self.stats.time_iter('start')
 
@@ -149,6 +167,11 @@ class AWE(object):
                 self._resample()
 
                 self.stats.time_iter('stop')
+
+                if self.iteration % self.checkpointfreq == 0:
+                    print time.asctime(), 'Checkpointing to', self.checkpointfile
+                    self.checkpoint(self.checkpointfile)
+
 
         except KeyboardInterrupt:
             pass

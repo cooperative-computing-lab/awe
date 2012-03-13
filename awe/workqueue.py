@@ -150,7 +150,24 @@ class WorkQueue(object):
         self.restarts = dict()
 
 
-    empty = property(lambda self: self.wq.empty())
+    @property
+    def empty(self):
+        return self.wq.empty()
+
+    def __getstate__(self):
+        """
+        SwigPyObjects cannot be pickles, so remove the underlying WorkQueue object
+        """
+        odict = self.__dict__.copy()
+        del odict['wq']
+        return odict
+
+    def __setstate__(self, odict):
+        """
+        Since SwigPyObjects are not pickleable, we just recreate the WorkQueue object from the configuration
+        """
+        self.__dict__.update(odict)
+        self.wq = self.cfg._mk_wq()
 
     def save_stats(self, dirname):
         if not os.path.exists(dirname):

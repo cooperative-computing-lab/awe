@@ -95,3 +95,25 @@ def typecheckfn(*args, **kws):
     return tc
 
 
+
+
+def checkpicklable(d):
+    for v in d.itervalues():
+        try:
+            slots = v.__slots__
+            hasslots = True
+        except AttributeError:
+            hasslots = False
+        try:
+            getstate = v.__getstate__
+            hasslots = True
+        except AttributeError:
+            hasgetstate = False
+
+        if hasslots and not hasgetstate:
+            print type(v), 'has slots but not __getstate__'
+
+        try:
+            d2 = d.__dict__
+            checkpicklable(d2)
+        except AttributeError: pass
