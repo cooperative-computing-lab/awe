@@ -8,7 +8,7 @@ import os
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = 0
+cfg.restarts = float('inf')
 
 
 cfg.execute('testinput/execute-task.sh')

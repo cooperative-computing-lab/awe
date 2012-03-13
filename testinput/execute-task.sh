@@ -11,10 +11,10 @@ echo
 echo "[$me] Initial file listing"
 ls
 
-binary=ProtoMol_r1935_tpr_topo_pdb_coords
+binary=ProtoMol
 echo "[$me] Ensuring core is present"
 [ ! -f $binary ] &&
-wget "http://www.nd.edu/~rnowling/$binary"
+wget "http://www.nd.edu/~cabdulwa/$binary"
 chmod a+x $binary
 
 echo "[$me] Running simulation"
