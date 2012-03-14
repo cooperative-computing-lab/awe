@@ -15,7 +15,7 @@ import cPickle as pickle
 import os, time, shutil
 
 
-__WALKER_ID = 0
+_WALKER_ID = 0
 
 class Walker(object):
 
@@ -30,7 +30,7 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=None, color=None):
+    def __init__(self, start=None, end=None, assignment=None, color=None, weight=None, wid=None):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
@@ -38,10 +38,14 @@ class Walker(object):
         self._end        = end
         self._assignment = assignment
         self._color      = color
+        self._weight     = weight
 
-        global __WALKER_ID
-        self._id        = __WALKER_ID
-        __WALKER_ID    += 1
+        if wid is None:
+            global _WALKER_ID
+            self._id     = _WALKER_ID
+            _WALKER_ID  += 1
+        else:
+            self._id     = wid
 
 
     @property
@@ -61,8 +65,14 @@ class Walker(object):
     @property
     def assignment(self): return self._assignment
 
+    @assignment.setter
+    def assignment(self, asn):   self._assignment = asn
+
     @property
     def color(self):      return self._color
+
+    @property
+    def weight(self):     return self._weight
 
     @property
     def natoms(self):     return len(self._coords)
@@ -80,7 +90,10 @@ class Walker(object):
 
 
     def __str__(self):
-        return '<Walker: assignment=%(assignment)d>' % {'assignment' : self.assignment}
+        return '<Walker: id=%(id)d, size=%(size)d, dim=%(dim)d, assignment=%(assignment)d, color=%(color)s, weight=%(weight)s>' \
+            % {'id' : self.id, 'size'   : self.natoms, 'dim' : self.ndim,
+               'assignment' : self.assignment, 'color' : self.color,
+               'weight' : self.weight}
 
     def __repr__(self): return str(self)
 
