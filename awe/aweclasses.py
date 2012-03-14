@@ -171,23 +171,22 @@ class AWE(object):
 
     def _submit(self):
 
-        for cell in self.system.cells:
-            for wid, walker in enumerate(cell.walkers):
-                task = self.wq.new_task()
-                task.specify_tag(self.encode_task_tag(cell.id, wid))
-                self.marshal_to_task(cell.id, wid, task)
-                self.wq.submit(task)
+        for walker in self.system.walkers:
+            task = self.wq.new_task()
+            task.specify_tag(self.encode_task_tag(walker))
+            self.marshal_to_task(walker, task)
+            self.wq.submit(task)
 
 
 
     def _recv(self):
 
         print time.asctime(), 'Recieving tasks'
-        system = self.system.as_empty()
+        system = self.system
         self.stats.time_barrier('start')
         while not self.wq.empty:
             walker = self.wq.recv(self.marshal_from_task)
-            system.add_walker(walker)
+            system.set_walker(walker)
         self.stats.time_barrier('stop')
 
 
@@ -234,13 +233,12 @@ class AWE(object):
 
     # @typecheck(int, int)
     # @returns(str)
-    def encode_task_tag(self, cid, wid):
-        cell = self.system.cell(cid)
+    def encode_task_tag(self, walker):
         tag = '%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
-            'cellid'  : cid,
-            'weight'  : cell.weight,
-            'walkerid' : wid}
+            'cellid'  : walker.assignment,
+            'weight'  : walker.weight,
+            'walkerid' : walker.id}
 
         return tag
 
@@ -256,11 +254,9 @@ class AWE(object):
 
         
 
-    @typecheck(int, int, workqueue.WQ.Task)
-    def marshal_to_task(self, cid, wid, task):
+    @typecheck(int, workqueue.WQ.Task)
+    def marshal_to_task(self, walker, task):
         
-        cell   = self.system.cell(cid)
-        walker = cell.walker(wid)
 
         ### create the pdb
         top        = self.system.topology
@@ -268,7 +264,9 @@ class AWE(object):
         pdbdat     = str(top)
 
         ### send walker to worker
+        wdat = pickle.dumps(walker)
         task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME, cache=False)
+        task.specify_buffer(wdat  , workqueue.WORKER_WALKER_NAME   , cache=False)
 
         ### specify output
         self.specify_task_output_file(task)
@@ -284,14 +282,18 @@ class AWE(object):
         import tarfile
         with tarfile.open(result.tag) as tar:
 
-            pdbstring  = tar.extractfile(workqueue.RESULT_POSITIONS).read()
-            cellstring = tar.extractfile(workqueue.RESULT_CELL     ).read()
+            walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
+            pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
+            cellstring        = tar.extractfile(workqueue.RESULT_CELL     ).read()
 
-            pdb    = structures.PDB(pdbstring)
-            coords = pdb.coords
-            cellid = int(cellstring)
+            pdb               = structures.PDB(pdbstring)
+            coords            = pdb.coords
+            cellid            = int(cellstring)
 
-            walker = Walker(end=coords, assignment=cellid)
+            walker            = pickle.loads(walkerstr)
+            walker.end        = coords
+            walker.assignment = cellid
+            print 'Loaded walker from worker:', walker
 
         os.unlink(result.tag)
         return walker
