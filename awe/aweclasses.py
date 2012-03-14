@@ -13,6 +13,7 @@ import numpy as np
 import cPickle as pickle
 
 import os, time, shutil
+from collections import defaultdict
 
 
 _WALKER_ID = 0
@@ -47,6 +48,16 @@ class Walker(object):
         else:
             self._id     = wid
 
+    def __eq__(self, other):
+        if not type(self) is type(other):
+            return False
+
+        return \
+            (self._start     == other._start).all() and \
+            self._assignment == other._assignment   and \
+            self._color      == other._color        and \
+            self._weight     == other._weight
+
 
     def restart(self, weight=None):
         assert self._start is not None
@@ -71,9 +82,7 @@ class Walker(object):
     def end(self):        return self._end
 
     @end.setter
-    def end(self, coords):
-        assert self._end is None
-        self._end = coords
+    def end(self, crds):  self._end = crds
 
     @property
     def assignment(self): return self._assignment
@@ -83,6 +92,9 @@ class Walker(object):
 
     @property
     def color(self):      return self._color
+
+    @color.setter
+    def color(self, c):   self._color = c
 
     @property
     def weight(self):     return self._weight
@@ -393,6 +405,10 @@ class System(object):
     def set_cell(self, cell):
         self._cells[cell.id] = cell
 
+    @returns(Walker)
+    def walker(self, wid):
+        return self._walkers[wid]
+
     @typecheck(Walker)
     def add_walker(self, walker):
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
@@ -447,3 +463,24 @@ class System(object):
     def clone(self, cells=False):
         _cells = self._cells if cells else dict()
         return System(topology=self.topology, cells=_cells)
+
+
+class SinkStates(object):
+
+    def __init__(self):
+        self._color_state = defaultdict(set)
+        self._state_color = dict()
+
+    def add(self, color, state):
+        self._color_state[color].add(state)
+        self._state_color[state] = color
+
+    def color(self, cell):
+        if cell.id in self._state_color:
+            return self._state_color[cell.id]
+
+    def states(self, color):
+        return self._color_state[color]
+
+    @property
+    def ncolors(self): return len(self._color_state)
