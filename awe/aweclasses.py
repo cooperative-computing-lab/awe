@@ -13,6 +13,7 @@ import numpy as np
 import cPickle as pickle
 
 import os, time, shutil
+from collections import defaultdict
 
 
 _WALKER_ID = 0
@@ -462,3 +463,24 @@ class System(object):
     def clone(self, cells=False):
         _cells = self._cells if cells else dict()
         return System(topology=self.topology, cells=_cells)
+
+
+class SinkStates(object):
+
+    def __init__(self):
+        self._color_state = defaultdict(set)
+        self._state_color = dict()
+
+    def add(self, color, state):
+        self._color_state[color].add(state)
+        self._state_color[state] = color
+
+    def color(self, cell):
+        if cell.id in self._state_color:
+            return self._state_color[cell.id]
+
+    def states(self, color):
+        return self._color_state[color]
+
+    @property
+    def ncolors(self): return len(self._color_state)
