@@ -305,7 +305,6 @@ class AWE(object):
             walker            = pickle.loads(walkerstr)
             walker.end        = coords
             walker.assignment = cellid
-            print 'Loaded walker from worker:', walker
 
         os.unlink(result.tag)
         return walker
@@ -318,9 +317,8 @@ class Cell(object):
 
     def __init__(self, cid, weight=1., core=0, walkers=None):
         self._id      = cid
-        self._weight  = weight
         self._core    = core
-        self._walkers = walkers or list()
+
 
     @property
     def id(self): return self._id
@@ -357,17 +355,15 @@ class System(object):
 
 
     def __str__(self):
-        return '<System: topology=%s, ncells=%s, cells=%s>' % (self.topology, len(self._cells), self._cells)
+        return '<System: topology=%s, ncells=%s, nwalkers=%s>' % \
+            (type(self.topology), len(self._cells), len(self._walkers))
 
     def __repr__(self):
         return 'System(topology=%r, cells=%r)' % (self._topology, self._cells)
 
     def __iadd__(self, other):
-        for cell in other.cells:
-            if cell.id not in self._cells:
-                self.add_cell(cell)
-        for walker in other.walkers:
-            self.add_walker(walker)
+        self._cells.update(other._cells)
+        self._walkers.update(other._walkers)
 
         return self
 
