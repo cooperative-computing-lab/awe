@@ -81,9 +81,7 @@ class Walker(object):
     def end(self):        return self._end
 
     @end.setter
-    def end(self, coords):
-        assert self._end is None
-        self._end = coords
+    def end(self, crds):  self._end = crds
 
     @property
     def assignment(self): return self._assignment
