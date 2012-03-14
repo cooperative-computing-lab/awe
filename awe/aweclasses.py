@@ -48,6 +48,19 @@ class Walker(object):
             self._id     = wid
 
 
+    def restart(self, weight=None):
+        assert self._start is not None
+        assert self._end   is not None
+        assert weight      is not None
+
+        return Walker(start      = self._end,
+                      end        = None,
+                      assignment = self._assignment,
+                      color      = self._color,
+                      weight     = self._weight,
+                      wid        = self._id)
+
+
     @property
     def id(self):         return self._id
 
