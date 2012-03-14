@@ -338,7 +338,8 @@ class System(object):
 
     def __init__(self, topology=None, cells=None):
         self._topology = topology
-        self._cells    = cells or list()
+        self._cells    = cells or dict()
+        self._walkers  = dict()
 
 
     def __str__(self):
@@ -349,12 +350,10 @@ class System(object):
 
     def __iadd__(self, other):
         for cell in other.cells:
-            if not self.has_cell(cell.id):
+            if cell.id not in self._cells:
                 self.add_cell(cell)
-            else:
-                mycell = self.cell(cell.id)
-                for walker in cell.walkers:
-                    mycell.add_walker(walker)
+        for walker in other.walkers:
+            self.add_walker(walker)
 
         return self
 
@@ -365,131 +364,84 @@ class System(object):
     @property
     @returns(list)
     def cells(self):
-        return self._cells
+        return self._cells.values()
 
     @property
     @returns(list)
     def walkers(self):
-        ws = list()
-        for c in self.cells:
-            for w in c:
-                ws.append(w)
-        return ws
+        return self._walkers.values()
 
     @property
     # @returns(np.array)
     def weights(self):
-        return np.array(map(lambda c: c.weight, self._cells))
+        return np.array(map(lambda w: w.weight, self.walkers))
 
     @property
     @returns(set)
     def colors(self):
-        colors = set()
-        for cell in self.cells:
-            for walker in cell:
-                colors.add(walker.color)
-        return colors
-
+        return set(map(lambda w: w.color, self.walkers))
 
     @typecheck(Cell)
     def add_cell(self, cell):
-        if cell.id in set(map(lambda c: c.id, self._cells)):
+        if cell.id in self._cells:
             raise ValueError, 'Duplicate cell id %d' % cell.id
-        self._cells.append(cell)
+        self.set_cell(cell)
+
+    @typecheck(Cell)
+    def set_cell(self, cell):
+        self._cells[cell.id] = cell
 
     @typecheck(Walker)
     def add_walker(self, walker):
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
-        self.cell(walker.assignment).add_walker(walker)
+        self.set_walker(walker)
 
+    @typecheck(Walker)
+    def set_walker(self, walker):
+        self._walkers[walker.id] = walker
 
     @returns(Cell)
     def cell(self, i):
-        cs = filter(lambda c: c.id == i, self._cells)
-        assert len(cs) == 1, 'actual: %s' % len(cs)
-        return cs[0]
+        return self._cells[i]
 
     @returns(bool)
     def has_cell(self, i):
-        return len(filter(lambda c: c.id == i, self._cells)) == 1
+        return i in self._cells
 
     # @returns(System)
-    def filter_by_cell(self, cellid):
-        cells  = filter(lambda c: c.id == cellid, self._cells)
-        newsys = System(topology=self._topology, cells=cells)
-        return self.clone(cells=cells)
+    def filter_by_cell(self, cell):
+        ws     = filter(lambda w: w.assignment == cell.id, self.walkers)
+        newsys = self.clone(cells={cell.id:self.cell(cell.id)})
+        for w in ws: newsys.add_walker(w)
+        return newsys
 
     # @returns(System)
     def filter_by_color(self, color):
-        s = self.clone()
-        for c in self.cells:
-            c2 = c.as_empty()
-            for w in c:
-                if w.color == color:
-                    c2.add_walker(w)
-            if len(c2) > 0:
-                s.add_cell(c2)
-        return s
+        ws     = filter(lambda w: w.color == color, self.walkers)
+        newsys = self.clone()
+
+        for w in ws:
+            newsys.add_walker(w)
+
+            cell = self.cell(w.assignment)
+            newsys.set_cell(cell)
+
+        return newsys
 
 
     # @returns(System)
     def filter_by_core(self, core):
-        cells = filter(lambda c: c.core == core, self._cells)
-        return self.clone(cells=cells)
+        cells  = filter(lambda c: c.core == core, self.cells)
+        cs     = {}
+        for c in cells: cs[c.id] = c
 
-    # @returns(list)
-    def empty_cells(self):
-        cells = list()
-        for cell in self.cells:
-            cells.append(cell.as_empty())
-        return cells
+        newsys = self.clone(cells=cs)
+        for w in self.walkers:
+            if w.assignment in cs:
+                newsys.add_walker(w)
 
-    # @returns(System)
-    def clone(self, cells=None):
-        cells = cells or list()
-        return System(topology=self.topology, cells=cells)
+        return newsys
 
-    # @returns(System)
-    def as_empty(self):
-        return self.clone(cells=self.empty_cells())
-
-
-
-    def as_state(self):
-
-        ### sanity check
-        nwalkers = len(self._cells[0])
-        natoms   = self._cells[0].walkers[0].natoms
-        ndim     = self._cells[0].walkers[0].ndim
-        for cell in self._cells:
-            assert len(cell) == nwalkers
-            for w in cell.walkers:
-                assert natoms == w.natoms
-                assert ndim   == w.ndim
-
-        ncells      = len(self._cells)
-        size        = ncells * nwalkers
-        cells       = np.zeros(size, dtype=int)
-        weights     = np.ones(size)
-        colors      = np.zeros(size, dtype=int)
-        startcoords = np.zeros((size, natoms, ndim))
-        endcoords   = np.zeros((size, natoms, ndim))
-        assignments = np.zeros(size, dtype=int)
-        walkers     = np.arange(size)
-
-        ix = 0
-        for cell in self._cells:
-            for walker in cell.walkers:
-
-                cells       [ix] = cell.id
-                weights     [ix] = cell.weight
-                colors      [ix] = cell.color
-                startcoords [ix] = walker.start
-                endcoords   [ix] = walker.end
-                assignments [ix] = walker.assignment
-
-                ix += 1
-
-        return State(cells=cells, weights=weights, colors=colors,
-                     startcoords=startcoords, endcoords=endcoords, assignments=assignments,
-                     walkers=walkers)
+    def clone(self, cells=False):
+        _cells = self._cells if cells else dict()
+        return System(topology=self.topology, cells=_cells)
