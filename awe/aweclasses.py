@@ -28,13 +28,15 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=0):
+    def __init__(self, start=None, end=None, assignment=None, color=None):
 
-        assert not (start is None and end is None)
+        assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
         self.start      = start
         self.end        = end
         self.assignment = assignment
+        self.color      = color
+
 
     @property
     def natoms(self):
@@ -250,10 +252,10 @@ class AWE(object):
 
 class Cell(object):
 
-    def __init__(self, cid, weight=1., color=0, walkers=None):
+    def __init__(self, cid, weight=1., core=0, walkers=None):
         self._id      = cid
         self._weight  = weight
-        self._color   = color
+        self._core    = core
         self._walkers = walkers or list()
 
     @property
@@ -263,33 +265,47 @@ class Cell(object):
     def weight(self): return self._weight
 
     @property
-    def color(self): return self._color
+    def core(self): return self._core
 
     @property
     def walkers(self): return self._walkers
 
     @property
+    @returns(int)
     def population(self): return len(self._walkers)
 
-    # @typecheck(Walker)
+    @property
+    def color(self, wid):return self._walkers[wid].color
+
+
+    @typecheck(Walker)
     def add_walker(self, w):
+        if w.color is None:
+            w.color = self.core
         self._walkers.append(w)
 
     def walker(self, i):
         return self._walkers[i]
 
-    def as_empty(self):
-        return Cell(self._id, weight=self._weight, color=self._color)
+    def as_empty(self, **kws):
+        keys = { 'cid'    : kws['cid']    if 'cid'    in kws else self.id    ,
+                 'weight' : kws['weight'] if 'weight' in kws else self.weight,
+                 'core'   : kws['core']   if 'core'   in kws else self.core  }
+        return Cell(**keys)
 
     def __len__(self):
         return len(self._walkers)
 
     def __str__(self):
-        return '<Cell: %d, weight=%s, color=%s, nwalkers=%s>' % \
-            (self.id, self.weight, self.color, len(self.walkers))
+        return '<Cell: %d, weight=%s, core=%s, nwalkers=%s>' % \
+            (self.id, self.weight, self.core, len(self.walkers))
 
     def __repr__(self):
         return str(self)
+
+    def __iter__(self):
+        for w in self.walkers:
+            yield w
 
 
 
@@ -322,9 +338,18 @@ class System(object):
     def topology(self): return self._topology.copy()
 
     @property
-    # @returns(list)
+    @returns(list)
     def cells(self):
         return self._cells
+
+    @property
+    @returns(list)
+    def walkers(self):
+        ws = list()
+        for c in self.cells:
+            for w in c:
+                ws.append(w)
+        return ws
 
     @property
     # @returns(np.array)
@@ -332,46 +357,59 @@ class System(object):
         return np.array(map(lambda c: c.weight, self._cells))
 
     @property
-    # @returns(set)
+    @returns(set)
     def colors(self):
-        return set(map(lambda c: c.color, self._cells))
+        colors = set()
+        for cell in self.cells:
+            for walker in cell:
+                colors.add(walker.color)
+        return colors
 
 
-
-    # @typecheck(Cell)
+    @typecheck(Cell)
     def add_cell(self, cell):
         if cell.id in set(map(lambda c: c.id, self._cells)):
             raise ValueError, 'Duplicate cell id %d' % cell.id
         self._cells.append(cell)
 
-    # @typecheck(Walker)
+    @typecheck(Walker)
     def add_walker(self, walker):
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
         self.cell(walker.assignment).add_walker(walker)
 
-    # @typecheck(int)
-    # @returns(Cell)
+
+    @returns(Cell)
     def cell(self, i):
         cs = filter(lambda c: c.id == i, self._cells)
         assert len(cs) == 1, 'actual: %s' % len(cs)
         return cs[0]
 
-    # @typecheck(int)
-    # @returns(bool)
+    @returns(bool)
     def has_cell(self, i):
         return len(filter(lambda c: c.id == i, self._cells)) == 1
 
-    # @typecheck(int)
     # @returns(System)
     def filter_by_cell(self, cellid):
         cells  = filter(lambda c: c.id == cellid, self._cells)
         newsys = System(topology=self._topology, cells=cells)
         return self.clone(cells=cells)
 
-    # @typecheck(int)
     # @returns(System)
     def filter_by_color(self, color):
-        cells = filter(lambda c: c.color == color, self._cells)
+        s = self.clone()
+        for c in self.cells:
+            c2 = c.as_empty()
+            for w in c:
+                if w.color == color:
+                    c2.add_walker(w)
+            if len(c2) > 0:
+                s.add_cell(c2)
+        return s
+
+
+    # @returns(System)
+    def filter_by_core(self, core):
+        cells = filter(lambda c: c.core == core, self._cells)
         return self.clone(cells=cells)
 
     # @returns(list)
