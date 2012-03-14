@@ -95,6 +95,15 @@ def typecheckfn(*args, **kws):
     return tc
 
 
+def deprecated(fn):
+    def wrapped(*args, **kws):
+        print 'WARNING: call to deprecated function: %s' % fn.func_name
+        return fn(*args, **kws)
+    wrapped.func_name = fn.func_name
+    wrapped.func_doc  = fn.func_doc
+    return wrapped
+
+
 
 
 def checkpicklable(d):
