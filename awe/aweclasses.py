@@ -205,7 +205,7 @@ class AWE(object):
     def _resample(self):
 
         self.stats.time_resample('start')
-        self.walkers = self.resample(self.system)
+        self.system = self.resample(self.system)
         self.stats.time_resample('stop')
             
 
