@@ -318,15 +318,19 @@ class Cell(object):
     def color(self, wid):return self._walkers[wid].color
 
     def __str__(self):
-        return '<Cell: %d, weight=%s, core=%s, nwalkers=%s>' % \
-            (self.id, self.weight, self.core, len(self.walkers))
+        return '<Cell: %d, core=%s>' % \
+            (self.id, self.core)
 
     def __repr__(self):
         return str(self)
 
-    def __iter__(self):
-        for w in self.walkers:
-            yield w
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return False
+
+        return \
+            self._id     == other._id     and \
+            self._core   == other._core
 
 
 
