@@ -456,7 +456,7 @@ class System(object):
 
         return newsys
 
-    def clone(self, cells=False):
+    def clone(self, cells=True):
         _cells = self._cells if cells else dict()
         return System(topology=self.topology, cells=_cells)
 
