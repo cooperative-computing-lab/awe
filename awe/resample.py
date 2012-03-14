@@ -65,12 +65,13 @@ class OneColor(IResampler):
         newsystem = system.clone()
 
         for cell in system.cells:
-            # print 'Processing cell', cell
+            newsystem.add_cell(cell)
 
             ### initialize the list of weights for walkers in the current cell
-            localsystem = system.filter_by_cell(cell.id)
+            localsystem = system.filter_by_cell(cell)
             weights    = localsystem.weights
             walkers    = localsystem.walkers
+            print 'walkers', walkers
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
@@ -89,8 +90,6 @@ class OneColor(IResampler):
             W     = sum(weights)
             tw    = W / self.targetwalkers
             # print '\tW', W, 'tw', tw
-
-            newcell = cell.as_empty(weight=tw)
 
             ### we assume that there is at least one walker in the cell
             x = mywalkers.pop()
@@ -121,8 +120,9 @@ class OneColor(IResampler):
                     ### split the current walker
                     # print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = aweclasses.Walker(start=currentWalker.end)
-                        newcell.add_walker(w)
+                        w = currentWalker.restart(tw)
+                        newsystem.add_walker(w)
+
 
                     ### update the weights for the current walker and mark
                     ##+ for reconsideration
@@ -146,8 +146,6 @@ class OneColor(IResampler):
                     if p < Wy / Wxy:
                         x = y
                     weights[x] = Wxy
-
-            newsystem.add_cell(newcell)
 
         return newsystem
 
