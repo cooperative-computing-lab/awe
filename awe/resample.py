@@ -71,7 +71,6 @@ class OneColor(IResampler):
             localsystem = system.filter_by_cell(cell)
             weights    = localsystem.weights
             walkers    = localsystem.walkers
-            print 'walkers', walkers
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
