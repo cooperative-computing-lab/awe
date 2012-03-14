@@ -312,39 +312,10 @@ class Cell(object):
     def id(self): return self._id
 
     @property
-    def weight(self): return self._weight
-
-    @property
     def core(self): return self._core
 
     @property
-    def walkers(self): return self._walkers
-
-    @property
-    @returns(int)
-    def population(self): return len(self._walkers)
-
-    @property
     def color(self, wid):return self._walkers[wid].color
-
-
-    @typecheck(Walker)
-    def add_walker(self, w):
-        if w.color is None:
-            w.color = self.core
-        self._walkers.append(w)
-
-    def walker(self, i):
-        return self._walkers[i]
-
-    def as_empty(self, **kws):
-        keys = { 'cid'    : kws['cid']    if 'cid'    in kws else self.id    ,
-                 'weight' : kws['weight'] if 'weight' in kws else self.weight,
-                 'core'   : kws['core']   if 'core'   in kws else self.core  }
-        return Cell(**keys)
-
-    def __len__(self):
-        return len(self._walkers)
 
     def __str__(self):
         return '<Cell: %d, weight=%s, core=%s, nwalkers=%s>' % \
