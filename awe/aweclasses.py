@@ -194,8 +194,8 @@ class AWE(object):
 
         return tag
 
-    # @typecheck(str)
-    # @returns(dict)
+    @typecheck(str)
+    @returns(dict)
     def decode_from_task_tag(self, tag):
         split = tag.split('|')
         outfile, cellid, weight, walkerid = tag.split('|')
@@ -206,7 +206,7 @@ class AWE(object):
 
         
 
-    # @typecheck(int, int, workqueue.WQ.Task)
+    @typecheck(int, int, workqueue.WQ.Task)
     def marshal_to_task(self, cid, wid, task):
         
         cell   = self.system.cell(cid)
@@ -227,8 +227,8 @@ class AWE(object):
         output = os.path.join(self.wq.tmpdir, task.tag)
         task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME, cache=False)
 
-    # @typecheck(workqueue.WQ.Task)
-    # @returns(Walker)
+    @typecheck(workqueue.WQ.Task)
+    @returns(Walker)
     def marshal_from_task(self, result):
 
         import tarfile
