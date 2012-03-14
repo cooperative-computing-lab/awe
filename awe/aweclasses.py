@@ -47,6 +47,16 @@ class Walker(object):
         else:
             self._id     = wid
 
+    def __eq__(self, other):
+        if not type(self) is type(other):
+            return False
+
+        return \
+            (self._start     == other._start).all() and \
+            self._assignment == other._assignment   and \
+            self._color      == other._color        and \
+            self._weight     == other._weight
+
 
     def restart(self, weight=None):
         assert self._start is not None
