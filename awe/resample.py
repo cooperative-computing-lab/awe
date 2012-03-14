@@ -63,15 +63,14 @@ class OneColor(IResampler):
         from numpy import floor, argsort, random, sum
 
         newsystem = system.clone()
-        state = system.as_state()
 
         for cell in system.cells:
             # print 'Processing cell', cell
 
             ### initialize the list of weights for walkers in the current cell
-            localstate = state.slice_by(state.cells == cell.id)
-            weights    = localstate.weights
-            walkers    = localstate.walkers
+            localsystem = system.filter_by_cell(cell.id)
+            weights    = localsystem.weights
+            walkers    = localsystem.walkers
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
@@ -91,7 +90,7 @@ class OneColor(IResampler):
             tw    = W / self.targetwalkers
             # print '\tW', W, 'tw', tw
 
-            newcell = aweclasses.Cell(cell.id, weight=tw, color=cell.color)
+            newcell = cell.as_empty(weight=tw)
 
             ### we assume that there is at least one walker in the cell
             x = mywalkers.pop()
@@ -105,7 +104,7 @@ class OneColor(IResampler):
             while True: # exit using break
 
                 Wx = weights[x]
-                currentWalker = localstate.walker(x)
+                currentWalker = walkers[x]
                 # print '\tweight of', x, 'is', Wx
 
                 ### split
