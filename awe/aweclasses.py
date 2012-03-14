@@ -15,6 +15,8 @@ import cPickle as pickle
 import os, time, shutil
 
 
+__WALKER_ID = 0
+
 class Walker(object):
 
     """
@@ -32,19 +34,41 @@ class Walker(object):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
-        self.start      = start
-        self.end        = end
-        self.assignment = assignment
-        self.color      = color
+        self._start      = start
+        self._end        = end
+        self._assignment = assignment
+        self._color      = color
+
+        global __WALKER_ID
+        self._id        = __WALKER_ID
+        __WALKER_ID    += 1
 
 
     @property
-    def natoms(self):
-        return len(self._coords)
+    def id(self):         return self._id
 
     @property
-    def ndim(self):
-        return self._coords.shape[-1]
+    def start(self):      return self._start
+
+    @property
+    def end(self):        return self._end
+
+    @end.setter
+    def end(self, coords):
+        assert self._end is None
+        self._end = coords
+
+    @property
+    def assignment(self): return self._assignment
+
+    @property
+    def color(self):      return self._color
+
+    @property
+    def natoms(self):     return len(self._coords)
+
+    @property
+    def ndim(self):       return self._coords.shape[-1]
 
     @property
     def _coords(self):
