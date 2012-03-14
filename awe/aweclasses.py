@@ -404,6 +404,10 @@ class System(object):
     def set_cell(self, cell):
         self._cells[cell.id] = cell
 
+    @returns(Walker)
+    def walker(self, wid):
+        return self._walkers[wid]
+
     @typecheck(Walker)
     def add_walker(self, walker):
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
