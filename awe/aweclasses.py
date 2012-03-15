@@ -467,13 +467,16 @@ class SinkStates(object):
         self._color_state = defaultdict(set)
         self._state_color = dict()
 
-    def add(self, color, state):
-        self._color_state[color].add(state)
-        self._state_color[state] = color
+    def add(self, color, *states):
+        for state in states:
+            self._color_state[color].add(state)
+            self._state_color[state] = color
 
     def color(self, cell):
         if cell.id in self._state_color:
             return self._state_color[cell.id]
+        else:
+            return None
 
     def states(self, color):
         return self._color_state[color]
