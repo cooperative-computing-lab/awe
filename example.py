@@ -54,7 +54,7 @@ for i in xrange(nstates):
 
 
 resample = awe.resample.MultiColor(nwalkers, partition)
-# resample = awe.resample.SaveWeights(resample)
+resample = awe.resample.SaveWeights(resample)
 adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
