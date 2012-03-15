@@ -8,12 +8,12 @@ import os
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = 0
+cfg.restarts = float('inf')
 
 
-cfg.execute('test.exe')
+# cfg.execute('test.exe')
 
-# cfg.execute('testinput/execute-task.sh')
+cfg.execute('testinput/execute-task.sh')
 
 cfg.cache('testinput/protomol.conf')
 cfg.cache('testinput/topol.tpr')
@@ -24,8 +24,8 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 3
-nwalkers   = 2
+iterations = 30
+nwalkers   = 10
 nstates    = 100
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
