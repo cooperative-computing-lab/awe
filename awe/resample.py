@@ -109,7 +109,7 @@ class OneColor(IResampler):
                 print '\tweight of', x, 'is', Wx
 
                 ### split
-                if Wx > tw or len(mywalkers) == 0:
+                if Wx >= tw or len(mywalkers) == 0:
 
                     ### choose number of times to split
                     ##+ r = floor( Wx / tw )
