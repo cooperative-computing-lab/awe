@@ -17,6 +17,7 @@ from collections import defaultdict
 
 
 _WALKER_ID = 0
+_DEFAULT_COLOR = -1
 
 class Walker(object):
 
@@ -31,7 +32,7 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=None, color=None, weight=None, wid=None):
+    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
@@ -476,7 +477,8 @@ class SinkStates(object):
         if cell.id in self._state_color:
             return self._state_color[cell.id]
         else:
-            return None
+            global _DEFAULT_COLOR
+            return _DEFAULT_COLOR
 
     def states(self, color):
         return self._color_state[color]
