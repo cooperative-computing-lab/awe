@@ -31,23 +31,24 @@ nstates    = 100
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 partition = awe.SinkStates()
 
+for color, grp in enumerate( [ [0,39,45,58,66,24,71], [6] ] ):
+    partition.add(color, *grp)
+
 print 'Loading cells and walkers'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 for i in xrange(nstates):
 
-    if i < nstates/2: color = 0
-    else            : color = 1
 
-    partition.add(color, i)
-
-    cell = awe.Cell(i)
+    cell  = awe.Cell(i)
+    color = partition.color(cell)
     system.add_cell(cell)
+
 
     for j in xrange(nwalkers):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = awe.PDB(pdbpath)
-        w       = awe.aweclasses.Walker(start=pdb.coords, assignment=i, color=color, weight=np.random.random())
+        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=np.random.random())
         system.add_walker(w)
 
 
