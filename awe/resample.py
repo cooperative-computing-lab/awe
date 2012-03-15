@@ -161,16 +161,9 @@ class MultiColor(OneColor):
 
     def resample(self, system):
 
-        newsystem = aweclasses.System(topology=system.topology)
-        for color in system.colors:
-            thiscolor  = system.filter_by_color(color)
-            print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
-            resampled  = OneColor.resample(self, thiscolor)
-            newsystem += resampled
-
         ### update colors
-        for w in newsystem.walkers:
-            cell     = newsystem.cell(w.assignment)
+        for w in system.walkers:
+            cell     = system.cell(w.assignment)
 
             oldcolor = w.color
             newcolor = self.partition.color(cell)
@@ -181,6 +174,14 @@ class MultiColor(OneColor):
                 w.color = newcolor
 
             self.transitions[oldcolor, newcolor] += 1
+
+        ### resample individual colors using OneColor algorithm
+        newsystem = aweclasses.System(topology=system.topology)
+        for color in system.colors:
+            thiscolor  = system.filter_by_color(color)
+            print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
+            resampled  = OneColor.resample(self, thiscolor)
+            newsystem += resampled
 
 
         return newsystem
