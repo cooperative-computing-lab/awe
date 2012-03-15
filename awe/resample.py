@@ -65,17 +65,18 @@ class OneColor(IResampler):
         newsystem = system.clone()
 
         for cell in system.cells:
-            newsystem.add_cell(cell)
 
             ### initialize the list of weights for walkers in the current cell
             localsystem = system.filter_by_cell(cell)
             weights    = localsystem.weights
             walkers    = localsystem.walkers
 
+            print time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers'
+
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
             mywalkers = list(argsort(-weights))
-            # print '\tmywalkers:', mywalkers
+            print '\tmywalkers:', mywalkers
 
             ### sanity check
             testmaxw = float('inf')
@@ -88,7 +89,7 @@ class OneColor(IResampler):
             ### setup cell weight and target weights
             W     = sum(weights)
             tw    = W / self.targetwalkers
-            # print '\tW', W, 'tw', tw
+            print '\tW', W, 'tw', tw
 
             ### we assume that there is at least one walker in the cell
             x = mywalkers.pop()
@@ -103,7 +104,7 @@ class OneColor(IResampler):
 
                 Wx = weights[x]
                 currentWalker = walkers[x]
-                # print '\tweight of', x, 'is', Wx
+                print '\tweight of', x, 'is', Wx
 
                 ### split
                 if Wx > tw or len(mywalkers) == 0:
@@ -114,10 +115,10 @@ class OneColor(IResampler):
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
                     activewalkers += r
-                    # print '\tactive walkers', activewalkers
+                    print '\tactive walkers', activewalkers
 
                     ### split the current walker
-                    # print '\tsplitting', x, r, 'times'
+                    print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
                         w = currentWalker.restart(tw)
                         newsystem.add_walker(w)
@@ -128,7 +129,7 @@ class OneColor(IResampler):
                     if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
                         mywalkers.append(x)
                         weights[x] = Wx - r * tw
-                        # print '\tupdated weights of', x
+                        print '\tupdated weights of', x
 
                     ### continue the loop?
                     if len(mywalkers) > 0:
@@ -138,7 +139,7 @@ class OneColor(IResampler):
                 ### merge
                 else:
                     y = mywalkers.pop()
-                    # print '\tmerging', x, y
+                    print '\tmerging', x, y
                     Wy = weights[y]
                     Wxy = Wx + Wy
                     p = np.random.random()
@@ -160,8 +161,8 @@ class MultiColor(OneColor):
 
         newsystem = aweclasses.System(topology=system.topology)
         for color in system.colors:
-            print time.asctime(), 'Resampling color', color
             thiscolor  = system.filter_by_color(color)
+            print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
 
