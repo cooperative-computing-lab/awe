@@ -212,29 +212,27 @@ class SaveWeights(IResampler):
         self.iteration = 0
 
     def saveweights(self, system, mode='a'):
-        print 'Saving weights to', self.datfile
+        print time.asctime(), 'Saving weights to', self.datfile
 
         ### all the walkers in a cell have the same weight, so we only
-        ### need to save the (iteration, cell, weight) triples
-        cells   = np.array(sorted(map(lambda c: c.id, system.cells)))
-        iters   = self.iteration * np.ones(len(cells))
-        weights = -1 * np.ones(len(cells))
-        colors  = -1 * np.ones(len(cells))
-        for cid in cells:
-            cell         = system.cell(cid)
-            weights[cid] = cell.weight
-            colors[cid]  = cell.color
-        assert weights.min() >= 0
-        assert colors.min()  >= 0
-        vals = np.vstack( (iters, cells, weights, colors) )
+        ### need to save the walkerid, iteration, cell, weight, and color for each walker
 
         with open(self.datfile, mode) as fd:
-            np.savetxt(fd, vals.T)
+            for i, w in enumerate(system.walkers):
+                s = '%(wid)d\t%(iteration)d\t%(cell)d\t%(weight)f\t%(color)s\n' % {
+                    'wid'       : w.id           ,
+                    'iteration' : self.iteration ,
+                    'cell'      : w.assignment   ,
+                    'weight'    : w.weight       ,
+                    'color'     : w.color } # if w.color is not None else 'nan'       }
+                fd.write(s)
+
 
     def resample(self, system):
         if self.iteration == 0:
             with open(self.datfile, 'w') as fd:
-                fd.write('# iteration cell weight color\n')
+                fd.write('# Each line represents a walker at:\n')
+                fd.write('# walkerid iteration cell weight color\n')
             self.saveweights(system, mode='a')
 
         newsystem        = self.resampler.resample(system)
