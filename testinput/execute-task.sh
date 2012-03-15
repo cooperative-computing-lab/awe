@@ -38,7 +38,7 @@ ls structure2.pdb cell2.dat
 
 echo "[$me] Compressing results"
 resultfile=results.tar
-tar cfv $resultfile *.energy* *.pdb *.dat Data/discrete.traj Data/tCounts.UnSym.mtx output/*
+tar cfv $resultfile *.energy* *.pdb *.dat Data/discrete.traj Data/tCounts.UnSym.mtx output/* *.pkl
 
 
 echo "[$me] Cleaning up"

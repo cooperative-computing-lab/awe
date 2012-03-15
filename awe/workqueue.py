@@ -21,6 +21,7 @@ _AWE_WORK_QUEUE = None
 ##+ These are the names of the input/output filess to be materialized on the worker
 
 WORKER_POSITIONS_NAME     = 'structure.pdb'
+WORKER_WALKER_NAME  = 'walker.pkl'
 WORKER_WEIGHTS_NAME = 'weight.dat'
 WORKER_COLOR_NAME   = 'color.dat'
 WORKER_CELL_NAME    = 'cell.dat'
@@ -213,7 +214,10 @@ class WorkQueue(object):
             self.restarts[task.tag] = 0
 
         if self.restarts[task.tag] < self.cfg.restarts:
-            print time.asctime(), 'restarting', task.tag, '#%d' % (self.restarts[task.tag] + 1)
+            print time.asctime(), 'task failed with', task.return_status, \
+                'result is', task.result, \
+                'restarting', task.tag, \
+                '#%d' % (self.restarts[task.tag] + 1)
             self.submit(task)
             self.restarts[task.tag] += 1
             return True
@@ -232,9 +236,9 @@ class WorkQueue(object):
             task = self.wait(self.cfg.waittime)
             self.update_wq_stats()
 
-            if task:
+            if task and task.result == 0:
 
-                # print time.asctime(), 'recived task', task.tag
+                # print time.asctime(), 'recived task', task.tag, task.return_status
 
                 output = task.output or ''
                 output = ('\n' + output).split('\n')
@@ -260,3 +264,11 @@ class WorkQueue(object):
                         continue
 
                 return result
+
+            elif task and not task.result == 0:
+                ### TODO: issue #32: keep track of task failure
+
+                if not self.restart(task):
+                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions'
+
+            else: continue
