@@ -73,6 +73,8 @@ class OneColor(IResampler):
 
             print time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers'
 
+            if not len(walkers) > 0: continue
+
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
             mywalkers = list(argsort(-weights))
