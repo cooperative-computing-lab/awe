@@ -21,6 +21,7 @@ _AWE_WORK_QUEUE = None
 ##+ These are the names of the input/output filess to be materialized on the worker
 
 WORKER_POSITIONS_NAME     = 'structure.pdb'
+WORKER_WALKER_NAME  = 'walker.pkl'
 WORKER_WEIGHTS_NAME = 'weight.dat'
 WORKER_COLOR_NAME   = 'color.dat'
 WORKER_CELL_NAME    = 'cell.dat'

@@ -13,7 +13,10 @@ import numpy as np
 import cPickle as pickle
 
 import os, time, shutil
+from collections import defaultdict
 
+
+_WALKER_ID = 0
 
 class Walker(object):
 
@@ -28,21 +31,79 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=0):
+    def __init__(self, start=None, end=None, assignment=None, color=None, weight=None, wid=None):
 
-        assert not (start is None and end is None)
+        assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
-        self.start      = start
-        self.end        = end
-        self.assignment = assignment
+        self._start      = start
+        self._end        = end
+        self._assignment = assignment
+        self._color      = color
+        self._weight     = weight
+
+        if wid is None:
+            global _WALKER_ID
+            self._id     = _WALKER_ID
+            _WALKER_ID  += 1
+        else:
+            self._id     = wid
+
+    def __eq__(self, other):
+        if not type(self) is type(other):
+            return False
+
+        return \
+            (self._start     == other._start).all() and \
+            self._assignment == other._assignment   and \
+            self._color      == other._color        and \
+            self._weight     == other._weight
+
+
+    def restart(self, weight=None):
+        assert self._start is not None
+        assert self._end   is not None
+        assert weight      is not None
+
+        return Walker(start      = self._end,
+                      end        = None,
+                      assignment = self._assignment,
+                      color      = self._color,
+                      weight     = self._weight,
+                      wid        = self._id)
+
 
     @property
-    def natoms(self):
-        return len(self._coords)
+    def id(self):         return self._id
 
     @property
-    def ndim(self):
-        return self._coords.shape[-1]
+    def start(self):      return self._start
+
+    @property
+    def end(self):        return self._end
+
+    @end.setter
+    def end(self, crds):  self._end = crds
+
+    @property
+    def assignment(self): return self._assignment
+
+    @assignment.setter
+    def assignment(self, asn):   self._assignment = asn
+
+    @property
+    def color(self):      return self._color
+
+    @color.setter
+    def color(self, c):   self._color = c
+
+    @property
+    def weight(self):     return self._weight
+
+    @property
+    def natoms(self):     return len(self._coords)
+
+    @property
+    def ndim(self):       return self._coords.shape[-1]
 
     @property
     def _coords(self):
@@ -54,7 +115,10 @@ class Walker(object):
 
 
     def __str__(self):
-        return '<Walker: assignment=%(assignment)d>' % {'assignment' : self.assignment}
+        return '<Walker: id=%(id)d, size=%(size)d, dim=%(dim)d, assignment=%(assignment)d, color=%(color)s, weight=%(weight)s>' \
+            % {'id' : self.id, 'size'   : self.natoms, 'dim' : self.ndim,
+               'assignment' : self.assignment, 'color' : self.color,
+               'weight' : self.weight}
 
     def __repr__(self): return str(self)
 
@@ -119,30 +183,29 @@ class AWE(object):
 
     def _submit(self):
 
-        for cell in self.system.cells:
-            for wid, walker in enumerate(cell.walkers):
-                task = self.wq.new_task()
-                task.specify_tag(self.encode_task_tag(cell.id, wid))
-                self.marshal_to_task(cell.id, wid, task)
-                self.wq.submit(task)
+        for walker in self.system.walkers:
+            task = self.wq.new_task()
+            task.specify_tag(self.encode_task_tag(walker))
+            self.marshal_to_task(walker, task)
+            self.wq.submit(task)
 
 
 
     def _recv(self):
 
         print time.asctime(), 'Recieving tasks'
-        system = self.system.as_empty()
+        system = self.system
         self.stats.time_barrier('start')
         while not self.wq.empty:
             walker = self.wq.recv(self.marshal_from_task)
-            system.add_walker(walker)
+            system.set_walker(walker)
         self.stats.time_barrier('stop')
 
 
     def _resample(self):
 
         self.stats.time_resample('start')
-        self.walkers = self.resample(self.system)
+        self.system = self.resample(self.system)
         self.stats.time_resample('stop')
             
 
@@ -182,18 +245,17 @@ class AWE(object):
 
     # @typecheck(int, int)
     # @returns(str)
-    def encode_task_tag(self, cid, wid):
-        cell = self.system.cell(cid)
+    def encode_task_tag(self, walker):
         tag = '%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
-            'cellid'  : cid,
-            'weight'  : cell.weight,
-            'walkerid' : wid}
+            'cellid'  : walker.assignment,
+            'weight'  : walker.weight,
+            'walkerid' : walker.id}
 
         return tag
 
-    # @typecheck(str)
-    # @returns(dict)
+    @typecheck(str)
+    @returns(dict)
     def decode_from_task_tag(self, tag):
         split = tag.split('|')
         outfile, cellid, weight, walkerid = tag.split('|')
@@ -204,11 +266,9 @@ class AWE(object):
 
         
 
-    # @typecheck(int, int, workqueue.WQ.Task)
-    def marshal_to_task(self, cid, wid, task):
+    @typecheck(int, workqueue.WQ.Task)
+    def marshal_to_task(self, walker, task):
         
-        cell   = self.system.cell(cid)
-        walker = cell.walker(wid)
 
         ### create the pdb
         top        = self.system.topology
@@ -216,7 +276,9 @@ class AWE(object):
         pdbdat     = str(top)
 
         ### send walker to worker
+        wdat = pickle.dumps(walker)
         task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME, cache=False)
+        task.specify_buffer(wdat  , workqueue.WORKER_WALKER_NAME   , cache=False)
 
         ### specify output
         self.specify_task_output_file(task)
@@ -225,21 +287,24 @@ class AWE(object):
         output = os.path.join(self.wq.tmpdir, task.tag)
         task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME, cache=False)
 
-    # @typecheck(workqueue.WQ.Task)
-    # @returns(Walker)
+    @typecheck(workqueue.WQ.Task)
+    @returns(Walker)
     def marshal_from_task(self, result):
 
         import tarfile
         with tarfile.open(result.tag) as tar:
 
-            pdbstring  = tar.extractfile(workqueue.RESULT_POSITIONS).read()
-            cellstring = tar.extractfile(workqueue.RESULT_CELL     ).read()
+            walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
+            pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
+            cellstring        = tar.extractfile(workqueue.RESULT_CELL     ).read()
 
-            pdb    = structures.PDB(pdbstring)
-            coords = pdb.coords
-            cellid = int(cellstring)
+            pdb               = structures.PDB(pdbstring)
+            coords            = pdb.coords
+            cellid            = int(cellstring)
 
-            walker = Walker(end=coords, assignment=cellid)
+            walker            = pickle.loads(walkerstr)
+            walker.end        = coords
+            walker.assignment = cellid
 
         os.unlink(result.tag)
         return walker
@@ -250,46 +315,34 @@ class AWE(object):
 
 class Cell(object):
 
-    def __init__(self, cid, weight=1., color=0, walkers=None):
+    def __init__(self, cid, weight=1., core=0, walkers=None):
         self._id      = cid
-        self._weight  = weight
-        self._color   = color
-        self._walkers = walkers or list()
+        self._core    = core
+
 
     @property
     def id(self): return self._id
 
     @property
-    def weight(self): return self._weight
+    def core(self): return self._core
 
     @property
-    def color(self): return self._color
-
-    @property
-    def walkers(self): return self._walkers
-
-    @property
-    def population(self): return len(self._walkers)
-
-    # @typecheck(Walker)
-    def add_walker(self, w):
-        self._walkers.append(w)
-
-    def walker(self, i):
-        return self._walkers[i]
-
-    def as_empty(self):
-        return Cell(self._id, weight=self._weight, color=self._color)
-
-    def __len__(self):
-        return len(self._walkers)
+    def color(self, wid):return self._walkers[wid].color
 
     def __str__(self):
-        return '<Cell: %d, weight=%s, color=%s, nwalkers=%s>' % \
-            (self.id, self.weight, self.color, len(self.walkers))
+        return '<Cell: %d, core=%s>' % \
+            (self.id, self.core)
 
     def __repr__(self):
         return str(self)
+
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return False
+
+        return \
+            self._id     == other._id     and \
+            self._core   == other._core
 
 
 
@@ -297,23 +350,20 @@ class System(object):
 
     def __init__(self, topology=None, cells=None):
         self._topology = topology
-        self._cells    = cells or list()
+        self._cells    = cells or dict()
+        self._walkers  = dict()
 
 
     def __str__(self):
-        return '<System: topology=%s, ncells=%s, cells=%s>' % (self.topology, len(self._cells), self._cells)
+        return '<System: topology=%s, ncells=%s, nwalkers=%s>' % \
+            (type(self.topology), len(self._cells), len(self._walkers))
 
     def __repr__(self):
         return 'System(topology=%r, cells=%r)' % (self._topology, self._cells)
 
     def __iadd__(self, other):
-        for cell in other.cells:
-            if not self.has_cell(cell.id):
-                self.add_cell(cell)
-            else:
-                mycell = self.cell(cell.id)
-                for walker in cell.walkers:
-                    mycell.add_walker(walker)
+        self._cells.update(other._cells)
+        self._walkers.update(other._walkers)
 
         return self
 
@@ -322,161 +372,114 @@ class System(object):
     def topology(self): return self._topology.copy()
 
     @property
-    # @returns(list)
+    @returns(list)
     def cells(self):
-        return self._cells
+        return self._cells.values()
+
+    @property
+    @returns(list)
+    def walkers(self):
+        return self._walkers.values()
 
     @property
     # @returns(np.array)
     def weights(self):
-        return np.array(map(lambda c: c.weight, self._cells))
+        return np.array(map(lambda w: w.weight, self.walkers))
 
     @property
-    # @returns(set)
+    @returns(set)
     def colors(self):
-        return set(map(lambda c: c.color, self._cells))
+        return set(map(lambda w: w.color, self.walkers))
 
-
-
-    # @typecheck(Cell)
+    @typecheck(Cell)
     def add_cell(self, cell):
-        if cell.id in set(map(lambda c: c.id, self._cells)):
+        if cell.id in self._cells:
             raise ValueError, 'Duplicate cell id %d' % cell.id
-        self._cells.append(cell)
+        self.set_cell(cell)
 
-    # @typecheck(Walker)
+    @typecheck(Cell)
+    def set_cell(self, cell):
+        self._cells[cell.id] = cell
+
+    @returns(Walker)
+    def walker(self, wid):
+        return self._walkers[wid]
+
+    @typecheck(Walker)
     def add_walker(self, walker):
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
-        self.cell(walker.assignment).add_walker(walker)
+        self.set_walker(walker)
 
-    # @typecheck(int)
-    # @returns(Cell)
+    @typecheck(Walker)
+    def set_walker(self, walker):
+        self._walkers[walker.id] = walker
+
+    @returns(Cell)
     def cell(self, i):
-        cs = filter(lambda c: c.id == i, self._cells)
-        assert len(cs) == 1, 'actual: %s' % len(cs)
-        return cs[0]
+        return self._cells[i]
 
-    # @typecheck(int)
-    # @returns(bool)
+    @returns(bool)
     def has_cell(self, i):
-        return len(filter(lambda c: c.id == i, self._cells)) == 1
+        return i in self._cells
 
-    # @typecheck(int)
     # @returns(System)
-    def filter_by_cell(self, cellid):
-        cells  = filter(lambda c: c.id == cellid, self._cells)
-        newsys = System(topology=self._topology, cells=cells)
-        return self.clone(cells=cells)
+    def filter_by_cell(self, cell):
+        ws     = filter(lambda w: w.assignment == cell.id, self.walkers)
+        newsys = self.clone(cells={cell.id:self.cell(cell.id)})
+        for w in ws: newsys.add_walker(w)
+        return newsys
 
-    # @typecheck(int)
     # @returns(System)
     def filter_by_color(self, color):
-        cells = filter(lambda c: c.color == color, self._cells)
-        return self.clone(cells=cells)
+        ws     = filter(lambda w: w.color == color, self.walkers)
+        newsys = self.clone()
 
-    # @returns(list)
-    def empty_cells(self):
-        cells = list()
-        for cell in self.cells:
-            cells.append(cell.as_empty())
-        return cells
+        for w in ws:
+            newsys.add_walker(w)
+
+            cell = self.cell(w.assignment)
+            newsys.set_cell(cell)
+
+        return newsys
+
 
     # @returns(System)
-    def clone(self, cells=None):
-        cells = cells or list()
-        return System(topology=self.topology, cells=cells)
+    def filter_by_core(self, core):
+        cells  = filter(lambda c: c.core == core, self.cells)
+        cs     = {}
+        for c in cells: cs[c.id] = c
 
-    # @returns(System)
-    def as_empty(self):
-        return self.clone(cells=self.empty_cells())
+        newsys = self.clone(cells=cs)
+        for w in self.walkers:
+            if w.assignment in cs:
+                newsys.add_walker(w)
+
+        return newsys
+
+    def clone(self, cells=True):
+        _cells = self._cells if cells else dict()
+        return System(topology=self.topology, cells=_cells)
 
 
+class SinkStates(object):
 
-    def as_state(self):
+    def __init__(self):
+        self._color_state = defaultdict(set)
+        self._state_color = dict()
 
-        ### sanity check
-        nwalkers = len(self._cells[0])
-        natoms   = self._cells[0].walkers[0].natoms
-        ndim     = self._cells[0].walkers[0].ndim
-        for cell in self._cells:
-            assert len(cell) == nwalkers
-            for w in cell.walkers:
-                assert natoms == w.natoms
-                assert ndim   == w.ndim
+    def add(self, color, *states):
+        for state in states:
+            self._color_state[color].add(state)
+            self._state_color[state] = color
 
-        ncells      = len(self._cells)
-        size        = ncells * nwalkers
-        cells       = np.zeros(size, dtype=int)
-        weights     = np.ones(size)
-        colors      = np.zeros(size, dtype=int)
-        startcoords = np.zeros((size, natoms, ndim))
-        endcoords   = np.zeros((size, natoms, ndim))
-        assignments = np.zeros(size, dtype=int)
-        walkers     = np.arange(size)
+    def color(self, cell):
+        if cell.id in self._state_color:
+            return self._state_color[cell.id]
+        else:
+            return None
 
-        ix = 0
-        for cell in self._cells:
-            for walker in cell.walkers:
-
-                cells       [ix] = cell.id
-                weights     [ix] = cell.weight
-                colors      [ix] = cell.color
-                startcoords [ix] = walker.start
-                endcoords   [ix] = walker.end
-                assignments [ix] = walker.assignment
-
-                ix += 1
-
-        return State(cells=cells, weights=weights, colors=colors,
-                     startcoords=startcoords, endcoords=endcoords, assignments=assignments,
-                     walkers=walkers)
-
-class State(object):
-    def __init__(self,
-                 cells=None, weights=None, colors=None,
-                 startcoords=None, endcoords=None, assignments=None,
-                 walkers=None):
-
-        self._cells       = cells
-        self._weights     = weights
-        self._colors      = colors
-        self._startcoords = startcoords
-        self._endcoords   = endcoords
-        self._assignments = assignments
-        self._walkers     = walkers
+    def states(self, color):
+        return self._color_state[color]
 
     @property
-    def cells(self)       : return self._cells       .copy()
-
-    @property
-    def weights(self)     : return self._weights     .copy()
-
-    @property
-    def colors(self)      : return self._colors      .copy()
-
-    @property
-    def startcoords(self) : return self._startcoords .copy()
-
-    @property
-    def endcoords(self)   : return self._endcoords   .copy()
-
-    @property
-    def assignments(self) : return self._assignments .copy()
-
-    @property
-    def walkers(self)     : return self._walkers     .copy()
-
-
-    def slice_by(self, test):
-        ixs = np.where(test)
-
-        return State(cells       = self.cells[ixs],
-                     weights     = self.weights[ixs],
-                     colors      = self.colors[ixs],
-                     startcoords = self.startcoords[ixs],
-                     endcoords   = self.endcoords[ixs],
-                     assignments = self.assignments[ixs],
-                     walkers     = self.walkers[ixs])
-
-    def walker(self, i):
-        return Walker(start=self.startcoords[i], end=self.endcoords[i], assignment=self.assignments[i])
+    def ncolors(self): return len(self._color_state)
