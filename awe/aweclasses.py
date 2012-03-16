@@ -65,12 +65,16 @@ class Walker(object):
         assert self._end   is not None
         assert weight      is not None
 
+        global _WALKER_ID
+        wid =  _WALKER_ID
+        _WALKER_ID += 1
+
         return Walker(start      = self._end,
                       end        = None,
                       assignment = self._assignment,
                       color      = self._color,
                       weight     = self._weight,
-                      wid        = self._id)
+                      wid        = wid)
 
 
     @property
@@ -222,7 +226,7 @@ class AWE(object):
 
                 self.iteration += 1
 
-                print time.asctime(), 'Iteration', self.iteration
+                print time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers'
 
                 self.stats.time_iter('start')
 
