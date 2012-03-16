@@ -173,7 +173,7 @@ class MultiColor(OneColor):
                 print 'Updating color:', w, oldcolor, '->', newcolor
                 w.color = newcolor
 
-            self.transitions[oldcolor, newcolor] += 1
+            self.transitions[oldcolor, newcolor] += w.weight
 
         ### resample individual colors using OneColor algorithm
         newsystem = aweclasses.System(topology=system.topology)
@@ -185,6 +185,10 @@ class MultiColor(OneColor):
 
 
         return newsystem
+
+    def save_transitions(self, path):
+        print time.asctime(), 'Saving transition matrix to', repr(path)
+        np.savetxt(path, self.transitions)
 
 
 class IPlotter(IResampler):

@@ -53,13 +53,15 @@ for i in xrange(nstates):
 
 
 
-resample = awe.resample.MultiColor(nwalkers, partition)
-resample = awe.resample.SaveWeights(resample)
+multicolor = awe.resample.MultiColor(nwalkers, partition)
+resample = awe.resample.SaveWeights(multicolor)
 adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
                     resample   = resample)
 
 adaptive.run()
+
+multicolor.save_transitions('transitions.dat')
 
 print 'Run time:', awe.time.time(), 's'
