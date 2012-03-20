@@ -11,9 +11,9 @@ cfg.fastabort = 3
 cfg.restarts = float('inf')
 
 
-# cfg.execute('test.exe')
+cfg.execute('test.exe')
 
-cfg.execute('testinput/execute-task.sh')
+# cfg.execute('testinput/execute-task.sh')
 
 cfg.cache('testinput/protomol.conf')
 cfg.cache('testinput/topol.tpr')
@@ -24,15 +24,16 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 30
-nwalkers   = 10
+iterations = 5
+nwalkers   = 2
 nstates    = 100
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 partition = awe.SinkStates()
 
-for color, grp in enumerate( [ [0,39,45,58,66,24,71], [6] ] ):
-    partition.add(color, *grp)
+partition.add(0, *range(0,50))
+partition.add(1, *range(50,100))
+
 
 print 'Loading cells and walkers'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'

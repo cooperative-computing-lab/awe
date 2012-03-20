@@ -208,14 +208,48 @@ class IPlotter(IResampler):
         self.plot()
         return ws
 
-class SaveWeights(IResampler):
+class ISaver(IResampler):
 
-    def __init__(self, resampler, datfile='weights.dat'):
+    @typecheck(IResampler, datfile=str)
+    def __init__(self, resampler, datfile='save.dat'):
         self.resampler = resampler
-        self.datfile = datfile
+        self.datfile   = datfile
         self.iteration = 0
 
-    def saveweights(self, system, mode='a'):
+    @typecheck(aweclasses.System, mode=str)
+    def _save(self, system, mode='a'):
+        self.save(system, mode=mode)
+
+    def save(self, system, mode='a'):
+        raise NotImplementedError
+
+    @returns(str)
+    def heading(self):
+        return ''
+
+    def resample(self, system):
+        if self.iteration == 0:
+            with open(self.datfile, 'w') as fd:
+                fd.write(self.heading())
+            self._save(system, mode='a')
+
+        newsystem = self.resampler.resample(system)
+        self.iteration += 1
+        self._save(newsystem, mode='a')
+
+        return newsystem
+
+class SaveWeights(ISaver):
+
+    def __init__(self, resampler, datfile='weights.dat'):
+        ISaver.__init__(self, resampler, datfile=datfile)
+
+    def heading(self):
+        return \
+            '# Each line represents a walker at:\n' + \
+            '# walkerid iteration cell weight color\n'
+
+    def save(self, system, mode='a'):
         print time.asctime(), 'Saving weights to', self.datfile
 
         ### all the walkers in a cell have the same weight, so we only
@@ -231,16 +265,3 @@ class SaveWeights(IResampler):
                     'color'     : w.color } # if w.color is not None else 'nan'       }
                 fd.write(s)
 
-
-    def resample(self, system):
-        if self.iteration == 0:
-            with open(self.datfile, 'w') as fd:
-                fd.write('# Each line represents a walker at:\n')
-                fd.write('# walkerid iteration cell weight color\n')
-            self.saveweights(system, mode='a')
-
-        newsystem        = self.resampler.resample(system)
-        self.iteration  += 1
-        self.saveweights(newsystem)
-
-        return newsystem
