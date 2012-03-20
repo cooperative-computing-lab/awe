@@ -240,7 +240,6 @@ class ISaver(IResampler):
         if self.iteration == 0:
             with open(self.datfile, 'w') as fd:
                 fd.write(self.heading())
-            self._save(system, mode='a')
 
         newsystem = self.resampler.resample(system)
         self.iteration += 1
