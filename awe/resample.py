@@ -210,6 +210,10 @@ class IPlotter(IResampler):
 
 class ISaver(IResampler):
 
+    """
+    Save after each resampling procedure
+    """
+
     @typecheck(IResampler, datfile=str)
     def __init__(self, resampler, datfile='save.dat'):
         self.resampler = resampler
@@ -217,16 +221,21 @@ class ISaver(IResampler):
         self.iteration = 0
 
     @typecheck(aweclasses.System, mode=str)
-    def _save(self, system, mode='a'):
-        self.save(system, mode=mode)
-
     def save(self, system, mode='a'):
-        raise NotImplementedError
+        self._save(system, mode=mode)
 
     @returns(str)
     def heading(self):
+        return self._heading()
+
+    def _save(self, system, mode='a'):
+        raise NotImplementedError
+
+    def _heading(self):
         return ''
 
+    @typecheck(aweclasses.System)
+    @returns(aweclasses.System)
     def resample(self, system):
         if self.iteration == 0:
             with open(self.datfile, 'w') as fd:
@@ -235,7 +244,7 @@ class ISaver(IResampler):
 
         newsystem = self.resampler.resample(system)
         self.iteration += 1
-        self._save(newsystem, mode='a')
+        self.save(newsystem, mode='a')
 
         return newsystem
 
@@ -244,12 +253,12 @@ class SaveWeights(ISaver):
     def __init__(self, resampler, datfile='weights.dat'):
         ISaver.__init__(self, resampler, datfile=datfile)
 
-    def heading(self):
+    def _heading(self):
         return \
             '# Each line represents a walker at:\n' + \
             '# walkerid iteration cell weight color\n'
 
-    def save(self, system, mode='a'):
+    def _save(self, system, mode='a'):
         print time.asctime(), 'Saving weights to', self.datfile
 
         ### all the walkers in a cell have the same weight, so we only
@@ -264,4 +273,3 @@ class SaveWeights(ISaver):
                     'weight'    : w.weight       ,
                     'color'     : w.color } # if w.color is not None else 'nan'       }
                 fd.write(s)
-
