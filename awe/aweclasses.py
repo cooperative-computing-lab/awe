@@ -222,7 +222,7 @@ class AWE(object):
         try:
             while True:
 
-                if self.iteration > self.iterations: break
+                if self.iteration >= self.iterations: break
 
                 self.iteration += 1
 
