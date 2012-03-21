@@ -122,7 +122,7 @@ class OneColor(IResampler):
                     ### split the current walker
                     print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
-                        w = currentWalker.restart(tw)
+                        w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
 
 

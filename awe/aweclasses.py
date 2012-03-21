@@ -73,7 +73,7 @@ class Walker(object):
                       end        = None,
                       assignment = self._assignment,
                       color      = self._color,
-                      weight     = self._weight,
+                      weight     = weight
                       wid        = wid)
 
 
