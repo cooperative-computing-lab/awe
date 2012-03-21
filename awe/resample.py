@@ -164,14 +164,20 @@ class MultiColor(OneColor):
         ### update colors
         for w in system.walkers:
             cell     = system.cell(w.assignment)
-
             oldcolor = w.color
-            newcolor = self.partition.color(cell)
-            if newcolor is None: newcolor = oldcolor
+            newcolor = cell.core
 
-            if not oldcolor == newcolor:
+            # sanity check: all walkers must have a color, but not all cells have a core.
+            assert w.color is not None
+            assert w.color >= 0
+
+            if not w.color == cell.core and cell.core >= 0:
+                oldcolor = w.color
+                newcolor = cell.core
                 print 'Updating color:', w, oldcolor, '->', newcolor
                 w.color = newcolor
+            else:
+                oldcolor = newcolor = w.color
 
             self.transitions[oldcolor, newcolor] += w.weight
 
