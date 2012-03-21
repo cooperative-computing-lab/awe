@@ -18,6 +18,7 @@ from collections import defaultdict
 
 _WALKER_ID = 0
 _DEFAULT_COLOR = -1
+DEFAULT_CORE = -1
 
 class Walker(object):
 
@@ -73,7 +74,7 @@ class Walker(object):
                       end        = None,
                       assignment = self._assignment,
                       color      = self._color,
-                      weight     = weight
+                      weight     = weight,
                       wid        = wid)
 
 
@@ -320,7 +321,7 @@ class AWE(object):
 
 class Cell(object):
 
-    def __init__(self, cid, weight=1., core=0, walkers=None):
+    def __init__(self, cid, weight=1., core=DEFAULT_CORE, walkers=None):
         self._id      = cid
         self._core    = core
 
