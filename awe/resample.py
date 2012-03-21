@@ -171,7 +171,7 @@ class MultiColor(OneColor):
             assert w.color is not None
             assert w.color >= 0
 
-            if not w.color == cell.core and cell.core >= 0:
+            if not cell.core == aweclasses.DEFAULT_CORE and not w.color == cell.core:
                 oldcolor = w.color
                 newcolor = cell.core
                 print 'Updating color:', w, oldcolor, '->', newcolor
