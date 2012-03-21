@@ -320,7 +320,7 @@ class AWE(object):
 
 class Cell(object):
 
-    def __init__(self, cid, weight=1., core=0, walkers=None):
+    def __init__(self, cid, weight=1., core=-1, walkers=None):
         self._id      = cid
         self._core    = core
 
