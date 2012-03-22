@@ -1,35 +1,70 @@
 
 
-export LD_LIBRARY_PATH=/afs/crc.nd.edu/x86_64_linux/Modules/tcltk/current/lib/:/afs/crc.nd.edu/x86_64_linux/Modules/tcltk/current/lib/tclx8.4/:$LD_LIBRARY_PATH
+CONF_IN=structure.pdb
+CONF_OUT=structure2.pdb
+ASSIGNMENT=cell2.dat
+RESULTFILE=results.tar
+WALKER=walker.pkl
+CLEANUP="$CONF_IN $CONF_OUT $ASSIGNMENT Data output Trajectories ProjectInfo.h5 frame* *.tpr"
 
+source ~/.bash_modules
+module load gromacs/4.5.3
+module load msmbuilder/lcls/2.1.1
+export OMP_NUM_THREADS=1
 
-echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-ldd /afs/crc.nd.edu/x86_64_linux/Modules/3.2.6/bin/modulecmd
-echo '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-
-
-echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-env
-echo '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-
-MODULESHOME=/afs/crc.nd.edu/x86_64_linux/Modules/3.2.6
-function module()
-{
-    eval $($MODULESHOME/bin/modulecmd sh $*)
+puts() {
+	echo "================================================================================"
+	echo "[worker] $@"
 }
 
-MODULEFILES=(/opt/crc/Modules/modulefiles /afs/nd.edu/user37/ccl/software/modulefiles /afs/crc.nd.edu/user/c/cabdulwa/Public/modulefiles /afs/crc.nd.edu/user/i/izaguirr/Public/modulefiles)
-for m in ${MODULEFILES[@]}; do
-	echo "Using module system in $m"
-	module use $m
-done
+check-initial() {
+	puts "Initial file listing"
+	ls
+	echo
+}
 
-modules=(epd gromacs/4.5.3 msmbuilder/env2)
+run-md() {
+	puts "Running simulation"
+	pdb2gmx -f $CONF_IN -ff amber96 -water none
+	grompp -f sim.mdp
+	mdrun -s topol.tpr -c $CONF_OUT -deffnm frame0
+	echo
+}
 
-for m in ${modules[@]}; do
-	echo "Loaded module $m"
-	module load $m
-done
+setup-msmbuilder() {
+	puts "Prepping for MSMBuilder"
+	mkdir -p output/traj
+	mv *.xtc output/traj
+	mkdir -v Data
+	cp -v Gens.lh5 Data
+	echo
+}
 
-export OMP_NUM_THREADS=1
+assign() {
+	puts "Assigning trajectory"
+	ConvertDataToHDF.py -s state0.pdb -I output
+	Assign.py
+	ConvertAssignToText.py
+	tail -1 Data/discrete.traj > $ASSIGNMENT
+	echo
+}
+
+check-result() {
+	puts "Checking if result files exist"
+	ls $CONF_OUT $ASSIGNMENT
+	echo
+}
+
+package() {
+	puts "Packaging results"
+	tar cvf $RESULTFILE $CONF_OUT $ASSIGNMENT $WALKER
+	ls $RESULTFILE
+	echo
+}
+
+cleanup() {
+	puts "Cleaning up"
+	rm -rv $CLEANUP
+	echo
+}
 
