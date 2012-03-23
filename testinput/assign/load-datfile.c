@@ -1,9 +1,15 @@
 
+#include <xdrfile/xdrfile.h>
+#include <xdrfile/xdrfile_xtc.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <assert.h>
+
+#define XTC_PRECISION 1000
+#define XDR_DIM       DIM
 
 
 int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float*** data) {
@@ -113,13 +119,70 @@ int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float
 }
 
 
+int load_last_xtc_frame (const char* path, float*** coords, int* natoms) {
+
+  printf ("Loading last frame from xtc file %s\n", path);
+
+  XDRFILE * file = xdrfile_open(path, "r");
+  if (file == NULL) {
+    char emsg[100];
+    sprintf (emsg, "Error opening xtc file %s", path);
+    perror (emsg);
+    return exdrFILENOTFOUND;
+  }
+
+  int result;
+
+  if ( (result = read_xtc_natoms ((char*) path, natoms)) != exdrOK ) {
+    printf ("Error reading number of atoms from %s", path);
+    return result;
+  }
+
+  printf ("Number of atoms: %d\n", *natoms);
+
+  int step;
+  float time;
+  matrix box;
+  float prec	= 1000;
+  int frame	= 0;
+  rvec* x	= (rvec*) malloc ((*natoms)*sizeof(rvec));
+
+  while ( (result = read_xtc (file, *natoms, &step, &time, box, x, &prec))  == exdrOK )
+    { frame ++; }
+  printf ("Read %d frames from %s\n", frame, path);
+
+  (*coords) = (float**) malloc ((*natoms)*sizeof(float*));
+  for (int a=0; a<(*natoms); a++){
+    (*coords)[a] = (float*) malloc (XDR_DIM*sizeof(float));
+    for (int d=0; d<XDR_DIM; d++) {
+      (*coords)[a][d] = x[a][d];
+    }
+  }
+
+  xdrfile_close(file);
+  return exdrOK;
+
+
+}
+
 int main (void) {
 
   int ncells, ncoords, ndims;
   float*** data;
 
   load_data("Gens.dat", &ncells, &ncoords, &ndims, data);
+  assert (ndims == 3);   // sanity check
 
+  int natoms;
+  float** coords;
+
+  load_last_xtc_frame("traj.xtc", &coords, &natoms);
+
+  // sanity check
+  for (int a=0; a<natoms; a++){
+    for (int d=0; d<XDR_DIM; d++) {
+      assert (coords[a][d] != 0.0);
+    }}
 
   exit (EXIT_SUCCESS);
 }
