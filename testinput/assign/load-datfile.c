@@ -50,7 +50,10 @@ int main (void) {
     while ( ! feof (file) ) {
       if ( fgets (buffer, BUFFER_SIZE, file) != NULL ){
 	lineno += 1;
-	sscanf (buffer, "%f", &val);
+	if ( sscanf (buffer, "%f", &val) != 1 ) {
+	  printf ("Failed to parse line %d of data section: '%s'\n", lineno, buffer);
+	  exit (EXIT_FAILURE);
+	}
 	data[cell][coord][dim] = val;
 
 	/* printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val); */
