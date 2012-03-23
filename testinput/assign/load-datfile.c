@@ -5,11 +5,10 @@
 #include <stddef.h>
 #include <assert.h>
 
-#define BUFFER_SIZE 100
-
 
 int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float*** data) {
 
+  int BUFFER_SIZE = 100;
   char buffer [BUFFER_SIZE];
   int ncells, ncoords, ndims;
 
