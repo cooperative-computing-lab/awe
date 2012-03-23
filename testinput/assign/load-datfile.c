@@ -8,30 +8,35 @@
 #define BUFFER_SIZE 100
 
 
-int main (void) {
+int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float*** data) {
 
   char buffer [BUFFER_SIZE];
   int ncells, ncoords, ndims;
-  float ***data;
 
-  FILE * file = fopen("Gens.dat", "r");
+  FILE * file = fopen(path, "r");
   if (file == NULL) perror ("Error opening file");
   else {
 
+    printf ("Reading header\n");
+
     if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of cells");
-    sscanf (buffer, "ncells: %d", &ncells);
+    sscanf (buffer, "ncells: %d", pncells);
 
     if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of coordinates");
-    sscanf (buffer, "ncoords: %d", &ncoords);
+    sscanf (buffer, "ncoords: %d", pncoords);
 
     if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of dimensions");
-    sscanf (buffer, "ndims: %d", &ndims);
+    sscanf (buffer, "ndims: %d", pndims);
+    ncells	= *pncells;
+    ncoords	= *pncoords;
+    ndims	= *pndims;
 
     if ( fgets (buffer, BUFFER_SIZE, file) == NULL) perror ("Error clearing empty line");
 
     printf("ncells = %d ncoords = %d ndims = %d\n", ncells, ncoords, ndims);
 
     /* allocate and initialize the array */
+    printf ("Allocating and initializing %d X %d X %d array\n", ncells, ncoords, ndims);
     data = (float***) malloc (ncells*sizeof(float**));
     for (int c=0; c<ncells; c++){
       data[c] = (float**) malloc (ncoords*sizeof(float*));
@@ -48,6 +53,8 @@ int main (void) {
     int dim	= 0;
     float val	= 0;
 
+    /* read in the data */
+    printf ("Reading data...\n");
     while ( ! feof (file) ) {
       if ( fgets (buffer, BUFFER_SIZE, file) != NULL ){
 	lineno += 1;
@@ -92,6 +99,7 @@ int main (void) {
 
     fclose(file);
   }
+  printf ("...done\n");
 
   // sanity check
   for (int c=0; c<ncells; c++){
@@ -100,6 +108,18 @@ int main (void) {
 	assert (data[c][x][d] != 0.0);
 	assert (data[c][x][d] > 0 || data[c][x][d] < 0);
       }}}
+
+  return 0;
+
+}
+
+
+int main (void) {
+
+  int ncells, ncoords, ndims;
+  float*** data;
+
+  load_data("Gens.dat", &ncells, &ncoords, &ndims, data);
 
 
   exit (EXIT_SUCCESS);
