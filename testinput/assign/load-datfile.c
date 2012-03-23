@@ -4,10 +4,12 @@
 #include <string.h>
 #include <stddef.h>
 
+#define BUFFER_SIZE 100
+
 
 int main (void) {
 
-  char buffer [100];
+  char buffer [BUFFER_SIZE];
   int ncells, ncoords, ndims;
   float ***data;
 
@@ -15,16 +17,16 @@ int main (void) {
   if (file == NULL) perror ("Error opening file");
   else {
 
-    if ( fgets (buffer, 100, file) == NULL ) perror ("Error reading number of cells");
+    if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of cells");
     sscanf (buffer, "ncells: %d", &ncells);
 
-    if ( fgets (buffer, 100, file) == NULL ) perror ("Error reading number of coordinates");
+    if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of coordinates");
     sscanf (buffer, "ncoords: %d", &ncoords);
 
-    if ( fgets (buffer, 100, file) == NULL ) perror ("Error reading number of dimensions");
+    if ( fgets (buffer, BUFFER_SIZE, file) == NULL ) perror ("Error reading number of dimensions");
     sscanf (buffer, "ndims: %d", &ndims);
 
-    if ( fgets (buffer, 100, file) == NULL) perror ("Error clearing empty line");
+    if ( fgets (buffer, BUFFER_SIZE, file) == NULL) perror ("Error clearing empty line");
 
     printf("ncells = %d ncoords = %d ndims = %d\n", ncells, ncoords, ndims);
 
@@ -46,7 +48,7 @@ int main (void) {
     float val	= 0;
 
     while ( ! feof (file) ) {
-      if ( fgets (buffer, 100, file) != NULL ){
+      if ( fgets (buffer, BUFFER_SIZE, file) != NULL ){
 	lineno += 1;
 	sscanf (buffer, "%f", &val);
 	data[cell][coord][dim] = val;
