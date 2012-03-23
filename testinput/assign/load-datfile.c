@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <assert.h>
 
 #define BUFFER_SIZE 100
 
@@ -92,17 +93,13 @@ int main (void) {
     fclose(file);
   }
 
+  // sanity check
   for (int c=0; c<ncells; c++){
-    printf("{%d", c);
     for (int x=0; x<ncoords; x++){
-      printf("\t[ ");
       for (int d=0; d<ndims; d++){
-	printf("%f ", data[c][x][d]);
-      }
-      printf("]\n");
-    }
-    printf("}\n");
-  }
+	assert (data[c][x][d] != 0.0);
+	assert (data[c][x][d] > 0 || data[c][x][d] < 0);
+      }}}
 
 
   exit (EXIT_SUCCESS);
