@@ -16,16 +16,14 @@ data = F.getNode('/XYZList').read()
 ### convert from the lossy integer scheme
 data = data.astype('float32') / PRECISION
 
-ncells, natoms, dim = data.shape
+ncells, ncoords, dim = data.shape
 
 with open(txtfile, 'w') as fd:
-    fd.write(str(ncells) + '\n')
-    fd.write(str(natoms) + '\n')
-    fd.write(str(dim)    + '\n')
+    fd.write('ncells: '  + str(ncells) + '\n')
+    fd.write('ncoords: ' + str(ncoords) + '\n')
+    fd.write('ndims: '   + str(dim)    + '\n')
+    fd.write('\n')
 
-    for c in xrange(ncells):
-        for a in xrange(natoms):
-            s = ' '.join(map(str, data[c][a]))
-            fd.write(s + '\n')
+    np.savetxt(fd, data.flatten(), fmt='%f')
 
 F.close()
