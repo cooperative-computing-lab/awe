@@ -118,7 +118,6 @@ int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float
 
 }
 
-
 int load_last_xtc_frame (const char* path, float*** coords, int* natoms) {
 
   printf ("Loading last frame from xtc file %s\n", path);
@@ -167,18 +166,18 @@ int load_last_xtc_frame (const char* path, float*** coords, int* natoms) {
 
 int main (void) {
 
+  const char* cells_file = "Gens.dat";
+  const char* xtc_file   = "traj.xtc";
+
   int ncells, ncoords, ndims;
   float*** data;
-
-  load_data("Gens.dat", &ncells, &ncoords, &ndims, data);
+  load_data(cells_file, &ncells, &ncoords, &ndims, data);
   assert (ndims == 3);   // sanity check
 
   int natoms;
   float** coords;
-
-  load_last_xtc_frame("traj.xtc", &coords, &natoms);
-
-  // sanity check
+  load_last_xtc_frame(xtc_file, &coords, &natoms);
+  // sanity check  
   for (int a=0; a<natoms; a++){
     for (int d=0; d<XDR_DIM; d++) {
       assert (coords[a][d] != 0.0);
