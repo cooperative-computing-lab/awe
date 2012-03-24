@@ -4,6 +4,7 @@
 #include "celldata.h"
 #include "xdr_util.h"
 #include "rmsd_calc.h"
+#include "gsl_util.h"
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_vector.h>

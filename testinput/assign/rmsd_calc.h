@@ -4,6 +4,7 @@
 #include "exit_codes.h"
 #include "xdr_util.h"
 #include "celldata.h"
+#include "gsl_util.h"
 
 #include "theobald_rmsd.h"
 
@@ -17,5 +18,9 @@
    - mat: IN, OUT: the 2-rank matrix of coordinates
 */
 exit_t center_structure (gsl_matrix* mat);
+
+exit_t flatten (const gsl_matrix* mat, gsl_vector* vec);
+
+double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
 #endif

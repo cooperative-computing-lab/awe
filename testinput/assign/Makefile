@@ -7,7 +7,7 @@ CFLAGS = --std=c99 -I/opt/macports/current/include/ -g
 
 LDFLAGS = -L/opt/macports/current/lib -lxdrfile -lgsl -lm
 
-CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c theobald_rmsd.c
+CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c theobald_rmsd.c
 HEADERS = $(CODE:.c:.h)
 OBJS = $(CODE:.c=.o)
 
@@ -35,6 +35,8 @@ rmsd_calc.o : rmsd_calc.c rmsd_calc.h
 theobald_rmsd.o : theobald_rmsd.c theobald_rmsd.h
 	$(COMPILE) theobald_rmsd.c
 
+gsl_util.o : gsl_util.c gsl_util.h
+	$(COMPILE) gsl_util.c
 
 clean :
 	rm *.o a.out

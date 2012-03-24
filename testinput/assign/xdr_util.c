@@ -70,11 +70,14 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame) {
   while ( (result = read_xtc (file, natoms, &step, &time, box, x, &prec)) == exdrOK )
     { frameix++; }
   xdrfile_close (file);
-  printf ("~> Read %d frames from: %s\n", frameix, filename);
+  printf ("~> Read %d frames from: %s\n", frameix, filename);  
 
   *frame = xdrframe_alloc ();
   xdrframe_init (frame, natoms);
   xdrframe_from_rvec (x, *frame);
+
+  // convert to Angstroms
+  gsl_matrix_scale ((*frame)->coords, 10);
 
   return 42;
 
