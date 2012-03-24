@@ -3,8 +3,7 @@
 
 #include "celldata.h"
 #include "xdr_util.h"
-
-#include "theobald_rmsd.h"
+#include "rmsd_calc.h"
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_vector.h>

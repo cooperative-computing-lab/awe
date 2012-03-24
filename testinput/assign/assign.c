@@ -2,7 +2,6 @@
 #include "assign.h"
 
 
-
 /* void center_structure (double** structure, const size_t len, const size_t ndims) { */
 /*   /\* Center the structer *in place* */
 /*        - structure: IN, OUT: the 2d array containing the structure */
@@ -134,6 +133,12 @@ int main (void) {
   xdrframe_last_in_xtc (xtc_file, &frame);
   xdrframe_printsummary (frame);
   xdrframe_printf (frame);
+
+  center_structure (frame->coords);
+  printf ("~> centered conformation\n");
+  xdrframe_printsummary (frame);
+  xdrframe_printf (frame);
+    
 
   exit (EXIT_SUCCESS);
 }
