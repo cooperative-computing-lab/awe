@@ -29,17 +29,15 @@ int main (void) {
   celldata_load_file (cells_file, cell_data);
   xdrframe_last_in_xtc (xtc_file, &frame);
 
-  center_structure (frame->coords);
   xdrframe_printsummary (frame);
   xdrframe_printf (frame);
 
-  double xG = calculate_theo_g (frame->coords);
-  printf ("~> Gx = %.3f\n", xG);
+  theodata* theo;
+  prepare_data (frame->coords, &theo);
+  printf ("~> Prepared data for frame:\n");
+  theodata_printf (theo);
+  gsl_matrix_printf (theo->coords);
 
-  /* gsl_vector* vec; */
-  /* gsl_matrix_flatten (frame->coords, &vec); */
-  /* gsl_vector_printf (vec); */
-    
 
   exit (EXIT_SUCCESS);
 }

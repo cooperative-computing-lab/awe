@@ -12,6 +12,26 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_statistics.h>
 
+typedef struct {
+  size_t nreal, npad, ndim;
+  double g;
+  gsl_matrix* coords;
+} theodata;
+
+
+theodata* theodata_alloc ();
+
+exit_t theodata_init (const size_t nreal, const size_t ndim, theodata** theo);
+
+void theodata_printf (const theodata* theo);
+
+
+/* Prepare a structure for rmsd computation using Theobald metric
+     mat: IN: the 2-rank matrix of coordinates
+     theo: OUT: the prepared data
+*/
+exit_t prepare_data (const gsl_matrix* mat, theodata** theo);
+
 
 
 /* Center the structure *in place*
