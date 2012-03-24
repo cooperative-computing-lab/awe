@@ -2,25 +2,6 @@
 #include "assign.h"
 
 
-/* void center_structure (double** structure, const size_t len, const size_t ndims) { */
-/*   /\* Center the structer *in place* */
-/*        - structure: IN, OUT: the 2d array containing the structure */
-/*        - len: IN: number of coordinates in the structure */
-/*        - ndims: IN: the dimensionality of the structure */
-
-/*   *\/ */
-
-/*   float mean; */
-/*   int i, d; */
-/*   for (i=0; i<len; i++){ */
-/*     printf ("["); */
-/*     for (int d=0; d<ndims; d++) printf ("%f\n ", structure[i][d]); */
-/*     printf ("]\n"); */
-/*     mean = gsl_stats_mean(structure[i], 1, ndims); */
-/*     for (d=0; d<ndims; d++) { structure[i][d] -= mean; */
-/*   }} */
-/* } */
-
 int load_data (const char* path, celldata* data) {
 
   int BUFFER_SIZE = 100;

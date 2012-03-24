@@ -13,6 +13,9 @@
 
 
 
+/* Center the structure *in place*
+   - mat: IN, OUT: the 2-rank matrix of coordinates
+*/
 exit_t center_structure (gsl_matrix* mat);
 
 #endif
