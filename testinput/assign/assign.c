@@ -1,6 +1,11 @@
 
+#include "theobald_rmsd.h"
+
 #include <xdrfile/xdrfile.h>
 #include <xdrfile/xdrfile_xtc.h>
+
+#include <gsl/gsl_statistics.h>
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +16,26 @@
 #define XTC_PRECISION 1000
 #define XDR_DIM       DIM
 
+
+
+void center_structure (double** structure, const size_t len, const size_t ndims) {
+  /* Center the structer *in place*
+       - structure: IN, OUT: the 2d array containing the structure
+       - len: IN: number of coordinates in the structure
+       - ndims: IN: the dimensionality of the structure
+
+  */
+
+  float mean;
+  int i, d;
+  for (i=0; i<len; i++){
+    printf ("[");
+    for (int d=0; d<ndims; d++) printf ("%f\n ", structure[i][d]);
+    printf ("]\n");
+    mean = gsl_stats_mean(structure[i], 1, ndims);
+    for (d=0; d<ndims; d++) { structure[i][d] -= mean;
+  }}
+}
 
 int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float*** data) {
 
@@ -69,7 +94,7 @@ int load_data (const char* path, int* pncells, int* pncoords, int* pndims, float
 	}
 	data[cell][coord][dim] = val;
 
-	/* printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val); */
+	printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val);
 
 	/* printf ("incrementing dim %d\n", dim); */
 	dim += 1;
@@ -164,15 +189,43 @@ int load_last_xtc_frame (const char* path, float*** coords, int* natoms) {
 
 }
 
+
+
+float compute_rmsd (float** ref, float** structure, int natoms, int ndims) {
+
+  float *AData, *BData;
+  return 42;
+
+  /* float msd = ls_rmsd2_aligned_T_g(nrealatoms,npaddedatoms,rowstride,(AData+i*truestride),BData,GAData[i],G_y); */
+
+}
+  
+
 int main (void) {
 
   const char* cells_file = "Gens.dat";
   const char* xtc_file   = "traj.xtc";
 
   int ncells, ncoords, ndims;
-  float*** data;
-  load_data(cells_file, &ncells, &ncoords, &ndims, data);
-  assert (ndims == 3);   // sanity check
+  float*** cell_data;
+  load_data(cells_file, &ncells, &ncoords, &ndims, cell_data);
+
+  // sanity check
+  assert (ncells == 100);
+  assert (ncoords == 22);
+  assert (ndims == 3);
+
+  for(int c=0; c<1; c++){
+    printf ("{ %4d\n", c);
+    for (int a=0; a<ncoords; a++){
+      printf ("  [ ");
+      for (int d=0; d<ndims; d++){
+  	printf ("%f ", cell_data[c][a][d]);
+      }
+      printf ("]\n");
+    }
+  }
+      
 
   int natoms;
   float** coords;
