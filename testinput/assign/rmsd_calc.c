@@ -24,3 +24,20 @@ exit_t center_structure (gsl_matrix* mat) {
 
   return exitOK;
 }
+
+
+double calculate_theo_g (const gsl_matrix* mat) {
+
+  double ssqrs = 0;
+  for (int d=0; d<mat->size2; d++) {
+    const gsl_vector_const_view col = gsl_matrix_const_column (mat, d);
+    for (int i=0; i<col.vector.size; i++) {
+      double s = gsl_vector_get (&col.vector, i);
+      s *= s;
+
+      // sum of squares
+      ssqrs += s;
+    }}
+
+  return ssqrs;
+}

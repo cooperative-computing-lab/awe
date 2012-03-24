@@ -23,4 +23,7 @@ exit_t flatten (const gsl_matrix* mat, gsl_vector* vec);
 
 double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
+/* Compute the G value for input into TheoRMSD */
+double calculate_theo_g (const gsl_matrix* mat);
+
 #endif

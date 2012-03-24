@@ -33,6 +33,8 @@ int main (void) {
   xdrframe_printsummary (frame);
   xdrframe_printf (frame);
 
+  double xG = calculate_theo_g (frame->coords);
+  printf ("~> Gx = %.3f\n", xG);
 
   /* gsl_vector* vec; */
   /* gsl_matrix_flatten (frame->coords, &vec); */
