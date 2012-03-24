@@ -2,7 +2,6 @@
 #include "rmsd_calc.h"
 
 
-// TODO: center_structure should 
 exit_t center_structure (gsl_matrix* mat) {
 
   // compute the mean along each axis (column)
@@ -41,3 +40,5 @@ double calculate_theo_g (const gsl_matrix* mat) {
 
   return ssqrs;
 }
+
+
