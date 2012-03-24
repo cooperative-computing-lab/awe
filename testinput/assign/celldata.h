@@ -1,6 +1,8 @@
 #ifndef _CELLDATA_H_
 #define _CELLDATA_H_
 
+#include "exit_codes.h"
+
 #include <gsl/gsl_matrix.h>
 
 #include <assert.h>
@@ -35,5 +37,6 @@ void celldata_printinfo (const celldata* cells);
 
 void celldata_printf (const celldata* cells);
 
+exit_t celldata_load_file (const char* path, celldata* data);
 
 #endif
