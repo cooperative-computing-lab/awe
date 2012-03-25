@@ -2,22 +2,6 @@
 #include "assign.h"
 
 
-
-
-
-
-
-/* float compute_rmsd (float** ref, float** structure, int natoms, int ndims) { */
-
-/*   float *AData, *BData; */
-/*   return 42; */
-
-/*   /\* float msd = ls_rmsd2_aligned_T_g(nrealatoms,npaddedatoms,rowstride,(AData+i*truestride),BData,GAData[i],G_y); *\/ */
-
-/* } */
-  
-
-
 int main (void) {
 
   const char* cells_file = "Gens.dat";
@@ -34,10 +18,11 @@ int main (void) {
 
   theodata* theo;
   prepare_data (frame->coords, &theo);
-  printf ("~> Prepared data for frame:\n");
-  theodata_printf (theo);
-  gsl_matrix_printf (theo->coords);
+  printf ("~> Prepared data for frames:\n");
+  theodata_printf_all (theo);
 
+  double rmsd = theo_rmsd (theo, theo);
+  printf ("~> rmsd = %.3f\n", rmsd);
 
   exit (EXIT_SUCCESS);
 }
