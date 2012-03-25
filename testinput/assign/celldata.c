@@ -15,14 +15,11 @@ void celldata_init (celldata** data, const size_t ncells, const size_t ncoords, 
 
   printf ("~> Creating celldata with <ncells=%lu ncoords=%lu ndims=%lu matrix %lu X %lu>\n", ncells, ncoords, ndims, nrows, ncols);
   *data = celldata_alloc();
-  (*data)->ncells	= ncells;
+  (*data)->ncells  = ncells;
   (*data)->ncoords = ncoords;
   (*data)->ndims   = ndims;
   (*data)->matrix  = gsl_matrix_calloc(ncells*ncoords, ndims);
 }
-
-
-
 
 matindex celldata_matindex (const celldata* cells, const cindex cell) {
   size_t i = cells->ncells+1 * cell;
