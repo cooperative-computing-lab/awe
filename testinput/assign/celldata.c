@@ -141,7 +141,8 @@ exit_t celldata_load_file (const char* path, celldata** data) {
 	  printf ("Failed to parse line %d of data section: '%s'\n", lineno, buffer);
 	  exit (EXIT_FAILURE);
 	}
-	celldata_set_value (data, cell, coord, dim, val);
+	val *= 10.0; // convert to Angstroms
+	celldata_set_value (*data, cell, coord, dim, (double) val);
 
 	/* printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val); */
 
