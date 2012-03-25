@@ -48,8 +48,6 @@ exit_t prepare_data (const gsl_matrix* mat, theodata** theo) {
 
   gsl_matrix_memcpy (mat2, mat);
   center_structure (mat2);
-  /* printf ("~> Centered coordinates: "); */
-  /* gsl_matrix_printf (mat2); */
 
   const double G = calculate_theo_g (mat2);
   (*theo)->g = G;
