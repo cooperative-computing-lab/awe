@@ -16,10 +16,13 @@ int main (void) {
   xdrframe_printsummary (frame);
   xdrframe_printf (frame);
 
-  theodata* theo;
-  prepare_data (frame->coords, &theo);
-  printf ("~> Prepared data for frames:\n");
-  theodata_printf_all (theo);
+  for (int c=0; c<cell_data->ncells; c++) {
+    const gsl_matrix cell = celldata_get_cell (cell_data, c);
+    /* printf ("~> Cell %d: ", c); */
+    /* gsl_matrix_printf (&cell); */
+    const double rmsd = compute_rmsd (&cell, frame->coords);
+    printf ("~> rmsd[%d]: %.3f\n", c, rmsd);
+  }
 
 
   exit (EXIT_SUCCESS);
