@@ -101,7 +101,7 @@ void test_celldata_init () {
 
 }
 
-exit_t celldata_load_file (const char* path, celldata* data) {
+exit_t celldata_load_file (const char* path, celldata** data) {
 
   int BUFFER_SIZE = 100;
   char buffer [BUFFER_SIZE];
@@ -125,7 +125,7 @@ exit_t celldata_load_file (const char* path, celldata* data) {
     if ( fgets (buffer, BUFFER_SIZE, file) == NULL) perror ("Error clearing empty line");
 
     printf("ncells = %d ncoords = %d ndims = %d\n", ncells, ncoords, ndims);
-    celldata_init (&data, ncells, ncoords, ndims);
+    celldata_init (data, ncells, ncoords, ndims);
 
 
 

@@ -10,7 +10,7 @@ int main (void) {
   celldata* cell_data;
   xdrframe* frame;
 
-  celldata_load_file (cells_file, cell_data);
+  celldata_load_file (cells_file, &cell_data);
   xdrframe_last_in_xtc (xtc_file, &frame);
 
   xdrframe_printsummary (frame);

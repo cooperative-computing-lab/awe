@@ -37,6 +37,6 @@ void celldata_printinfo (const celldata* cells);
 
 void celldata_printf (const celldata* cells);
 
-exit_t celldata_load_file (const char* path, celldata* data);
+exit_t celldata_load_file (const char* path, celldata** data);
 
 #endif
