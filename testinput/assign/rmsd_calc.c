@@ -126,3 +126,12 @@ double theo_rmsd (const theodata* theo1, const theodata* theo2) {
 
   return ls_rmsd2_aligned_T_g (theo1->nreal, theo1->npad, theo1->npad, theo1->coords, theo2->coords, theo1->g, theo2->g);
 }
+
+
+double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
+  theodata *theo1, *theo2;
+
+  prepare_data (m1, &theo1);
+  prepare_data (m2, &theo2);
+  return theo_rmsd (theo1, theo2);
+}
