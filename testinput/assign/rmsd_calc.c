@@ -133,3 +133,129 @@ double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
   prepare_data (m2, &theo2);
   return theo_rmsd (theo1, theo2);
 }
+
+
+double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
+
+  /** http://cnx.org/content/m11608/latest/ */
+
+  // sanity check
+  assert (m1->size2 == 3);
+  assert (m2->size2 == 3);
+  assert (m1->size1 == m2->size1);
+
+  const size_t D = 3;
+  const size_t N = m1->size1;
+
+  // 0) center structures
+  gsl_matrix
+    *x = gsl_matrix_alloc (N, D),
+    *y = gsl_matrix_alloc (N, D);
+  gsl_matrix_memcpy (x, m1);
+  gsl_matrix_memcpy (y, m2);
+  center_structure (x);
+  center_structure (y);
+
+
+  // 1) build 3XN matrices X and Y as transposed x, y
+  gsl_matrix
+    *X = gsl_matrix_alloc (D, N),
+    *Y = gsl_matrix_alloc (D, N);
+  gsl_matrix_transpose_memcpy (X, x);
+  gsl_matrix_transpose_memcpy (Y, y);
+
+
+  // 2) Compute the covariance matrix C = XY'
+  gsl_matrix *C = gsl_matrix_calloc (D, D);
+  gsl_blas_dgemm ( CblasNoTrans, CblasTrans, 1.0, X, Y, 0.0, C);
+
+  // 3) Compute the SVD (Singular Value Decomposition) of C = VSW'
+  gsl_matrix
+    *V = gsl_matrix_calloc (D, D),
+    *W = gsl_matrix_calloc (D, D);
+  gsl_vector
+    *s    = gsl_vector_calloc (D),
+    *work = gsl_vector_calloc (D);
+
+  // gsl_linalg_SV_decomp replaced the first matrix with V
+  gsl_matrix_memcpy (V, C);
+  gsl_linalg_SV_decomp (V, W, s, work);
+
+  // 4) Compute d = sign(det(C))
+  gsl_matrix *LU = gsl_matrix_calloc (D, D);
+  gsl_permutation *perm = gsl_permutation_calloc (D);
+  int signum = 1;
+  gsl_matrix_memcpy (LU, C);
+  gsl_linalg_LU_decomp (LU, perm, &signum);
+  const int determinant = gsl_linalg_LU_det (LU, signum);
+  const int d = determinant > 0 ? 1 : -1;
+  gsl_matrix_free (LU);
+  gsl_permutation_free (perm);
+
+  // 5) Compute the optimal rotation U as
+  /** 
+            | 1 0 0 |
+      U = W | 0 1 0 | V'
+            | 0 0 d |
+  */
+  gsl_matrix *I = gsl_matrix_calloc (D, D);
+  gsl_matrix_set_identity (I);
+  gsl_matrix_set (I, D-1, D-1, d);
+  gsl_matrix_transpose (V);
+  gsl_matrix 
+    *u = gsl_matrix_calloc (D, D),
+    *U = gsl_matrix_calloc (D, D);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, W, I, 0.0, u);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, u, V, 0.0, U);
+
+
+  // 6) fit Y to X
+  gsl_matrix *Ycp = gsl_matrix_alloc (Y->size1, Y->size2);
+  gsl_matrix_memcpy (Ycp, Y);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, Ycp, 0.0, Y);
+
+  // Compute RMSD
+  /** The RMSD is the square root of the average of the squared distances between corresponding atoms of x and y.
+            ______________________________
+           /       N
+          /       ____
+         /     1  \    |         | 2
+ _      /     ___  \   | x - y   |
+  \    /       N   /   |  i    i |
+   \  /           /___
+    \/	          i = 1
+  */
+
+  
+  double sum_squares = 0.0;
+  for (int i=0; i <N; i++) {
+    gsl_vector_view x = gsl_matrix_column (X, i);
+    gsl_vector_view y = gsl_matrix_column (Y, i);
+    double dot = 0;
+    gsl_blas_ddot (&x.vector, &y.vector, &dot);
+    double edist = sqrt (fabs (dot));
+    sum_squares += sqrt (pow (edist, 2));
+  }
+  double rmsd = sqrt (sum_squares / N);
+
+  // free resources
+  gsl_matrix_free (x);
+  gsl_matrix_free (y);
+  gsl_matrix_free (X);
+  gsl_matrix_free (Y);
+  gsl_matrix_free (C);
+  gsl_matrix_free (V);
+  gsl_matrix_free (W);
+  gsl_vector_free (s);
+  gsl_vector_free (work);
+  gsl_matrix_free (I);
+  gsl_matrix_free (u);
+  gsl_matrix_free (U);
+  gsl_matrix_free (Ycp);
+
+
+  // done
+  return rmsd;
+
+
+}

@@ -8,9 +8,13 @@
 
 #include "theobald_rmsd.h"
 
+#include <gsl/gsl_blas.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_statistics.h>
+
+#include <math.h>
 
 typedef struct {
   size_t nreal, npad, ndim;
@@ -56,6 +60,6 @@ double calculate_theo_g (const gsl_matrix* mat);
 
 double theo_rmsd (const theodata* theo1, const theodata* theo2);
 
-double naive_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
+double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
 #endif
