@@ -20,8 +20,6 @@ int main (void) {
   double minrmsd = DBL_MAX;
   for (int c=0; c<cell_data->ncells; c++) {
     const gsl_matrix cell = celldata_get_cell (cell_data, c);
-    /* printf ("~> Cell %d: ", c); */
-    /* gsl_matrix_printf (&cell); */
     const double rmsd = compute_rmsd (&cell, frame->coords);
     printf ("~> rmsd[%d]: %.3f\n", c, rmsd);
     if (rmsd < minrmsd) {
