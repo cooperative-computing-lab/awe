@@ -21,8 +21,6 @@ int main (void) {
   printf ("~> Prepared data for frames:\n");
   theodata_printf_all (theo);
 
-  double rmsd = theo_rmsd (theo, theo);
-  printf ("~> rmsd = %.3f\n", rmsd);
 
   exit (EXIT_SUCCESS);
 }
