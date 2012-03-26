@@ -215,12 +215,12 @@ double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
   gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, Ycp, 0.0, Y);
 
   // Compute RMSD
-  /** The RMSD is the square root of the average of the squared distances between corresponding atoms of x and y.
+  /** The RMSD is the square root of the average of the squared distances between corresponding atoms of X and Y.
             ______________________________
            /       N
           /       ____
          /     1  \    |         | 2
- _      /     ___  \   | x - y   |
+ _      /     ___  \   | X - Y   |
   \    /       N   /   |  i    i |
    \  /           /___
     \/	          i = 1
@@ -231,12 +231,12 @@ double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
   for (int i=0; i <N; i++) {
     gsl_vector_view x = gsl_matrix_column (X, i);
     gsl_vector_view y = gsl_matrix_column (Y, i);
-    double dot = 0;
-    gsl_blas_ddot (&x.vector, &y.vector, &dot);
-    double edist = sqrt (fabs (dot));
-    sum_squares += sqrt (pow (edist, 2));
+    gsl_vector_sub (&x.vector, &y.vector);
+    double dot = 0.0;
+    gsl_blas_ddot (&x.vector, &x.vector, &dot);
+    sum_squares += sqrt (dot);
   }
-  double rmsd = sqrt (sum_squares / N);
+  const double rmsd = sqrt (sum_squares / N);
 
   // free resources
   gsl_matrix_free (x);

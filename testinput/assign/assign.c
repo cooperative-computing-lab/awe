@@ -2,10 +2,15 @@
 #include "assign.h"
 
 
-int main (void) {
+int main (int argc, char *argv[]) {
 
-  const char* cells_file = "Gens.dat";
-  const char* xtc_file   = "traj.xtc";
+  const char
+    *cells_file = argv[1], // "Gens.dat";
+    *xtc_file   = argv[2], // "traj.xtc";
+    *out_file   = argv[3]; // assignment.dat
+
+  printf ("~> Cells file: %s\n", cells_file);
+  printf ("~> Xtc file: %s\n", xtc_file);
 
   celldata* cell_data;
   xdrframe* frame;
@@ -30,7 +35,16 @@ int main (void) {
 
   printf ("~> Assignment: %d\n", assignment);
 
+  FILE *out = fopen (out_file, "w");
+  if (out == NULL) {
+    char emsg[50];
+    sprintf (emsg, "Could not open for writing: %s\n", out_file);
+    perror (emsg);
+    exit (EXIT_FAILURE);
+  }
 
+  fprintf (out, "%d", assignment);
+  fclose (out);
 
   exit (EXIT_SUCCESS);
 }
