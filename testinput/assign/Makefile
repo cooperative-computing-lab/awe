@@ -14,8 +14,8 @@ OBJS = $(CODE:.c=.o)
 COMPILE = $(CC) $(CFLAGS) -c
 
 
-a.out : $(OBJS)
-	$(CC) $(OBJS) $(LDFLAGS)
+assign : $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o assign
 
 assign.o : assign.c assign.h
 	$(COMPILE) assign.c
@@ -39,4 +39,4 @@ gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
 clean :
-	rm *.o a.out
+	rm *.o assign
