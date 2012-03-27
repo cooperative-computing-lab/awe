@@ -8,16 +8,14 @@ import os
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
 cfg.fastabort = 3
-cfg.restarts = float('inf')
+cfg.restarts = 0 # float('inf')
 
 
-cfg.execute('test.exe')
+# cfg.execute('test.exe')
 
-# cfg.execute('testinput/execute-task.sh')
+cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('testinput/protomol.conf')
-cfg.cache('testinput/topol.tpr')
-cfg.cache('testinput/with-env')
+cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/Gens.lh5')
 cfg.cache('testinput/AtomIndices.dat')
