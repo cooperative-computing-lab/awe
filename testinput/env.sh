@@ -7,14 +7,21 @@ RESULTFILE=results.tar
 WALKER=walker.pkl
 CLEANUP="Data output Trajectories ProjectInfo.h5 frame* *.tpr"
 
-source ~/.bash_modules
+source /afs/crc.nd.edu/user/c/cabdulwa/.bash_modules
 module load gromacs/4.5.3
 module load msmbuilder/lcls/2.1.1
 export OMP_NUM_THREADS=1
+export GMX_MAX_BACKUP=-1
+NPROCS=1
 
 puts() {
 	echo "================================================================================"
 	echo "[worker] $@"
+}
+
+whereami() {
+	puts "My locations:"
+	hostname
 }
 
 check-initial() {
@@ -27,7 +34,7 @@ run-md() {
 	puts "Running simulation"
 	pdb2gmx -f $CONF_IN -ff amber96 -water none
 	grompp -f sim.mdp
-	mdrun -s topol.tpr -c $CONF_OUT -deffnm frame0
+	mdrun -s topol.tpr -c $CONF_OUT -deffnm frame0 -nt $NPROCS
 	echo
 }
 
