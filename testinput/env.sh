@@ -5,7 +5,7 @@ CONF_OUT=structure2.pdb
 ASSIGNMENT=cell2.dat
 RESULTFILE=results.tar
 WALKER=walker.pkl
-CLEANUP="$CONF_IN $CONF_OUT $ASSIGNMENT Data output Trajectories ProjectInfo.h5 frame* *.tpr"
+CLEANUP="Data output Trajectories ProjectInfo.h5 frame* *.tpr"
 
 source ~/.bash_modules
 module load gromacs/4.5.3
