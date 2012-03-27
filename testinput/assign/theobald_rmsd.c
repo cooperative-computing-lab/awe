@@ -311,7 +311,8 @@ real ls_rmsd2_aligned_T_g(const int nrealatoms, const int npaddedatoms, const in
      *       G_b:          trace of B'B
      */
 
-            
+  /* printf ("# theo rmsd: nreal = %d npadded = %d rowstride = %d Ga = %f Gb = %f\n", */
+  /* 	  nrealatoms, npaddedatoms, rowstride, G_a, G_b); */
             
 	int nIndex;
     // Will have 3 garbage elements at the end

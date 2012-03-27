@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 
+typedef gsl_vector vector_t;
+typedef gsl_matrix matrix_t;
+
 exit_t gsl_matrix_flatten (const gsl_matrix* mat, gsl_vector** vec);
 
 void gsl_vector_printf (const gsl_vector* vec);

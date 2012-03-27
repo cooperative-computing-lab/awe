@@ -16,24 +16,29 @@ int main (int argc, char *argv[]) {
   xdrframe* frame;
 
   celldata_load_file (cells_file, &cell_data);
+
+  celldata_printf (cell_data);
+
   xdrframe_last_in_xtc (xtc_file, &frame);
 
   xdrframe_printsummary (frame);
   xdrframe_printf (frame);
 
-  int assignment;
+  printf ("~> Computing rmsds...\n");
+  int assignment = 0;
   double minrmsd = DBL_MAX;
+  int asns = 0;
   for (int c=0; c<cell_data->ncells; c++) {
     const gsl_matrix cell = celldata_get_cell (cell_data, c);
-    const double rmsd = naive_3d_rmsd (&cell, frame->coords);
-    printf ("~> rmsd[%d]: %.3f\n", c, rmsd);
+    const double rmsd = compute_rmsd (&cell, frame->coords);
+    printf ("~~> rmsd[%5d]: %8.5f\n", c, rmsd);
     if (rmsd < minrmsd) {
       minrmsd = rmsd;
       assignment = c;
-    }
-  }
+      asns ++;
+    } }
+  printf ("~> Assignment: %d jumps: %d\n", assignment, asns);
 
-  printf ("~> Assignment: %d\n", assignment);
 
   FILE *out = fopen (out_file, "w");
   if (out == NULL) {
@@ -47,4 +52,5 @@ int main (int argc, char *argv[]) {
   fclose (out);
 
   exit (EXIT_SUCCESS);
+
 }

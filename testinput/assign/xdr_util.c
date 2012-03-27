@@ -3,19 +3,21 @@
 #include "xdr_util.h"
 
 void xdrframe_printsummary (const xdrframe* frame) {
-  printf ("~> <xdrframe: natoms = %lu matrix = %lu X %lu>\n", frame->natoms, frame->coords->size1, frame->coords->size2);
+  printf ("~> <xdrframe: natoms = %lu matrix = %lu X %lu>", frame->natoms, frame->coords->size1, frame->coords->size2);
 }
 
 void xdrframe_printf (const xdrframe* frame) {
+  xdrframe_printsummary (frame);
+  printf ("{\n");
   for (int i=0; i<frame->coords->size1; i++){
-    printf ("  [ ");
+    printf ("    [ ");
     for (int j=0; j<frame->coords->size2; j++){
       printf ("%.3f ", gsl_matrix_get (frame->coords, i, j));
     }
     printf ("]\n");
   }
+  printf ("}\n");
 }
-
 
 xdrframe* xdrframe_alloc () {
   return (xdrframe*) malloc (sizeof(xdrframe));
@@ -76,10 +78,6 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame) {
   xdrframe_init (frame, natoms);
   xdrframe_from_rvec (x, *frame);
 
-  // convert to Angstroms
-  gsl_matrix_scale ((*frame)->coords, 10);
-
   return 42;
 
 }
-

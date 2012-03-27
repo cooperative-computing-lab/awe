@@ -30,7 +30,7 @@ void theodata_printf_all (const theodata* theo) {
   for (int r=0; r<theo->ndim; r++) {
     printf ("%3s[", " ");
     for (int c=0; c<theo->npad; c++) {
-      printf ("%.3f ", theodata_get (theo, r, c));
+      printf ("%.3f, ", theodata_get (theo, r, c));
     }
     printf ("]\n");
   }
@@ -102,18 +102,23 @@ exit_t center_structure (gsl_matrix* mat) {
 
 double calculate_theo_g (const gsl_matrix* mat) {
 
-  double ssqrs = 0;
+  double G = 0;
   for (int d=0; d<mat->size2; d++) {
     const gsl_vector_const_view col = gsl_matrix_const_column (mat, d);
-    for (int i=0; i<col.vector.size; i++) {
-      double s = gsl_vector_get (&col.vector, i);
-      s *= s;
+    double dot = 0;
+    gsl_blas_ddot (&col.vector, &col.vector, &dot);
+    G += dot;
+  }
 
-      // sum of squares
-      ssqrs += s;
-    }}
+    /* for (int i=0; i<col.vector.size; i++) { */
+    /*   double s = gsl_vector_get (&col.vector, i); */
+    /*   s *= s; */
 
-  return ssqrs;
+    /*   // sum of squares */
+    /*   ssqrs += s; */
+    /* }} */
+
+  return G; // ssqrs;
 }
 
 double theo_rmsd (const theodata* theo1, const theodata* theo2) {
@@ -122,7 +127,8 @@ double theo_rmsd (const theodata* theo1, const theodata* theo2) {
   assert (theo1->npad	== theo2->npad);
   assert (theo1->ndim	== theo2->ndim);
 
-  return ls_rmsd2_aligned_T_g (theo1->nreal, theo1->npad, theo1->npad, theo1->coords, theo2->coords, theo1->g, theo2->g);
+  const double msd = ls_rmsd2_aligned_T_g (theo1->nreal, theo1->npad, theo1->npad, theo1->coords, theo2->coords, theo1->g, theo2->g);
+  return sqrt (msd);
 }
 
 
@@ -131,10 +137,15 @@ double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
 
   prepare_data (m1, &theo1);
   prepare_data (m2, &theo2);
+
+  /* theodata_printf_all (theo1); */
+  /* theodata_printf_all (theo2); */
+
   return theo_rmsd (theo1, theo2);
 }
 
 
+/** DO NOT USE */
 double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
 
   /** http://cnx.org/content/m11608/latest/ */
@@ -234,7 +245,7 @@ double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
     gsl_vector_sub (&x.vector, &y.vector);
     double dot = 0.0;
     gsl_blas_ddot (&x.vector, &x.vector, &dot);
-    sum_squares += sqrt (dot);
+    sum_squares += dot;
   }
   const double rmsd = sqrt (sum_squares / N);
 
