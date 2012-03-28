@@ -9,4 +9,3 @@ assign
 check-result
 package
 cleanup
-exit 1
