@@ -6,7 +6,8 @@ import numpy as np
 import os
 
 cfg = awe.workqueue.Config()
-cfg.name = 'awe-badi'
+cfg.name = None # 'awe-badi'
+cfg.port = 9001
 cfg.fastabort = 3
 cfg.restarts = 0 # float('inf')
 
@@ -15,9 +16,15 @@ cfg.restarts = 0 # float('inf')
 
 cfg.execute('testinput/execute-task.sh')
 
+cfg.cache('binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('binaries/$OS-$ARCH/grompp')
+cfg.cache('binaries/$OS-$ARCH/mdrun')
+cfg.cache('binaries/$OS-$ARCH/assign')
+
+cfg.cache('testinput/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
-cfg.cache('testinput/Gens.lh5')
+cfg.cache('testinput/cells.dat')
 cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
@@ -35,6 +42,7 @@ partition.add(1, *range(50,100))
 
 print 'Loading cells and walkers'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
+srcdir = 'cell-definitions'
 for i in xrange(nstates):
 
     if i < nstates / 3:

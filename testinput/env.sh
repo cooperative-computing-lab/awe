@@ -1,17 +1,20 @@
 
+set -o errexit
+set -o verbose
 
 CONF_IN=structure.pdb
 CONF_OUT=structure2.pdb
 ASSIGNMENT=cell2.dat
+DESIRED_FILES="$CONF_OUT $ASSIGNMENT"
 RESULTFILE=results.tar
 WALKER=walker.pkl
-CLEANUP="Data output Trajectories ProjectInfo.h5 frame* *.tpr"
+CLEANUP="traj* *.tpr"
 
-source /afs/crc.nd.edu/user/c/cabdulwa/.bash_modules
-module load gromacs/4.5.3
-module load msmbuilder/lcls/2.1.1
-export OMP_NUM_THREADS=1
-export GMX_MAX_BACKUP=-1
+### disable gmx automatic backups.
+export GMX_MAXBACKUP=-1
+### access the topologies sent to the worker
+export GMXLIB=$PWD/gmxtopologies
+### assume each worker is allocated one processor
 NPROCS=1
 
 puts() {
@@ -19,9 +22,14 @@ puts() {
 	echo "[worker] $@"
 }
 
-whereami() {
-	puts "My locations:"
-	hostname
+prelude() {
+        puts "Prelude: current environment"
+	env
+	puts "Prelude: uname -a"
+	uname -a
+	puts "Prelude: bash options"
+	set -o
+	echo
 }
 
 check-initial() {
@@ -32,32 +40,23 @@ check-initial() {
 
 run-md() {
 	puts "Running simulation"
-	pdb2gmx -f $CONF_IN -ff amber96 -water none
-	grompp -f sim.mdp
-	mdrun -s topol.tpr -c $CONF_OUT -deffnm frame0 -nt $NPROCS
-	echo
-}
-
-setup-msmbuilder() {
-	puts "Prepping for MSMBuilder"
-	mkdir -p output/traj
-	mv *.xtc output/traj
-	mkdir -v Data
-	cp -v Gens.lh5 Data
+	echo $GMXLIB
+	./pdb2gmx -f $CONF_IN -ff amber96 -water none
+	./grompp -f sim.mdp
+	./mdrun -s topol.tpr -c $CONF_OUT -nt $NPROCS
 	echo
 }
 
 assign() {
 	puts "Assigning trajectory"
-	ConvertDataToHDF.py -s state0.pdb -I output
-	Assign.py
-	ConvertAssignToText.py
-	tail -1 Data/discrete.traj > $ASSIGNMENT
+	./assign cells.dat traj.xtc AtomIndices.dat $ASSIGNMENT
 	echo
 }
 
 check-result() {
-	puts "Checking if result files exist"
+        puts "Generated files:"
+	ls
+	puts "Checking if result files ($DESIRED_FILES) exist"
 	ls $CONF_OUT $ASSIGNMENT
 	echo
 }
