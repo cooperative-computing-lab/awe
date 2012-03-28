@@ -6,9 +6,9 @@ import numpy as np
 import os
 
 cfg = awe.workqueue.Config()
-cfg.name = None # 'awe-badi'
+cfg.name = 'awe-badi'
 cfg.port = 9001
-cfg.fastabort = 3
+cfg.fastabort = 9
 cfg.restarts = 0 # float('inf')
 
 
@@ -29,8 +29,8 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 5
-nwalkers   = 2
+iterations = 1000
+nwalkers   = 40
 nstates    = 100
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
@@ -41,8 +41,8 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 srcdir = 'cell-definitions'
+srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 for i in xrange(nstates):
 
     if i < nstates / 3:
@@ -70,7 +70,10 @@ resample = awe.resample.SaveWeights(multicolor)
 adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
-                    resample   = resample)
+                    resample   = resample,
+                    statsdir   = '/tmp/awe-stats',
+                    checkpointfile = '/tmp/awe-checkpoint.dat',
+                    checkpointfreq = 100)
 
 adaptive.run()
 
