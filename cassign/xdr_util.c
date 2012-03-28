@@ -3,7 +3,7 @@
 #include "xdr_util.h"
 
 void xdrframe_printsummary (const xdrframe* frame) {
-  printf ("~> <xdrframe: natoms = %lu matrix = %lu X %lu>", frame->natoms, frame->coords->size1, frame->coords->size2);
+  printf ("<xdrframe: natoms = %lu matrix = %lu X %lu>", frame->natoms, frame->coords->size1, frame->coords->size2);
 }
 
 void xdrframe_printf (const xdrframe* frame) {
@@ -130,7 +130,6 @@ exit_t xdrframe_load_atomindices (const char *mndxpath, gsl_vector **target) {
     int count = fscanf (mndx, "%d", &ndx);
     if (count == 1) {
       gsl_vector_set (*target, i, (int)ndx);
-      printf ("[i] = %f\n", gsl_vector_get (*target, i));
       i++;
     }
     else if ( count > 1 ) {

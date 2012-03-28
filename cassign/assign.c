@@ -5,10 +5,10 @@
 int main (int argc, char *argv[]) {
 
   const char
-    *cells_file = /*argv[1], */ "Gens.dat",
-    *xtc_file   = /*argv[2], */ "traj.xtc",
-    *mndx_file  = /*argv[3], */ "AtomIndices.dat",
-    *out_file   = /*argv[4]; */ "asn.dat";
+    *cells_file = argv[1], //"Gens.dat",
+    *xtc_file   = argv[2], //"traj.xtc",
+    *mndx_file  = argv[3], // "AtomIndices.dat",
+    *out_file   = argv[4]; // "cell2.dat";
 
   printf ("~> Cells file: %s\n", cells_file);
   printf ("~> Xtc file: %s\n", xtc_file);
@@ -19,24 +19,32 @@ int main (int argc, char *argv[]) {
 
   celldata_load_file (cells_file, &cell_data);
 
-  celldata_printf (cell_data);
+  printf ("~> Loaded cells: ");
+  celldata_printinfo (cell_data);
+  printf ("\n");
 
   xdrframe_last_in_xtc (xtc_file, &frame);
 
   xdrframe_printsummary (frame);
-  xdrframe_printf (frame);
+  printf ("\n");
+  /* xdrframe_printf (frame); */
 
   xdrframe_load_atomindices (mndx_file, &atomindices);
+  printf ("~> Atom Indices: ");
   gsl_vector_printf (atomindices);
+  printf ("\n");
 
   celldata *newcells;
   xdrframe *newframe;
   celldata_get_rows (cell_data, atomindices, &newcells);
   xdrframe_select_atoms (frame, atomindices, &newframe);
 
-  celldata_printf (newcells);
-  xdrframe_printf (newframe);
-
+  printf ("~> Using: ");
+  celldata_printinfo (newcells);
+  printf ("\n");
+  printf ("~> Using: ");
+  xdrframe_printsummary (newframe);
+  printf ("\n");
   
 
   printf ("~> Computing rmsds...\n");
@@ -60,6 +68,7 @@ int main (int argc, char *argv[]) {
   printf ("~> minrmsd: %f maxrmsd: %f\n", minrmsd, maxrmsd);
 
 
+  printf ("~> Saving assignment to: %s\n", out_file);
   FILE *out = fopen (out_file, "w");
   if (out == NULL) {
     char emsg[50];
