@@ -227,6 +227,13 @@ class WorkQueue(object):
     def wait(self, *args, **kws):
         return self.wq.wait(*args, **kws)
 
+    def taskoutput(self, task):
+        output = task.output or ''
+        output = ('\n' + output).split('\n')
+        output = '\n\t'.join(output)
+        return output
+
+
 
     def recv(self, marshall):
 
@@ -240,13 +247,9 @@ class WorkQueue(object):
 
                 # print time.asctime(), 'recived task', task.tag, task.return_status
 
-                output = task.output or ''
-                output = ('\n' + output).split('\n')
-                output = '\n\t'.join(output)
-
                 if not task.return_status == 0 and not self.restart(task):
                     raise WorkQueueWorkerException, \
-                        output + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
+                        self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
                 self.update_task_stats(task)
 
@@ -258,7 +261,7 @@ class WorkQueue(object):
                     ##+ attempt to restart these
                     if not self.restart(task):
                         raise WorkQueueException, \
-                            output + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
+                            self.taskoutput(task) + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
                             (ex.__class__.__name__, ex, traceback.format_exc())
                     else:
                         continue
@@ -269,6 +272,7 @@ class WorkQueue(object):
                 ### TODO: issue #32: keep track of task failure
 
                 if not self.restart(task):
-                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions'
+                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions\n\n%s' % \
+                        self.taskoutput(task)
 
             else: continue

@@ -153,7 +153,9 @@ class AWE(object):
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
-    def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None):
+    def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
+                 statsdir = 'stats',
+                 checkpointfile='checkpoint', checkpointfreq=1):
 
         self.wq         = workqueue.WorkQueue(wqconfig)
         self.system     = system
@@ -163,10 +165,10 @@ class AWE(object):
         self.iteration  = 0
 
         self.stats      = stats.AWEStats()
-        self.statsdir   = 'stats'
+        self.statsdir   = statsdir
 
-        self.checkpointfile = 'checkpoint'
-        self.checkpointfreq = 1
+        self.checkpointfile = checkpointfile
+        self.checkpointfreq = checkpointfreq
 
 
     def checkpoint(self, path):

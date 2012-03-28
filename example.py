@@ -7,25 +7,30 @@ import os
 
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
-cfg.fastabort = 3
-cfg.restarts = float('inf')
+cfg.port = 9001
+cfg.fastabort = 9
+cfg.restarts = 0 # float('inf')
 
 
-cfg.execute('test.exe')
+# cfg.execute('test.exe')
 
-# cfg.execute('testinput/execute-task.sh')
+cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('testinput/protomol.conf')
-cfg.cache('testinput/topol.tpr')
-cfg.cache('testinput/with-env')
+cfg.cache('binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('binaries/$OS-$ARCH/grompp')
+cfg.cache('binaries/$OS-$ARCH/mdrun')
+cfg.cache('binaries/$OS-$ARCH/assign')
+
+cfg.cache('testinput/gmxtopologies')
+cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
-cfg.cache('testinput/Gens.lh5')
+cfg.cache('testinput/cells.dat')
 cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 5
-nwalkers   = 2
+iterations = 1000
+nwalkers   = 40
 nstates    = 100
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
@@ -36,6 +41,7 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
+srcdir = 'cell-definitions'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 for i in xrange(nstates):
 
@@ -64,7 +70,10 @@ resample = awe.resample.SaveWeights(multicolor)
 adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
-                    resample   = resample)
+                    resample   = resample,
+                    statsdir   = '/tmp/awe-stats',
+                    checkpointfile = '/tmp/awe-checkpoint.dat',
+                    checkpointfreq = 100)
 
 adaptive.run()
 

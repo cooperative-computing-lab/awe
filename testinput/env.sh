@@ -1,35 +1,76 @@
 
+set -o errexit
+set -o verbose
 
-export LD_LIBRARY_PATH=/afs/crc.nd.edu/x86_64_linux/Modules/tcltk/current/lib/:/afs/crc.nd.edu/x86_64_linux/Modules/tcltk/current/lib/tclx8.4/:$LD_LIBRARY_PATH
+CONF_IN=structure.pdb
+CONF_OUT=structure2.pdb
+ASSIGNMENT=cell2.dat
+DESIRED_FILES="$CONF_OUT $ASSIGNMENT"
+RESULTFILE=results.tar
+WALKER=walker.pkl
+CLEANUP="traj* *.tpr"
 
+### disable gmx automatic backups.
+export GMX_MAXBACKUP=-1
+### access the topologies sent to the worker
+export GMXLIB=$PWD/gmxtopologies
+### assume each worker is allocated one processor
+NPROCS=1
 
-echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-ldd /afs/crc.nd.edu/x86_64_linux/Modules/3.2.6/bin/modulecmd
-echo '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-
-
-echo '++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-env
-echo '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'
-
-MODULESHOME=/afs/crc.nd.edu/x86_64_linux/Modules/3.2.6
-function module()
-{
-    eval $($MODULESHOME/bin/modulecmd sh $*)
+puts() {
+	echo "================================================================================"
+	echo "[worker] $@"
 }
 
-MODULEFILES=(/opt/crc/Modules/modulefiles /afs/nd.edu/user37/ccl/software/modulefiles /afs/crc.nd.edu/user/c/cabdulwa/Public/modulefiles /afs/crc.nd.edu/user/i/izaguirr/Public/modulefiles)
-for m in ${MODULEFILES[@]}; do
-	echo "Using module system in $m"
-	module use $m
-done
+prelude() {
+        puts "Prelude: current environment"
+	env
+	puts "Prelude: uname -a"
+	uname -a
+	puts "Prelude: bash options"
+	set -o
+	echo
+}
 
-modules=(epd gromacs/4.5.3 msmbuilder/env2)
+check-initial() {
+	puts "Initial file listing"
+	ls
+	echo
+}
 
-for m in ${modules[@]}; do
-	echo "Loaded module $m"
-	module load $m
-done
+run-md() {
+	puts "Running simulation"
+	echo $GMXLIB
+	./pdb2gmx -f $CONF_IN -ff amber96 -water none
+	./grompp -f sim.mdp
+	./mdrun -s topol.tpr -c $CONF_OUT -nt $NPROCS
+	echo
+}
 
-export OMP_NUM_THREADS=1
+assign() {
+	puts "Assigning trajectory"
+	./assign cells.dat traj.xtc AtomIndices.dat $ASSIGNMENT
+	echo
+}
+
+check-result() {
+        puts "Generated files:"
+	ls
+	puts "Checking if result files ($DESIRED_FILES) exist"
+	ls $CONF_OUT $ASSIGNMENT
+	echo
+}
+
+package() {
+	puts "Packaging results"
+	tar cvf $RESULTFILE $CONF_OUT $ASSIGNMENT $WALKER
+	ls $RESULTFILE
+	echo
+}
+
+cleanup() {
+	puts "Cleaning up"
+	rm -rv $CLEANUP
+	echo
+}
 
