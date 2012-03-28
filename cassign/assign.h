@@ -19,7 +19,6 @@
 
 
 
-int load_data (const char* path, celldata* data);
 
 
 

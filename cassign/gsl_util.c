@@ -36,3 +36,16 @@ void gsl_matrix_printf (const gsl_matrix* mat) {
   }
   printf ("}\n");
 }
+
+exit_t gsl_matrix_get_rows (const gsl_matrix *mat, const gsl_vector *indices, gsl_matrix **result) {
+  assert (indices->size < mat->size1);
+
+  *result = gsl_matrix_alloc (indices->size, mat->size2);
+  for (int i=0; i<indices->size; i++) {
+    const size_t r = gsl_vector_get (indices, i);
+    for (int c=0; c<mat->size2; c++) {
+      const double val = gsl_matrix_get (mat, r, c);
+      gsl_matrix_set (*result, i, c, val);
+    }}
+  return exitOK;
+}

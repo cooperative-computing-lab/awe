@@ -140,4 +140,32 @@ exit_t celldata_load_file (const char* path, celldata** data) {
   return exitOK;
 }
 
+exit_t celldata_set_cell (celldata *celldata, const size_t c, const cell_t *cell) {
+  assert (c < celldata->ncells);
+  assert (cell->size1 == celldata->ncoords);
+  assert (cell->size2 == celldata->ndims);
+
+  for (int r=0; r<celldata->ncoords; r++) {
+    for (int col=0; col<celldata->ndims; col++) {
+      const double v = gsl_matrix_get (cell, r, col);
+      celldata_set_value (celldata, c, r, col, v);
+    }}
+
+  return exitOK;
+}
+
+exit_t celldata_get_rows (const celldata *cells, const vector_t *atomindices, celldata **newcells) {
+  assert (atomindices->size < cells->ncoords);
+  celldata_init (newcells, cells->ncells, atomindices->size, cells->ndims);
+
+  for (int cid=0; cid<cells->ncells; cid++) {
+    const cell_t oldcell = celldata_get_cell (cells, cid);
+    cell_t *newcell;
+    gsl_matrix_get_rows (&oldcell, atomindices, &newcell);
+    celldata_set_cell (*newcells, cid, newcell);
+  }
+
+  return exitOK;
+}  
+
 #endif
