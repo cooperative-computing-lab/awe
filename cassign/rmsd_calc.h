@@ -57,7 +57,7 @@ double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
 double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2);
 
-double kabsch_function (const gsl_matrix *P, const gsl_matrix *Q);
+exit_t kabsch_function (const gsl_matrix *P, const gsl_matrix *Q, gsl_matrix **U, gsl_matrix **r, double *rmsd);
 
 /* Compute the G value for input into TheoRMSD */
 double calculate_theo_g (const gsl_matrix* mat);

@@ -164,17 +164,20 @@ double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2) {
 
 
   gsl_matrix *U, *t;
-  const double rmsd = kabsch_function (P, Q);
+  double rmsd;
+  kabsch_function (P, Q, &U, &t, &rmsd);
 
   gsl_matrix_free (P);
   gsl_matrix_free (Q);
+  gsl_matrix_free (U);
+  gsl_matrix_free (t);
 
   return rmsd;
 
 }  
 
 
-double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
+exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U, gsl_matrix **r, double *rmsd) {
 
   assert (A->size1 == B->size1);
   assert (A->size2 == B->size2);
@@ -321,10 +324,10 @@ double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
 
 
   // U = W*I*V'
-  gsl_matrix *U = gsl_matrix_calloc (D, D);
+  *U = gsl_matrix_calloc (D, D);
   mtmp = gsl_matrix_calloc (D,D);
   gsl_blas_dgemm (CblasNoTrans, CblasTrans, 1.0, I, V, 0.0, mtmp);
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, W, mtmp, 1.0, U);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, W, mtmp, 1.0, *U);
   /* OK: U:    [-0.446 -0.756 -0.479 ]
                [0.601 0.144 -0.786 ]
 	       [0.663 -0.638 0.391 ]
@@ -336,11 +339,11 @@ double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
 
   // r : a D-dimensional column vector, representing the translation
   // r = q0 - U*p0
-  gsl_matrix *r		= gsl_matrix_calloc (D, 1);
+  *r    		= gsl_matrix_calloc (D, 1);
   mtmp			= gsl_matrix_calloc (D, 1);
-  gsl_matrix_memcpy       (r, q0)                 ;                  // gsl_matrix_sub clobbers 1st parameter
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, p0, 0.0, mtmp);
-  gsl_matrix_sub (r, mtmp);
+  gsl_matrix_memcpy       (*r, q0)                 ;                  // gsl_matrix_sub clobbers 1st parameter
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, *U, p0, 0.0, mtmp);
+  gsl_matrix_sub (*r, mtmp);
   /* OK: r:    [-3.557 ]
                [3.489 ]
 	       [8.925 ]
@@ -351,7 +354,7 @@ double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
 
   // diff = U*P - Q
   gsl_matrix *diff = gsl_matrix_calloc (D, N);
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, P, 1.0, diff);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, *U, P, 1.0, diff);
   gsl_matrix_sub(diff, Q);
   /* OK:    [-0.040 0.023 0.004 0.106 0.031 0.051 0.018 0.000 0.027 0.049 -0.001 -0.005 0.001 0.000 0.025 0.082 -0.051 -0.087 -0.058 -0.008 -0.029 -0.139 ]
             [0.000 0.043 0.157 -0.034 0.080 0.205 -0.036 -0.134 -0.047 -0.054 -0.058 -0.055 -0.054 -0.055 -0.049 -0.114 0.024 0.045 0.031 -0.002 -0.004 0.110 ]
@@ -371,7 +374,7 @@ double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
     lrms = lrms + gsl_matrix_get (m, 0, i) * dot;
   }
 
-  const double rmsd = sqrt (lrms);
+  *rmsd = sqrt (lrms);
 
 
 
@@ -388,12 +391,10 @@ double kabsch_function (const gsl_matrix *A, const gsl_matrix *B) {
   gsl_vector_free (work);
   gsl_matrix_free (V);
   gsl_matrix_free (I);
-  gsl_matrix_free (U);
-  gsl_matrix_free (r);
   gsl_matrix_free (diff);
 
 
-  return rmsd;
+  return exitOK;
 
 
 }
