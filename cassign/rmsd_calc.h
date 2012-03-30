@@ -55,11 +55,14 @@ exit_t flatten (const gsl_matrix* mat, gsl_vector* vec);
 
 double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
+double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2);
+
+double kabsch_function (const gsl_matrix *P, const gsl_matrix *Q);
+
 /* Compute the G value for input into TheoRMSD */
 double calculate_theo_g (const gsl_matrix* mat);
 
 double theo_rmsd (const theodata* theo1, const theodata* theo2);
 
-double naive_3d_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
 #endif

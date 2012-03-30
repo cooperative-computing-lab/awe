@@ -5,10 +5,10 @@
 int main (int argc, char *argv[]) {
 
   const char
-    *cells_file = argv[1], //"Gens.dat",
-    *xtc_file   = argv[2], //"traj.xtc",
-    *mndx_file  = argv[3], // "AtomIndices.dat",
-    *out_file   = argv[4]; // "cell2.dat";
+    *cells_file = /*argv[1], */"Gens.dat",
+    *xtc_file   = /*argv[2], */"traj.xtc",
+    *mndx_file  = /*argv[3], */ "AtomIndices.dat",
+    *out_file   = /*argv[4]; */ "cell2.dat";
 
   printf ("~> Cells file: %s\n", cells_file);
   printf ("~> Xtc file: %s\n", xtc_file);
@@ -34,10 +34,10 @@ int main (int argc, char *argv[]) {
   gsl_vector_printf (atomindices);
   printf ("\n");
 
-  celldata *newcells;
-  xdrframe *newframe;
-  celldata_get_rows (cell_data, atomindices, &newcells);
-  xdrframe_select_atoms (frame, atomindices, &newframe);
+  celldata *newcells = cell_data;
+  xdrframe *newframe = frame;
+  /* celldata_get_rows (cell_data, atomindices, &newcells); */
+  /* xdrframe_select_atoms (frame, atomindices, &newframe); */
 
   printf ("~> Using: ");
   celldata_printinfo (newcells);
@@ -55,7 +55,8 @@ int main (int argc, char *argv[]) {
   int asns = 0;
   for (int c=0; c<cell_data->ncells; c++) {
     const gsl_matrix cell = celldata_get_cell (newcells, c);
-    const double rmsd = compute_rmsd (&cell, newframe->coords);
+    const gsl_matrix *coords = newframe->coords;
+    const double rmsd = compute_rmsd (&cell, coords);
     printf ("~~> rmsd[%5d]: %8.5f\n", c, rmsd);
     if (rmsd < minrmsd) {
       minrmsd = rmsd;

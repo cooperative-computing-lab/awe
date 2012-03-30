@@ -11,45 +11,30 @@ OBJS = $(CODE:.c=.o)
 COMPILE = $(CC) $(CFLAGS) -c
 
 
-kabsch : gsl_util.o new_rmsd.o kabsch.o
-	$(CC) kabsch.o gsl_util.o new_rmsd.o $(LDFLAGS) -o kabsch
 
-kabsch.o : kabsch.c
-	$(COMPILE) kabsch.c
+assign : $(OBJS)
+	$(CC) $(OBJS) $(LDFLAGS) -o assign
 
-new_rmsd.o : new_rmsd.c new_rmsd.h
-	$(COMPILE) new_rmsd.c
+assign.o : assign.c assign.h
+	$(COMPILE) assign.c
+
+celldata.o : celldata.c celldata.h
+	$(COMPILE) celldata.c
+
+xdr_util.o : xdr_util.c xdr_util.h
+	$(COMPILE) xdr_util.c
+
+exit_codes.o : exit_codes.c exit_codes.h
+	$(COMPILE) exit_codes.c
+
+rmsd_calc.o : rmsd_calc.c rmsd_calc.h
+	$(COMPILE) rmsd_calc.c
+
+theobald_rmsd.o : theobald_rmsd.c theobald_rmsd.h
+	$(COMPILE) theobald_rmsd.c
 
 gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
-clean:
-	rm *.o kabsch
-
-
-# assign : $(OBJS)
-# 	$(CC) $(OBJS) $(LDFLAGS) -o assign
-
-# assign.o : assign.c assign.h
-# 	$(COMPILE) assign.c
-
-# celldata.o : celldata.c celldata.h
-# 	$(COMPILE) celldata.c
-
-# xdr_util.o : xdr_util.c xdr_util.h
-# 	$(COMPILE) xdr_util.c
-
-# exit_codes.o : exit_codes.c exit_codes.h
-# 	$(COMPILE) exit_codes.c
-
-# rmsd_calc.o : rmsd_calc.c rmsd_calc.h
-# 	$(COMPILE) rmsd_calc.c
-
-# theobald_rmsd.o : theobald_rmsd.c theobald_rmsd.h
-# 	$(COMPILE) theobald_rmsd.c
-
-# gsl_util.o : gsl_util.c gsl_util.h
-# 	$(COMPILE) gsl_util.c
-
-# clean :
-# 	rm *.o assign
+clean :
+	rm *.o assign
