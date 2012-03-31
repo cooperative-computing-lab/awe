@@ -84,7 +84,7 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame) {
 
 
 exit_t xdrframe_select_atoms (const xdrframe *frame, const gsl_vector *indices, xdrframe **newframe) {
-  assert (indices->size <frame->natoms);
+  assert (indices->size <= frame->natoms);
 
   xdrframe_init (newframe, indices->size);
   gsl_matrix_get_rows (frame->coords, indices, &(*newframe)->coords);

@@ -38,7 +38,7 @@ void gsl_matrix_printf (const gsl_matrix* mat) {
 }
 
 exit_t gsl_matrix_get_rows (const gsl_matrix *mat, const gsl_vector *indices, gsl_matrix **result) {
-  assert (indices->size < mat->size1);
+  assert (indices->size <= mat->size1);
 
   *result = gsl_matrix_alloc (indices->size, mat->size2);
   for (int i=0; i<indices->size; i++) {
