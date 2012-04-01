@@ -72,6 +72,10 @@ int main (int argc, char *argv[]) {
 
   celldata_load_file (cells_file, &cell_data);
   load_atomindices (cell_ndx_file, &cell_indices);
+  printf ("~> Cell Atom Indices: ");
+  gsl_vector_printf (cell_indices);
+  printf ("\n");
+
 
   printf ("~> Loaded cells: ");
   celldata_printinfo (cell_data);
@@ -81,10 +85,9 @@ int main (int argc, char *argv[]) {
 
   xdrframe_printsummary (frame);
   printf ("\n");
-  /* xdrframe_printf (frame); */
 
   load_atomindices (xtc_ndx_file, &xtc_indices);
-  printf ("~> Atom Indices: ");
+  printf ("~> XTC Atom Indices: ");
   gsl_vector_printf (xtc_indices);
   printf ("\n");
 
@@ -116,7 +119,7 @@ int main (int argc, char *argv[]) {
     const gsl_matrix cell = celldata_get_cell (newcells, c);
     const gsl_matrix *coords = newframe->coords;
     const double rmsd = compute_rmsd (&cell, coords);
-    printf ("~~> rmsd[%5d]: %8.5f\n", c, rmsd);
+    printf ("~~> rmsd to cell %3d: %8.5f\n", c, rmsd);
     if (rmsd < minrmsd) {
       minrmsd = rmsd;
       assignment = c;
