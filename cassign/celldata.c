@@ -155,7 +155,7 @@ exit_t celldata_set_cell (celldata *celldata, const size_t c, const cell_t *cell
 }
 
 exit_t celldata_get_rows (const celldata *cells, const vector_t *atomindices, celldata **newcells) {
-  assert (atomindices->size < cells->ncoords);
+  assert (atomindices->size <= cells->ncoords);
   celldata_init (newcells, cells->ncells, atomindices->size, cells->ndims);
 
   for (int cid=0; cid<cells->ncells; cid++) {

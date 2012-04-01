@@ -32,8 +32,6 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame);
 
 exit_t xdrframe_select_atoms (const xdrframe *frame, const gsl_vector *indices, xdrframe **newframe);
 
-exit_t xdrframe_load_atomindices (const char *mndxpath, gsl_vector **target);
-
 void xdrframe_printsummary (const xdrframe* frame);
 void xdrframe_printf (const xdrframe* frame);
 

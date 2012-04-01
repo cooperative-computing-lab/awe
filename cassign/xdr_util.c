@@ -84,63 +84,9 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame) {
 
 
 exit_t xdrframe_select_atoms (const xdrframe *frame, const gsl_vector *indices, xdrframe **newframe) {
-  assert (indices->size <frame->natoms);
+  assert (indices->size <= frame->natoms);
 
   xdrframe_init (newframe, indices->size);
   gsl_matrix_get_rows (frame->coords, indices, &(*newframe)->coords);
   return exitOK;
-}
-
-
-exit_t xdrframe_load_atomindices (const char *mndxpath, gsl_vector **target) {
-  /** 1) get the number of lines the file
-      2) allocate the vector
-      3) reread the file
-
-      This access the file twice, buf unfortunately, I'm not (yet)
-      aware of any standard list datastructure for C, and am willing
-      to accept the redundancy at the moment
-  */
-
-  exit_t status = exitOK;
-
-  const int BUFFER_SIZE = 100;
-  char buffer[BUFFER_SIZE];
-  int linecount = 0;
-  size_t ndx;
-
-  FILE *mndx = fopen (mndxpath, "r");
-  if (mndx == NULL) { return exitPATH_NOT_FOUND; }
-
-  while ( ! feof (mndx) ) {
-    int count = fscanf (mndx, "%d", &ndx);
-    if (count == 1)
-      { linecount ++; }
-  }
-
-  fclose (mndx);
-  if ( ! status == exitOK ) { return status; }
-
-  mndx = fopen (mndxpath, "r");
-
-  *target = gsl_vector_calloc (linecount);
-  size_t i = 0;
-
-  while ( ! feof (mndx) ) {
-    int count = fscanf (mndx, "%d", &ndx);
-    if (count == 1) {
-      gsl_vector_set (*target, i, (int)ndx);
-      i++;
-    }
-    else if ( count > 1 ) {
-      perror ("Atom indices file incorrectly formatted");
-      status = exitFAILURE;
-      break;
-    }
-    else { break; }
-  }
-
-  fclose (mndx);
-
-  return status;
 }

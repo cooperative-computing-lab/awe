@@ -1,200 +1,26 @@
-
-#include "rmsd_calc.h"
-
+#include "new_rmsd.h"
 
 
-theodata* theodata_alloc () {
-  return (theodata*) malloc (sizeof(theodata));
-}
+double rmsd (const gsl_matrix *A, const gsl_matrix *B) {
 
-exit_t theodata_init (const size_t nreal, const size_t ndim, theodata** theo) {
-  const size_t npad = 4 + nreal - nreal % 4;
+  assert (A->size1 == 22);
+  assert (A->size2 == 3);
 
-  *theo = theodata_alloc ();
-  (*theo)->nreal = nreal;
-  (*theo)->npad  = npad;
-  (*theo)->ndim  = ndim;
-  (*theo)->coords = (float*) calloc (ndim * npad, sizeof(float));
+  assert (A->size1 == B->size1);
+  assert (A->size2 == B->size2);
 
-  return exitOK;
-}
-
-void theodata_printf (const theodata* theo) {
-  printf ("<theodata: nreal = %lu npad = %lu ndim = %lu G = %.3f>",
-	  theo->nreal, theo->npad, theo->ndim, theo->g);
-}
-
-void theodata_printf_all (const theodata* theo) {
-  theodata_printf (theo);
-  printf ("{\n");
-  for (int r=0; r<theo->ndim; r++) {
-    printf ("%3s[", " ");
-    for (int c=0; c<theo->npad; c++) {
-      printf ("%.3f, ", theodata_get (theo, r, c));
-    }
-    printf ("]\n");
-  }
-  printf ("}\n");
-}
-
-exit_t prepare_data (const gsl_matrix* mat, theodata** theo) {
-  size_t
-    Rs = mat->size1,
-    Cs = mat->size2;
-
-  gsl_matrix* mat2 = gsl_matrix_calloc (Rs, Cs);
-  theodata_init (Rs, Cs, theo);
-
-
-  gsl_matrix_memcpy (mat2, mat);
-  center_structure (mat2);
-
-  const double G = calculate_theo_g (mat2);
-  (*theo)->g = G;
-
-  for (int r=0; r<Rs; r++) {
-    for (int c=0; c<Cs; c++) {
-      const float v = (float) gsl_matrix_get (mat2, r, c);
-      theodata_set ((*theo), c, r, v);
-    }}
-
-  gsl_matrix_free (mat2);
-
-  return exitOK;
-}
-
-size_t theodata_ix (const theodata* theo, const size_t dim, const size_t coord) {
-  return dim * theo->npad + coord;
-}
-
-exit_t theodata_set (theodata* theo, const size_t dim, const size_t coord, const float val) {
-  const size_t ix = theodata_ix (theo, dim, coord);
-  theo->coords[ix] = val;
-  return exitOK;
-}
-
-float theodata_get (const theodata* theo, const size_t dim, const size_t coord) {
-  const size_t ix = theodata_ix (theo, dim, coord);
-  return theo->coords[ix];
-}
-
-exit_t center_structure (gsl_matrix* mat) {
-
-  // compute the mean along each axis (column)
-  gsl_vector means = *gsl_vector_calloc (mat->size2);
-  for (int d=0; d<mat->size2; d++) {
-    const gsl_vector_const_view view = gsl_matrix_const_column (mat, d);
-    const double mean = gsl_stats_mean (view.vector.data, view.vector.stride, view.vector.size);
-    gsl_vector_set (&means, d, mean);
-  }
-
-  // center the coordinates
-  for (int r=0; r<mat->size1; r++) {
-    for (int d=0; d<mat->size2; d++) {
-      const double m = gsl_vector_get (&means, d);
-      const double v0 = gsl_matrix_get (mat, r, d);
-      const double v1 = v0 - m;
-      gsl_matrix_set (mat, r, d, v1);
-    }}
-
-  return exitOK;
-}
-
-double calculate_theo_g (const gsl_matrix* mat) {
-
-  double G = 0;
-  for (int d=0; d<mat->size2; d++) {
-    const gsl_vector_const_view col = gsl_matrix_const_column (mat, d);
-    double dot = 0;
-    gsl_blas_ddot (&col.vector, &col.vector, &dot);
-    G += dot;
-  }
-
-    /* for (int i=0; i<col.vector.size; i++) { */
-    /*   double s = gsl_vector_get (&col.vector, i); */
-    /*   s *= s; */
-
-    /*   // sum of squares */
-    /*   ssqrs += s; */
-    /* }} */
-
-  return G; // ssqrs;
-}
-
-double theo_rmsd (const theodata* theo1, const theodata* theo2) {
-
-  assert (theo1->nreal	== theo2->nreal);
-  assert (theo1->npad	== theo2->npad);
-  assert (theo1->ndim	== theo2->ndim);
-
-  const double msd = ls_rmsd2_aligned_T_g (theo1->nreal, theo1->npad, theo1->npad, theo1->coords, theo2->coords, theo1->g, theo2->g);
-  return sqrt (msd);
-}
-
-
-double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
-  /* theodata *theo1, *theo2; */
-
-  /* prepare_data (m1, &theo1); */
-  /* prepare_data (m2, &theo2); */
-
-  /* theodata_printf_all (theo1); */
-  /* theodata_printf_all (theo2); */
-
-  return kabsch_rmsd (m1, m2);
-}
-
-
-double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2) {
-
-  assert (m1->size1 == m2->size1);
-  assert (m1->size2 == m2->size2);
 
   const int
-    N = m1->size1,
-    D = m1->size2;
+    N = A->size1,
+    D = A->size2;
     
 
   gsl_matrix
     *P = gsl_matrix_calloc (D, N),
     *Q = gsl_matrix_calloc (D, N);
 
-  gsl_matrix_transpose_memcpy (P, m1);
-  gsl_matrix_transpose_memcpy (Q, m2);
-
-
-  gsl_matrix *U, *t;
-  double rmsd;
-  kabsch_function (P, Q, &U, &t, &rmsd);
-
-  gsl_matrix_free (P);
-  gsl_matrix_free (Q);
-  gsl_matrix_free (U);
-  gsl_matrix_free (t);
-
-  return rmsd;
-
-}  
-
-
-exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U, gsl_matrix **r, double *rmsd) {
-
-  assert (A->size1 == B->size1);
-  assert (A->size2 == B->size2);
-
-  const int
-    D = B->size1,
-    N = A->size2;
-
-
-  gsl_matrix
-    *P = gsl_matrix_calloc (D, N),
-    *Q = gsl_matrix_calloc (D, N);
-
-  gsl_matrix_memcpy (P, A);
-  gsl_matrix_memcpy (Q, B);
-
-
+  gsl_matrix_transpose_memcpy (P, A);
+  gsl_matrix_transpose_memcpy (Q, B);
 
   // m = ones(1,N)/N
   gsl_matrix *m = gsl_matrix_calloc (1, N);
@@ -324,10 +150,10 @@ exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U
 
 
   // U = W*I*V'
-  *U = gsl_matrix_calloc (D, D);
+  gsl_matrix *U = gsl_matrix_calloc (D, D);
   mtmp = gsl_matrix_calloc (D,D);
   gsl_blas_dgemm (CblasNoTrans, CblasTrans, 1.0, I, V, 0.0, mtmp);
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, W, mtmp, 1.0, *U);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, W, mtmp, 1.0, U);
   /* OK: U:    [-0.446 -0.756 -0.479 ]
                [0.601 0.144 -0.786 ]
 	       [0.663 -0.638 0.391 ]
@@ -339,11 +165,11 @@ exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U
 
   // r : a D-dimensional column vector, representing the translation
   // r = q0 - U*p0
-  *r    		= gsl_matrix_calloc (D, 1);
+  gsl_matrix *r		= gsl_matrix_calloc (D, 1);
   mtmp			= gsl_matrix_calloc (D, 1);
-  gsl_matrix_memcpy       (*r, q0)                 ;                  // gsl_matrix_sub clobbers 1st parameter
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, *U, p0, 0.0, mtmp);
-  gsl_matrix_sub (*r, mtmp);
+  gsl_matrix_memcpy       (r, q0)                 ;                  // gsl_matrix_sub clobbers 1st parameter
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, p0, 0.0, mtmp);
+  gsl_matrix_sub (r, mtmp);
   /* OK: r:    [-3.557 ]
                [3.489 ]
 	       [8.925 ]
@@ -354,7 +180,7 @@ exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U
 
   // diff = U*P - Q
   gsl_matrix *diff = gsl_matrix_calloc (D, N);
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, *U, P, 1.0, diff);
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, U, P, 1.0, diff);
   gsl_matrix_sub(diff, Q);
   /* OK:    [-0.040 0.023 0.004 0.106 0.031 0.051 0.018 0.000 0.027 0.049 -0.001 -0.005 0.001 0.000 0.025 0.082 -0.051 -0.087 -0.058 -0.008 -0.029 -0.139 ]
             [0.000 0.043 0.157 -0.034 0.080 0.205 -0.036 -0.134 -0.047 -0.054 -0.058 -0.055 -0.054 -0.055 -0.049 -0.114 0.024 0.045 0.031 -0.002 -0.004 0.110 ]
@@ -374,27 +200,9 @@ exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U
     lrms = lrms + gsl_matrix_get (m, 0, i) * dot;
   }
 
-  *rmsd = sqrt (lrms);
+  const double rmsd = sqrt (lrms);
 
-
-
-  // clean up
-  gsl_matrix_free (P);
-  gsl_matrix_free (Q);
-  gsl_matrix_free (m);
-  gsl_matrix_free (p0);
-  gsl_matrix_free (q0);
-  gsl_matrix_free (v1);
-  gsl_matrix_free (C);
-  gsl_matrix_free (W);
-  gsl_vector_free (s);
-  gsl_vector_free (work);
-  gsl_matrix_free (V);
-  gsl_matrix_free (I);
-  gsl_matrix_free (diff);
-
-
-  return exitOK;
+  return rmsd;
 
 
 }

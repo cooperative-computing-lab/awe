@@ -2,15 +2,14 @@
 
 CC = gcc
 CFLAGS = --std=c99 -g
-# CFLAGS = --std=c99 -O2 -mtune=$(CPU) -fPIC -msse2 -msse3 -fopenmp -I/opt/macports/current/include/ -g
-
-LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm -static
+LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm
 
 CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c theobald_rmsd.c
 HEADERS = $(CODE:.c:.h)
 OBJS = $(CODE:.c=.o)
 
 COMPILE = $(CC) $(CFLAGS) -c
+
 
 
 assign : $(OBJS)
@@ -39,3 +38,4 @@ gsl_util.o : gsl_util.c gsl_util.h
 
 clean :
 	rm *.o assign
+
