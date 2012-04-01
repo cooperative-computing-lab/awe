@@ -29,9 +29,12 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 1000
+iterations = 10000
 nwalkers   = 40
 nstates    = 100
+
+weights = np.random.random((nstates,nwalkers))
+weights /= np.sum(weights.flatten())
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
@@ -41,8 +44,8 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = 'cell-definitions'
 srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
+srcdir = '/tmp/conformations'
 for i in xrange(nstates):
 
     if i < nstates / 3:
@@ -60,7 +63,7 @@ for i in xrange(nstates):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = awe.PDB(pdbpath)
-        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=np.random.random())
+        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j])
         system.add_walker(w)
 
 
@@ -73,7 +76,7 @@ adaptive = awe.AWE( wqconfig   = cfg,
                     resample   = resample,
                     statsdir   = '/tmp/awe-stats',
                     checkpointfile = '/tmp/awe-checkpoint.dat',
-                    checkpointfreq = 100)
+                    checkpointfreq = 1)
 
 adaptive.run()
 

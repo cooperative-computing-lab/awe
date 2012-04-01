@@ -175,7 +175,7 @@ class AWE(object):
 
         tmpfile = path + '.tmp'
         with open(tmpfile, 'wb') as fd:
-            pickle.dump(self, fd)
+            pickle.dump(self, fd, pickle.HIGHEST_PROTOCOL)
         shutil.move(tmpfile, path)
 
 

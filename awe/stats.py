@@ -223,8 +223,14 @@ class WQStats(object):
 
         self.total_bytes_transferred .update(task.total_bytes_transferred)
 
-        # convert all times to seconds from microseconds
-        self.computation_time        .update( task.computation_time                / 10.**6)
+        ### convert all times to seconds from microseconds
+
+        # try/except: support different versions of cctools
+        try: comp_time = task.cmd_execution_time
+        except AttributeError:
+            comp_time  = task.computation_time
+
+        self.computation_time        .update( comp_time                            / 10.**6)
         self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
         self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
 
