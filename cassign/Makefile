@@ -1,8 +1,8 @@
 
 
-CC = clang
-CFLAGS = --std=c99 -g -I/opt/macports/current/include
-LDFLAGS = -L/opt/macports/current/lib -lxdrfile -lgsl -lgslcblas -lm -framework veclib
+CC = gcc
+CFLAGS = --std=c99 -g
+LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm
 
 CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c theobald_rmsd.c
 HEADERS = $(CODE:.c:.h)
@@ -38,3 +38,4 @@ gsl_util.o : gsl_util.c gsl_util.h
 
 clean :
 	rm *.o assign
+
