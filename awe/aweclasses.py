@@ -157,14 +157,16 @@ class AWE(object):
                  statsdir = 'stats',
                  checkpointfile='checkpoint', checkpointfreq=1):
 
-        self.wq         = workqueue.WorkQueue(wqconfig)
+        self.statslogger = stats.StatsLogger('stats.log.bz2')
+
+        self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
         self.system     = system
         self.iterations = iterations
         self.resample   = resample
 
         self.iteration  = 0
 
-        self.stats      = stats.AWEStats()
+        self.stats      = stats.AWEStats(logger=self.statslogger)
         self.statsdir   = statsdir
 
         self.checkpointfile = checkpointfile
@@ -230,6 +232,9 @@ class AWE(object):
                 self.iteration += 1
 
                 print time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers'
+                runtime = stats.time.time()
+                self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
+                self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
 
                 self.stats.time_iter('start')
 
@@ -247,8 +252,8 @@ class AWE(object):
         except KeyboardInterrupt:
             pass
 
-        finally:
-            self.save_stats(self.statsdir)
+        # finally:
+        #     self.save_stats(self.statsdir)
 
 
     # @typecheck(int, int)

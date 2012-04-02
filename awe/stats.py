@@ -12,11 +12,15 @@ from util import typecheck
 import numpy as np
 
 import time as systime
+import bz2
 
 
 class Timer(object):
     def __init__(self):
-        self.t0 = 0.
+        self.reset()
+
+    def reset(self):
+        self.t0 = 0
         self.t1 = float('inf')
 
     def start(self):
@@ -186,7 +190,9 @@ class WQStats(object):
     Keep track of the WQ statistics
     """
 
-    def __init__(self):
+    def __init__(self, logger=None):
+
+        self.logger = logger or StatsLogger()
 
         self._task_times             = ExtendableArray()  # keep track of the times values are added
         self._wq_times               = ExtendableArray()
@@ -219,44 +225,99 @@ class WQStats(object):
         """
         Update the running statistics with a task result
         """
-        self._task_times.append(time.time())
 
-        self.total_bytes_transferred .update(task.total_bytes_transferred)
+        # self._task_times.append(time.time())
+        t = time.time()
 
-        ### convert all times to seconds from microseconds
+        component = 'TASK'
+
+        self.logger.update (t, component, 'host'                  , task.host)
+        self.logger.update (t, component, 'result'                , task.result)
+        self.logger.update (t, component, 'return_status'         , task.return_status)
+        self.logger.update (t, component, 'total_bytes_transfered', task.total_bytes_transferred)
+
+
+        # self.total_bytes_transferred .update(task.total_bytes_transferred)
 
         # try/except: support different versions of cctools
-        try: comp_time = task.cmd_execution_time
+        try:
+            comp_time = task.cmd_execution_time
+            comp_name = 'cmd_execution_time'
         except AttributeError:
             comp_time  = task.computation_time
+            comp_name  = computation_time
 
-        self.computation_time        .update( comp_time                            / 10.**6)
-        self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
-        self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
+        ### convert all times to seconds from microseconds
+        self.logger.update (t, component, comp_name            , comp_time                                                 / 10.**6)
+        self.logger.update (t, component, 'total_transfer_time', task.total_transfer_time                                  / 10.**6)
+        self.logger.update (t, component, 'time_send_files'    , (task.send_input_finish     - task.send_input_start     ) / 10.**6)
+        self.logger.update (t, component, 'time_receive_files' , (task.receive_output_finish - task.receive_output_start ) / 10.**6)
+        self.logger.update (t, component, 'turnaround_time'    , (task.finish_time           - task.submit_time          ) / 10.**6)
+
+        # self.computation_time        .update( comp_time                            / 10.**6)
+        # self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
+        # self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
 
     @typecheck(workqueue.WQ.WorkQueue)
     def wq(self, wq):
 
-        self._wq_times.append(time.time())
+        # self._wq_times.append(time.time())
+        t = time.time()
 
         q = wq.stats
 
-        self.workers_ready          .update(q.workers_ready)
-        self.workers_busy           .update(q.workers_busy)
-        self.tasks_running          .update(q.tasks_running)
-        self.tasks_waiting          .update(q.tasks_waiting)
-        self.tasks_complete         .update(q.tasks_complete)
+        component = 'WORKQUEUE'
 
-        self.total_tasks_dispatched .update(q.total_tasks_dispatched)
-        self.total_tasks_complete   .update(q.total_tasks_complete)
-        self.total_workers_joined   .update(q.total_workers_joined)
-        self.total_workers_removed  .update(q.total_workers_removed)
-        self.total_bytes_sent       .update(q.total_bytes_sent)
-        self.total_bytes_received   .update(q.total_bytes_received)
 
-        # convert all times to seconds from microseconds
-        self.total_send_time        .update(q.total_send_time    / 10.**6)
-        self.total_receive_time     .update(q.total_receive_time / 10.**6)
+        self.logger.update     (t, component, 'workers_init'              , q.workers_init)
+        self.logger.update     (t, component, 'workers_ready'             , q.workers_ready)
+        self.logger.update     (t, component, 'workers_busy'              , q.workers_busy)
+        self.logger.update     (t, component, 'tasks_running'             , q.tasks_running)
+        self.logger.update     (t, component, 'tasks_waiting'             , q.tasks_waiting)
+        self.logger.update     (t, component, 'tasks_complete'            , q.tasks_complete)
+
+
+        self.logger.update     (t, component, 'total_tasks_dispatched'    , q.total_tasks_dispatched)
+        self.logger.update     (t, component, 'total_tasks_complete'      , q.total_tasks_complete)
+        self.logger.update     (t, component, 'total_workers_joined'      , q.total_workers_joined)
+        self.logger.update     (t, component, 'total_workers_removed'     , q.total_workers_removed)
+        self.logger.update     (t, component, 'total_bytes_sent'          , q.total_bytes_sent)
+        self.logger.update     (t, component, 'total_bytes_received'      , q.total_bytes_received)
+
+        # convert to seconds from microseconds
+        self.logger.update     (t, component, 'total_send_time'           , q.total_send_time / 10.**6)
+        self.logger.update     (t, component, 'total_receive_time'        , q.total_receive_time / 10.**6)
+
+        ## newer version of WQ
+        try:
+            self.logger.update (t, component, 'total_workers_connected'   , q.total_workers_connected)
+            self.logger.update (t, component, 'avg_capacity'              , q.avg_capacity)
+            self.logger.update (t, component, 'capacity'                  , q.capacity)
+            self.logger.update (t, component, 'efficiency'                , q.efficiency)
+            self.logger.update (t, component, 'excessive_workers_removed' , q.excessive_workers_removed)
+            self.logger.update (t, component, 'idle_percentage'           , q.idle_percentage)
+            self.logger.update (t, component, 'workers_by_pool'           , q.workers_by_pool)
+        except AttributeError: pass
+        
+
+        # self.workers_ready          .update(q.workers_ready)
+        # self.workers_busy           .update(q.workers_busy)
+        # self.tasks_running          .update(q.tasks_running)
+        # self.tasks_waiting          .update(q.tasks_waiting)
+        # self.tasks_complete         .update(q.tasks_complete)
+
+        # self.total_tasks_dispatched .update(q.total_tasks_dispatched)
+        # self.total_tasks_complete   .update(q.total_tasks_complete)
+        # self.total_workers_joined   .update(q.total_workers_joined)
+        # self.total_workers_removed  .update(q.total_workers_removed)
+        # self.total_bytes_sent       .update(q.total_bytes_sent)
+        # self.total_bytes_received   .update(q.total_bytes_received)
+
+        # # convert all times to seconds from microseconds
+        # self.total_send_time        .update(q.total_send_time    / 10.**6)
+        # self.total_receive_time     .update(q.total_receive_time / 10.**6)
+
+
 
     def save(self, wqstats, taskstats):
         """
@@ -319,14 +380,16 @@ class Timings(object):
 
 class AWEStats(object):
 
-    def __init__(self):
+    def __init__(self, logger=None):
 
-        self.iteration = Timings()
-        self.resample  = Timings()
-        self.barrier   = Timings()
+        self.iteration = Timer()
+        self.resample  = Timer()
+        self.barrier   = Timer()
+
+        self.logger    = logger or StatsLogger()
 
     @typecheck(str, Timings)
-    def _timeit(self, state, timings):
+    def _timeit(self, state, timings, name):
         """
         *state* = {start|stop}
         """
@@ -335,17 +398,20 @@ class AWEStats(object):
             timings.start()
         elif state.lower() == 'stop':
             timings.stop()
+            t = time.time()
+            self.logger.update(t, 'AWE', name, timings.elapsed())
+            timings.reset()
         else:
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
-        self._timeit(state, self.iteration)
+        self._timeit(state, self.iteration, 'iteration time')
 
     def time_resample(self, state):
-        self._timeit(state, self.resample)
+        self._timeit(state, self.resample, 'resample time')
 
     def time_barrier(self, state):
-        self._timeit(state, self.barrier)
+        self._timeit(state, self.barrier, 'barrier time')
 
     def save(self, path):
         print 'Saving to', path
@@ -368,3 +434,23 @@ class AWEStats(object):
             data['barrier_values'] = vs
 
             np.savez(fd, **data)
+
+
+class StatsLogger (object):
+
+    def __init__(self, path='stats.log.bz2'):
+
+        print 'StatsLogger opening', path
+        self._fd = bz2.BZ2File(path, 'w', 42)
+        self._path = path
+
+    def __del__(self):
+        self._fd.close()
+
+    @property
+    def path(self): return self._path
+
+    @typecheck(float, str, str)
+    def update(self, t, component, name, val):
+        s = '%f %s %s %s\n' % (t, component, name, val)
+        self._fd.write(s)

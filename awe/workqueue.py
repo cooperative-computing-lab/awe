@@ -138,18 +138,19 @@ class Config(object):
 
 class WorkQueue(object):
 
-    @awe.typecheck(Config)
-    def __init__(self, cfg):
+    # @awe.typecheck(Config)
+    def __init__(self, cfg, statslogger=None):
 
         self.cfg    = cfg
         self.wq     = self.cfg._mk_wq()
 
-        self.stats  = awe.stats.WQStats()
+        self.stats  = awe.stats.WQStats(logger=statslogger)
 
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
         self.restarts = dict()
 
+        self.statslogger = statslogger or stats.StatsLogger()
 
     @property
     def empty(self):
@@ -243,6 +244,10 @@ class WorkQueue(object):
             task = self.wait(self.cfg.waittime)
             self.update_wq_stats()
 
+
+            if task: self.update_task_stats(task)
+
+
             if task and task.result == 0:
 
                 # print time.asctime(), 'recived task', task.tag, task.return_status
@@ -251,7 +256,6 @@ class WorkQueue(object):
                     raise WorkQueueWorkerException, \
                         self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
 
-                self.update_task_stats(task)
 
                 try:
                     result = marshall(task)

@@ -29,7 +29,7 @@ cfg.cache('testinput/AtomIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 10000
+iterations = 10
 nwalkers   = 40
 nstates    = 100
 
