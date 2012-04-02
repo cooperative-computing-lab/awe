@@ -158,10 +158,16 @@ class MultiColor(OneColor):
         self.partition   = partition
         ncolors          = partition.ncolors
         self.transitions = np.zeros((ncolors, ncolors))
+	self.iteration = 1
+	of = open('output.dat','w')
+	of.write('%iteration,cellid,color,total_weight \n')
 
     def resample(self, system):
 
         ### update colors
+        ncolors          = self.partition.ncolors
+        trans = np.zeros((ncolors,ncolors))
+
         for w in system.walkers:
             cell     = system.cell(w.assignment)
             oldcolor = w.color
@@ -179,7 +185,8 @@ class MultiColor(OneColor):
             else:
                 oldcolor = newcolor = w.color
 
-            self.transitions[oldcolor, newcolor] += w.weight
+            trans[oldcolor, newcolor] += w.weight
+        self.transitions = np.append(self.transitions,trans,axis=0)
 
         ### resample individual colors using OneColor algorithm
         newsystem = aweclasses.System(topology=system.topology)
@@ -189,6 +196,14 @@ class MultiColor(OneColor):
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
 
+        of = open('output.dat','a')
+        for cell in newsystem.cells:
+	    thiscell = system.filter_by_cell(cell)
+	    for color in thiscell.colors:
+	        thiscolor = thiscell.filter_by_color(color)
+		of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
+	of.close()
+	self.iteration += 1
 
         return newsystem
 
