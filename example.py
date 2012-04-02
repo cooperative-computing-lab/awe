@@ -25,12 +25,13 @@ cfg.cache('testinput/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/cells.dat')
-cfg.cache('testinput/AtomIndices.dat')
+cfg.cache('testinput/CellIndices.dat')
+cfg.cache('testinput/StructureIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 10
-nwalkers   = 40
+iterations = 5
+nwalkers   = 4
 nstates    = 100
 
 weights = np.random.random((nstates,nwalkers))
