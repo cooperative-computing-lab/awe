@@ -2,7 +2,7 @@
 
 CC = gcc
 CFLAGS = --std=c99 -g
-LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm
+LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm -static
 
 CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c theobald_rmsd.c
 HEADERS = $(CODE:.c:.h)
