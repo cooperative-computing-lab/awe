@@ -224,6 +224,9 @@ class AWE(object):
         Run the algorithm
         """
 
+        assert len(self.system.cells  ) > 0
+        assert len(self.system.walkers) > 0
+
         try:
             while True:
 
