@@ -276,7 +276,7 @@ class WorkQueue(object):
                 ### TODO: issue #32: keep track of task failure
 
                 if not self.restart(task):
-                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions\n\n%s' % \
-                        self.taskoutput(task)
+                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \
+                        (task.tag, self.taskoutput(task))
 
             else: continue
