@@ -210,6 +210,7 @@ class AWE(object):
             walker = self.wq.recv(self.marshal_from_task)
             system.set_walker(walker)
         self.stats.time_barrier('stop')
+        print system
 
 
     def _resample(self):
@@ -319,6 +320,9 @@ class AWE(object):
             cellid            = int(cellstring)
 
             walker            = pickle.loads(walkerstr)
+
+            print time.asctime(), 'Walker', walker.id, 'cell', walker.assignment, '->', cellid
+
             walker.end        = coords
             walker.assignment = cellid
 
