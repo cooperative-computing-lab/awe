@@ -235,14 +235,13 @@ class WQStats(object):
         self.logger.update (t, component, 'return_status'         , task.return_status)
         self.logger.update (t, component, 'total_bytes_transfered', task.total_bytes_transferred)
 
-
-        # self.total_bytes_transferred .update(task.total_bytes_transferred)
-
         # try/except: support different versions of cctools
         try:
+            ### autobuild
             comp_time = task.cmd_execution_time
             comp_name = 'cmd_execution_time'
         except AttributeError:
+            ### "stable" version
             comp_time  = task.computation_time
             comp_name  = computation_time
 
