@@ -241,21 +241,27 @@ class WQStats(object):
             ### autobuild
             comp_time = task.cmd_execution_time
             comp_name = 'cmd_execution_time'
+            self.logger.update (t, component, 'time_send_files'  ,
+                                (task.send_input_finish - task.send_input_start     ) / 10.**6)
+            self.logger.update (t, component, 'time_receive_files' ,
+                                (task.receive_output_finish - task.receive_output_start ) / 10.**6)
+
+
+
         except AttributeError:
             ### "stable" version
             comp_time  = task.computation_time
-            comp_name  = computation_time
+            comp_name  = 'computation_time'
 
         ### convert all times to seconds from microseconds
-        self.logger.update (t, component, comp_name            , comp_time                                                 / 10.**6)
-        self.logger.update (t, component, 'total_transfer_time', task.total_transfer_time                                  / 10.**6)
-        self.logger.update (t, component, 'time_send_files'    , (task.send_input_finish     - task.send_input_start     ) / 10.**6)
-        self.logger.update (t, component, 'time_receive_files' , (task.receive_output_finish - task.receive_output_start ) / 10.**6)
-        self.logger.update (t, component, 'turnaround_time'    , (task.finish_time           - task.submit_time          ) / 10.**6)
+        self.logger.update (t, component, comp_name            ,
+                            comp_time                                                 / 10.**6)
+        self.logger.update (t, component, 'total_transfer_time',
+                            task.total_transfer_time                                  / 10.**6)
 
-        # self.computation_time        .update( comp_time                            / 10.**6)
-        # self.total_transfer_time     .update( task.total_transfer_time             / 10.**6)
-        # self.task_life_time          .update((task.finish_time - task.submit_time) / 10.**6)
+        self.logger.update (t, component, 'turnaround_time'    ,
+                            (task.finish_time           - task.submit_time          ) / 10.**6)
+
 
     @typecheck(workqueue.WQ.WorkQueue)
     def wq(self, wq):
