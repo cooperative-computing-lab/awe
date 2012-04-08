@@ -231,6 +231,7 @@ class WQStats(object):
         component = 'TASK'
 
         self.logger.update (t, component, 'host'                  , task.host)
+        self.logger.update (t, component, 'tag'                   , task.tag)
         self.logger.update (t, component, 'result'                , task.result)
         self.logger.update (t, component, 'return_status'         , task.return_status)
         self.logger.update (t, component, 'total_bytes_transfered', task.total_bytes_transferred)
