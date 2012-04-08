@@ -226,8 +226,7 @@ class WQStats(object):
         Update the running statistics with a task result
         """
 
-        # self._task_times.append(time.time())
-        t = time.time()
+        t = systime.time()
 
         component = 'TASK'
 
@@ -262,7 +261,7 @@ class WQStats(object):
     def wq(self, wq):
 
         # self._wq_times.append(time.time())
-        t = time.time()
+        t = systime.time()
 
         q = wq.stats
 
@@ -373,7 +372,7 @@ class Timings(object):
 
     def stop(self):
         self.timer.stop()
-        self.times.append(time.time())
+        self.times.append(systime.time())
         self.stats.update(self.timer.elapsed())
 
 
@@ -398,7 +397,7 @@ class AWEStats(object):
             timings.start()
         elif state.lower() == 'stop':
             timings.stop()
-            t = time.time()
+            t = systime.time()
             self.logger.update(t, 'AWE', name, timings.elapsed())
             timings.reset()
         else:
