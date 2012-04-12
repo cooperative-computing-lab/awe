@@ -158,6 +158,7 @@ class AWE(object):
                  checkpointfile='checkpoint', checkpointfreq=1):
 
         self.statslogger = stats.StatsLogger('stats.log.bz2')
+        self.transitionslogger = stats.StatsLogger('cell-transitions.log.bz2')
 
         self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
         self.system     = system
@@ -227,6 +228,9 @@ class AWE(object):
 
         assert len(self.system.cells  ) > 0
         assert len(self.system.walkers) > 0
+
+        t = time.time()
+        self.statslogger.update(t, 'AWE', 'start_unix_time', t)
 
         try:
             while True:
@@ -322,6 +326,9 @@ class AWE(object):
             walker            = pickle.loads(walkerstr)
 
             print time.asctime(), 'Walker', walker.id, 'cell', walker.assignment, '->', cellid
+            self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
+                                          'iteration %s from %s to %s' % \
+                                              (self.iteration, walker.assignment, cellid))
 
             walker.end        = coords
             walker.assignment = cellid

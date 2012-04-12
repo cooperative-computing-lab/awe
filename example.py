@@ -1,5 +1,4 @@
 
-
 import awe
 
 import numpy as np
@@ -7,7 +6,6 @@ import os
 
 cfg = awe.workqueue.Config()
 cfg.name = 'awe-badi'
-cfg.port = 9001
 cfg.fastabort = 9
 cfg.restarts = 0 # float('inf')
 
