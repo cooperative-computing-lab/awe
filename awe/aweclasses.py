@@ -325,10 +325,11 @@ class AWE(object):
 
             walker            = pickle.loads(walkerstr)
 
-            print time.asctime(), 'Walker', walker.id, 'cell', walker.assignment, '->', cellid
+            selftransition = walker.assignment == cellid
+            print time.asctime(), 'Walker', walker.id, 'cell', walker.assignment, '->', cellid, selftransition
             self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
-                                          'iteration %s from %s to %s' % \
-                                              (self.iteration, walker.assignment, cellid))
+                                          'iteration %s from %s to %s %s' % \
+                                              (self.iteration, walker.assignment, cellid, selftransition))
 
             walker.end        = coords
             walker.assignment = cellid

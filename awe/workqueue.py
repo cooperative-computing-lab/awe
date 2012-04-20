@@ -139,7 +139,7 @@ class Config(object):
 class WorkQueue(object):
 
     # @awe.typecheck(Config)
-    def __init__(self, cfg, statslogger=None):
+    def __init__(self, cfg, statslogger=None, taskoutputlogger=None):
 
         self.cfg    = cfg
         self.wq     = self.cfg._mk_wq()
@@ -150,7 +150,8 @@ class WorkQueue(object):
 
         self.restarts = dict()
 
-        self.statslogger = statslogger or stats.StatsLogger()
+        self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
+        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='task_output.log.bz2', buffersize=42)
 
     @property
     def empty(self):
@@ -247,6 +248,12 @@ class WorkQueue(object):
 
             if task: self.update_task_stats(task)
 
+            if task:
+                print time.asctime(), 'received task. result =', task.result, 'return_status =', task.return_status
+
+                self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
+                self.taskoutputlogger.output(task.output)
+                self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
 
             if task and task.result == 0:
 
@@ -274,6 +281,10 @@ class WorkQueue(object):
 
             elif task and not task.result == 0:
                 ### TODO: issue #32: keep track of task failure
+
+                ### TODO: if restart limit reached, report, but continue
+                ### we don't want an error to complete break the master before we reach 10K workers
+
 
                 if not self.restart(task):
                     raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \

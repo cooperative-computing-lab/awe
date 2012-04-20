@@ -443,10 +443,10 @@ class AWEStats(object):
 
 class StatsLogger (object):
 
-    def __init__(self, path='stats.log.bz2'):
+    def __init__(self, path='stats.log.bz2', buffersize=9):
 
         print 'StatsLogger opening', path
-        self._fd = bz2.BZ2File(path, 'w', 42)
+        self._fd = bz2.BZ2File(path, 'w', buffersize)
         self._path = path
 
     def __del__(self):
@@ -459,3 +459,6 @@ class StatsLogger (object):
     def update(self, t, component, name, val):
         s = '%f %s %s %s\n' % (t, component, name, val)
         self._fd.write(s)
+
+    def output(self, val):
+        self._fd.write(str(val))
