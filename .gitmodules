@@ -1,3 +1,6 @@
 [submodule "pygof.git"]
 	path = pygof.git
 	url = git@bitbucket.org:badi/pygof.git
+[submodule "prody.git"]
+	path = prody.git
+	url = https://github.com/abakan/ProDy.git
