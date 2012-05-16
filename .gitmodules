@@ -4,3 +4,6 @@
 [submodule "prody.git"]
 	path = prody.git
 	url = https://github.com/abakan/ProDy.git
+[submodule "cctools.git"]
+	path = cctools.git
+	url = git@bitbucket.org:badi/cctools-trunk-mirror.git
