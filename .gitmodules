@@ -1,0 +1,3 @@
+[submodule "pygof.git"]
+	path = pygof.git
+	url = git@bitbucket.org:badi/pygof.git
