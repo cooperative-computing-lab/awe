@@ -57,6 +57,10 @@ class OneColor(IResampler):
 
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
+#####
+        self.histfile = 'walkerhistory.dat'
+        self.histfile_fd = open(self.histfile)
+        self.histfile_fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
 
@@ -124,6 +128,7 @@ class OneColor(IResampler):
                     for _ in itertools.repeat(x, r):
                         w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
+                        self.histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
 
 
                     ### update the weights for the current walker and mark
