@@ -10,7 +10,8 @@ import awe
 
 import work_queue as WQ
 
-import os, tarfile, tempfile, time, shutil, traceback
+import os, tarfile, tempfile, time, shutil, traceback, random
+from collections import defaultdict
 
 
 ### A process can only support a single WorkQueue instance
@@ -91,7 +92,7 @@ class Config(object):
         self.shutdown  = False
         self.fastabort = 3
         self.restarts  = 95 # until restarts are handled on a per-iteration basis
-
+        self.maxreps   = 9
         self.waittime  = 10 # in seconds
 
 
@@ -136,6 +137,68 @@ class Config(object):
             return wq
 
 
+class TagSet(object):
+    def __init__(self, maxreps=5):
+        self._tags = defaultdict(set)
+        self._maxreps = maxreps
+
+    def can_duplicate(self):
+        valid = filter(lambda k: k < self._maxreps, self._tags.iterkeys())
+        return len(valid) > 0
+
+    def clear(self):
+        self._tags.clear()
+
+    def clean(self):
+        for k in self._tags.keys():
+            if len(self._tags[k]) < 1:
+                del self._tags[k]
+
+    def _find_tag_group(self, tag):
+        for group, tags in self._tags.iteritems():
+            if tag in tags:
+                return group
+        return None
+
+    def add(self, tag, startcount=0):
+        key = self._find_tag_group(tag)
+
+        ### add the tag to the appropriate group, removing it from previous one
+        if key is None:
+            self._tags[startcount].add(tag)
+        else:
+            self._tags[key+1].add(tag)
+            self._tags[key  ].discard(tag)
+
+        ### delete the group if it became empty
+        if key is not None and len(self._tags[key]) == 0:
+            del self._tags[key]
+
+
+    def select(self):
+        if len(self) > 0:
+            count  = 1
+            minkey = min(self._tags.keys())
+            assert len(self._tags[minkey]) > 0, str(minkey) + ', ' + str(self._tags[minkey])
+            return random.sample(self._tags[minkey], count)[0]
+        else:
+            return None
+
+    def discard(self, tag, key=None):
+        key = key or self._find_tag_group(tag)
+        print time.asctime(), 'Discarding tag', tag, 'from group', key
+        if key is not None:
+            self._tags[key].discard(tag)
+
+    def __len__(self):
+        return reduce(lambda s, k: s + len(self._tags[k]), self._tags.iterkeys(), 0 )
+
+    def __str__(self):
+        d = dict([(k,len(s)) for k,s in self._tags.iteritems()])
+        return '<TagSet(maxreps=%s): %s>' % (self._maxreps, d)
+
+
+
 class WorkQueue(object):
 
     # @awe.typecheck(Config)
@@ -143,6 +206,7 @@ class WorkQueue(object):
 
         self.cfg    = cfg
         self.wq     = self.cfg._mk_wq()
+        self._tagset = TagSet(maxreps=self.cfg.maxreps)
 
         self.stats  = awe.stats.WQStats(logger=statslogger)
 
@@ -208,6 +272,7 @@ class WorkQueue(object):
 
     @awe.typecheck(WQ.Task)
     def submit(self, task):
+        self._tagset.add(task.tag)
         return self.wq.submit(task)
 
     @awe.typecheck(WQ.Task)
@@ -235,6 +300,33 @@ class WorkQueue(object):
         output = '\n\t'.join(output)
         return output
 
+    def add_tag(self, tagtext):
+        self._tagset.add(tagtext)
+
+    def discard_tag(self, tagtext):
+        self._tagset.discard(tagtext)
+
+    def cancel_tag(self, tagtext):
+        while self.wq.cancel_by_tasktag(tagtext):
+            print time.asctime(), 'Canceled tag', tagtext, self._tagset
+
+    def select_tag(self):
+        self._tagset.clean()
+        return self._tagset.select()
+
+    def clear_tags(self):
+        self._tagset.clear()
+
+    def tasks_in_queue(self):
+        return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
+
+    def active_workers(self):
+        return self.wq.stats.workers_busy + self.wq.stats.workers_ready + self.wq.stats.workers_cancelling
+
+    def can_duplicate_tasks(self):
+        return   self.tasks_in_queue() < self.active_workers() 
+            # and len(self._tagset) > 0
+            # and self._tagset.can_duplicate()
 
 
     def recv(self, marshall):
@@ -249,7 +341,7 @@ class WorkQueue(object):
             if task: self.update_task_stats(task)
 
             if task:
-                print time.asctime(), 'received task. result =', task.result, 'return_status =', task.return_status
+                print time.asctime(), 'received task. result =', task.result, 'return_status =', task.return_status, self._tagset, 'tasks in Q =', self.tasks_in_queue(), 'active workers =', self.active_workers()
 
                 self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
                 self.taskoutputlogger.output(task.output)
@@ -277,6 +369,8 @@ class WorkQueue(object):
                     else:
                         continue
 
+                self.cancel_tag(task.tag)
+                self.discard_tag(task.tag)
                 return result
 
             elif task and not task.result == 0:

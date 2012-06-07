@@ -59,7 +59,7 @@ class OneColor(IResampler):
         self.targetwalkers = targetwalkers
 #####
         self.histfile = 'walkerhistory.dat'
-        self.histfile_fd = open(self.histfile)
+        self.histfile_fd = open(self.histfile, 'w')
         self.histfile_fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):

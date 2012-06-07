@@ -33,7 +33,7 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None):
+    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None, cellid=None, initid=None):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
@@ -42,6 +42,7 @@ class Walker(object):
         self._assignment = assignment
         self._color      = color
         self._weight     = weight
+        self._cellid     = cellid
 
         if wid is None:
             global _WALKER_ID
@@ -49,6 +50,8 @@ class Walker(object):
             _WALKER_ID  += 1
         else:
             self._id     = wid
+
+        self._initid    = initid or self._id
 
     def __eq__(self, other):
         if not type(self) is type(other):
@@ -61,7 +64,7 @@ class Walker(object):
             self._weight     == other._weight
 
 
-    def restart(self, weight=None):
+    def restart(self, weight=None, cellid=None):
         assert self._start is not None
         assert self._end   is not None
         assert weight      is not None
@@ -70,16 +73,26 @@ class Walker(object):
         wid =  _WALKER_ID
         _WALKER_ID += 1
 
+        cid = cellid or self._cellid
+
         return Walker(start      = self._end,
                       end        = None,
                       assignment = self._assignment,
                       color      = self._color,
                       weight     = weight,
-                      wid        = wid)
+                      wid        = wid,
+                      cellid     = cid,
+                      initid     = self._initid)
 
 
     @property
     def id(self):         return self._id
+
+    @property
+    def cellid(self):     return self._cellid
+
+    @property
+    def initid(self):    return self._initid
 
     @property
     def start(self):      return self._start
@@ -195,12 +208,31 @@ class AWE(object):
     def _submit(self):
 
         for walker in self.system.walkers:
-            task = self.wq.new_task()
-            task.specify_tag(self.encode_task_tag(walker))
-            self.marshal_to_task(walker, task)
+            task = self._new_task(walker)
             self.wq.submit(task)
 
+    @typecheck(Walker)
+    @returns(workqueue.WQ.Task)
+    def _new_task(self, walker):
+        task = self.wq.new_task()
+        tag  = self.encode_task_tag(walker)
+        task.specify_tag(tag)
+        self.marshal_to_task(walker, task)
+        return task
 
+    def _try_duplicate_tasks(self):
+        i = 0
+        while self.wq.can_duplicate_tasks():
+            i += 1
+            if i > 20: break
+            tag    = self.wq.select_tag()
+            print time.asctime(), 'Trying to duplicate tag:', tag
+            if tag is None: break
+            print time.asctime(), 'Duplicating tag', tag
+            wid    = self.decode_from_task_tag(tag)['walkerid']
+            walker = self.system.walker(wid)
+            task   = self._new_task(walker)
+            self.wq.submit(task)
 
     def _recv(self):
 
@@ -210,7 +242,9 @@ class AWE(object):
         while not self.wq.empty:
             walker = self.wq.recv(self.marshal_from_task)
             system.set_walker(walker)
+            self._try_duplicate_tasks()
         self.stats.time_barrier('stop')
+        self.wq.clear_tags()
         print system
 
 
