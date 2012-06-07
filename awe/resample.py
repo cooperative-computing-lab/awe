@@ -211,6 +211,20 @@ class MultiColor(OneColor):
         print time.asctime(), 'Saving transition matrix to', repr(path)
         np.savetxt(path, self.transitions)
 
+class SuperCell(MultiColor):
+    def __init__(self,nwalkers,partition,cellmapf):
+        MultiColor.__init__(self,nwalkers,partition)
+        self.cellmap = []
+        for line in open(cellmapf):
+            self.cellmap.append(int(line))
+
+    def resample(self,system):
+        cellmap = self.cellmap
+        for w in system.walkers:
+            w.assignment = cellmap[w.assignment]
+        newsystem = MultiColor.resample(self,system)
+        MultiColor.save_transitions(self,'transtions.dat')
+        return newsystem
 
 class IPlotter(IResampler):
 
