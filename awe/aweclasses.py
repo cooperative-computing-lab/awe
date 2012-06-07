@@ -195,12 +195,31 @@ class AWE(object):
     def _submit(self):
 
         for walker in self.system.walkers:
-            task = self.wq.new_task()
-            task.specify_tag(self.encode_task_tag(walker))
-            self.marshal_to_task(walker, task)
+            task = self._new_task(walker)
             self.wq.submit(task)
 
+    @typecheck(Walker)
+    @returns(workqueue.WQ.Task)
+    def _new_task(self, walker):
+        task = self.wq.new_task()
+        tag  = self.encode_task_tag(walker)
+        task.specify_tag(tag)
+        self.marshal_to_task(walker, task)
+        return task
 
+    def _try_duplicate_tasks(self):
+        i = 0
+        while self.wq.can_duplicate_tasks():
+            i += 1
+            if i > 20: break
+            tag    = self.wq.select_tag()
+            print time.asctime(), 'Trying to duplicate tag:', tag
+            if tag is None: break
+            print time.asctime(), 'Duplicating tag', tag
+            wid    = self.decode_from_task_tag(tag)['walkerid']
+            walker = self.system.walker(wid)
+            task   = self._new_task(walker)
+            self.wq.submit(task)
 
     def _recv(self):
 
@@ -210,7 +229,9 @@ class AWE(object):
         while not self.wq.empty:
             walker = self.wq.recv(self.marshal_from_task)
             system.set_walker(walker)
+            self._try_duplicate_tasks()
         self.stats.time_barrier('stop')
+        self.wq.clear_tags()
         print system
 
 

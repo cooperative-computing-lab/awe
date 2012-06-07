@@ -5,10 +5,11 @@ import numpy as np
 import os
 
 cfg = awe.workqueue.Config()
-cfg.name = 'awe-badi'
+cfg.name = 'test-awe'
 cfg.fastabort = 9
-cfg.restarts = 0 # float('inf')
-
+cfg.restarts = float('inf')
+cfg.maxreps = float('inf')
+cfg.debug = 'all'
 
 # cfg.execute('test.exe')
 
@@ -43,8 +44,8 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 srcdir = '/tmp/conformations'
+srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
 for i in xrange(nstates):
 
     if i < nstates / 3:
