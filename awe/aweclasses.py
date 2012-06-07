@@ -33,7 +33,7 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None):
+    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None, cellid=None):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
@@ -42,6 +42,7 @@ class Walker(object):
         self._assignment = assignment
         self._color      = color
         self._weight     = weight
+        self._cellid     = cellid
 
         if wid is None:
             global _WALKER_ID
@@ -61,7 +62,7 @@ class Walker(object):
             self._weight     == other._weight
 
 
-    def restart(self, weight=None):
+    def restart(self, weight=None, cellid=None):
         assert self._start is not None
         assert self._end   is not None
         assert weight      is not None
@@ -70,16 +71,22 @@ class Walker(object):
         wid =  _WALKER_ID
         _WALKER_ID += 1
 
+        cid = cellid or self._cellid
+
         return Walker(start      = self._end,
                       end        = None,
                       assignment = self._assignment,
                       color      = self._color,
                       weight     = weight,
-                      wid        = wid)
+                      wid        = wid,
+                      cellid     = cid)
 
 
     @property
     def id(self):         return self._id
+
+    @property
+    def cellid(self):     return self._cellid
 
     @property
     def start(self):      return self._start

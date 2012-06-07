@@ -63,7 +63,7 @@ for i in xrange(nstates):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = awe.PDB(pdbpath)
-        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j])
+        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j], cellid=cell.id)
         system.add_walker(w)
 
 
