@@ -33,7 +33,7 @@ class Walker(object):
       *assignment* : int
     """
 
-    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None, cellid=None):
+    def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None, cellid=None, initid=None):
 
         assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
 
@@ -50,6 +50,8 @@ class Walker(object):
             _WALKER_ID  += 1
         else:
             self._id     = wid
+
+        self._initid    = initid or self._id
 
     def __eq__(self, other):
         if not type(self) is type(other):
@@ -79,7 +81,8 @@ class Walker(object):
                       color      = self._color,
                       weight     = weight,
                       wid        = wid,
-                      cellid     = cid)
+                      cellid     = cid,
+                      initid     = self._initid)
 
 
     @property
@@ -87,6 +90,9 @@ class Walker(object):
 
     @property
     def cellid(self):     return self._cellid
+
+    @property
+    def initid(self):    return self._initid
 
     @property
     def start(self):      return self._start
