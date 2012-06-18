@@ -324,9 +324,8 @@ class WorkQueue(object):
         return self.wq.stats.workers_busy + self.wq.stats.workers_ready + self.wq.stats.workers_cancelling
 
     def can_duplicate_tasks(self):
-        return   self.tasks_in_queue() < self.active_workers() 
-            # and len(self._tagset) > 0
-            # and self._tagset.can_duplicate()
+        return  self.tasks_in_queue() < self.active_workers() \
+            and self._tagset.can_duplicate()
 
 
     def recv(self, marshall):
