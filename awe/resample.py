@@ -64,6 +64,12 @@ class OneColor(IResampler):
 
     def resample(self, system):
 
+        try:
+            self.histfile_fd
+        except AttributeError:
+            self.histfile_fd = open(self.histfile, 'a')
+
+
         from numpy import floor, argsort, random, sum
 
         newsystem = system.clone()
