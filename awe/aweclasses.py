@@ -266,6 +266,7 @@ class AWE(object):
         while not self.wq.empty:
             walker = self.wq.recv(self.marshal_from_task)
             system.set_walker(walker)
+            self.logwalker(walker)
             self._try_duplicate_tasks()
         self.stats.time_barrier('stop')
         self.wq.clear_tags()
