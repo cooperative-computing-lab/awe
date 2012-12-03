@@ -59,16 +59,12 @@ class OneColor(IResampler):
         self.targetwalkers = targetwalkers
 #####
         self.histfile = 'walkerhistory.dat'
-        self.histfile_fd = open(self.histfile, 'w')
-        self.histfile_fd.write('%origID, parentID, currentID \n')
+        with open(self.histfile, 'w') as fd:
+            fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
 
-        try:
-            self.histfile_fd
-        except AttributeError:
-            self.histfile_fd = open(self.histfile, 'a')
-
+        histfile_fd = open(self.histfile, 'a')
 
         from numpy import floor, argsort, random, sum
 
@@ -134,7 +130,7 @@ class OneColor(IResampler):
                     for _ in itertools.repeat(x, r):
                         w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
-                        self.histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
+                        histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
 
 
                     ### update the weights for the current walker and mark
@@ -172,6 +168,7 @@ class MultiColor(OneColor):
 	self.iteration = 1
 	of = open('output.dat','w')
 	of.write('%iteration,cellid,color,total_weight \n')
+        of.close()
 
     def resample(self, system):
 
