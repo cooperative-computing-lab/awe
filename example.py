@@ -75,7 +75,6 @@ adaptive = awe.AWE( wqconfig   = cfg,
                     iterations = iterations,
                     resample   = resample,
                     statsdir   = '/tmp/awe-stats',
-                    checkpointfile = '/tmp/awe-checkpoint.dat',
                     checkpointfreq = 1)
 
 adaptive.run()
