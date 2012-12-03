@@ -209,6 +209,14 @@ class AWE(object):
         print 'Recovering walker', value.id
         obj['system'].set_walker(value)
 
+    def recover(self):
+        cpt = self.traxlogger.cpt_path
+        if os.path.exists(cpt):
+            print 'Recovering', cpt
+            parms = self.traxlogger.recover(self._trax_log_recover)
+            for a in parms.iterkeys():
+                setattr(self, a, parms[a])
+
 
     def save_stats(self, dirname):
         if not os.path.exists(dirname):
