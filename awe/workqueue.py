@@ -225,6 +225,8 @@ class WorkQueue(object):
         """
         SwigPyObjects cannot be pickles, so remove the underlying WorkQueue object
         """
+        self.statslogger.close()
+        self.taskoutputlogger.close()
         odict = self.__dict__.copy()
         del odict['wq']
         return odict
@@ -234,6 +236,9 @@ class WorkQueue(object):
         Since SwigPyObjects are not pickleable, we just recreate the WorkQueue object from the configuration
         """
         self.__dict__.update(odict)
+        self.statslogger.open()
+        self.taskoutputlogger.open()
+
         # self.wq = self.cfg._mk_wq()
 
     def save_stats(self, dirname):
