@@ -285,6 +285,8 @@ class AWE(object):
         Run the algorithm
         """
 
+        self.recover()
+
         assert len(self.system.cells  ) > 0
         assert len(self.system.walkers) > 0
 
