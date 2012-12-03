@@ -215,7 +215,7 @@ class WorkQueue(object):
         self.restarts = dict()
 
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
-        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='task_output.log.bz2', buffersize=42)
+        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='task_output.log.gz', buffersize=42)
 
     @property
     def empty(self):
