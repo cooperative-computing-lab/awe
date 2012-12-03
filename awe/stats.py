@@ -12,7 +12,8 @@ from util import typecheck
 import numpy as np
 
 import time as systime
-import bz2
+import gzip
+import os
 
 
 class Timer(object):
@@ -440,17 +441,23 @@ class AWEStats(object):
 
             np.savez(fd, **data)
 
+    def close(self):
+        self.logger.close()
+
+    def open(self):
+        self.logger.open()
+
 
 class StatsLogger (object):
 
-    def __init__(self, path='stats.log.bz2', buffersize=9):
+    def __init__(self, path='stats.log.gz', buffersize=9):
 
         print 'StatsLogger opening', path
-        self._fd = bz2.BZ2File(path, 'w', buffersize)
+        self._fd = None
         self._path = path
+        self._buffersize = buffersize
 
-    def __del__(self):
-        self._fd.close()
+        self.open()
 
     @property
     def path(self): return self._path
@@ -462,3 +469,12 @@ class StatsLogger (object):
 
     def output(self, val):
         self._fd.write(str(val))
+
+    def close(self):
+        if self._fd is not None:
+            self._fd.close()
+            self._fd = None
+
+    def open(self):
+        if self._fd is None:
+            self._fd = gzip.GzipFile(self._path, 'ab')
