@@ -9,6 +9,8 @@ import io, stats, workqueue
 from util import typecheck, returns
 import structures, util
 
+import trax
+
 import numpy as np
 import cPickle as pickle
 
@@ -168,7 +170,7 @@ class AWE(object):
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
                  statsdir = 'stats',
-                 checkpointfile='checkpoint', checkpointfreq=1):
+                 traxlogger = None, checkpointfreq=1):
 
         self.statslogger = stats.StatsLogger('stats.log.gz')
         self.transitionslogger = stats.StatsLogger('cell-transitions.log.gz')
@@ -183,16 +185,29 @@ class AWE(object):
         self.stats      = stats.AWEStats(logger=self.statslogger)
         self.statsdir   = statsdir
 
-        self.checkpointfile = checkpointfile
+        self.traxlogger = traxlogger or trax.SimpleTransactional()
         self.checkpointfreq = checkpointfreq
 
 
-    def checkpoint(self, path):
+    def checkpoint(self):
+        cpt = self.traxlogger.cpt_path
+        if os.path.exists(cpt):
+            shutil.move(cpt, cpt + '.last')
+        chk = dict(system         = self.system,
+                   iterations     = self.iterations,
+                   iteration      = self.iteration,
+                   resample       = self.resample,
+                   checkpointfreq = self.checkpointfreq
+                   )
+        self.traxlogger.checkpoint(chk)
 
-        tmpfile = path + '.tmp'
-        with open(tmpfile, 'wb') as fd:
-            pickle.dump(self, fd, pickle.HIGHEST_PROTOCOL)
-        shutil.move(tmpfile, path)
+
+    def logwalker(self, walker):
+        self.traxlogger.log(walker)
+
+    def _trax_log_recover(self, obj, value):
+        print 'Recovering walker', value.id
+        obj['system'].set_walker(value)
 
 
     def save_stats(self, dirname):
