@@ -231,8 +231,9 @@ class AWE(object):
     def _submit(self):
 
         for walker in self.system.walkers:
-            task = self._new_task(walker)
-            self.wq.submit(task)
+            if walker.end is None:
+                task = self._new_task(walker)
+                self.wq.submit(task)
 
     @typecheck(Walker)
     @returns(workqueue.WQ.Task)
