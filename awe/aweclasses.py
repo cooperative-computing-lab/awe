@@ -269,6 +269,11 @@ class AWE(object):
         try:
             while True:
 
+                if self.iteration % self.checkpointfreq == 0:
+                    print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
+                    self.checkpoint()
+
+
                 if self.iteration >= self.iterations: break
 
                 self.iteration += 1
@@ -285,11 +290,6 @@ class AWE(object):
                 self._resample()
 
                 self.stats.time_iter('stop')
-
-                if self.iteration % self.checkpointfreq == 0:
-                    print time.asctime(), 'Checkpointing to', self.checkpointfile
-                    self.checkpoint(self.checkpointfile)
-
 
         except KeyboardInterrupt:
             pass
