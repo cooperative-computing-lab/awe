@@ -170,8 +170,8 @@ class AWE(object):
                  statsdir = 'stats',
                  checkpointfile='checkpoint', checkpointfreq=1):
 
-        self.statslogger = stats.StatsLogger('stats.log.bz2')
-        self.transitionslogger = stats.StatsLogger('cell-transitions.log.bz2')
+        self.statslogger = stats.StatsLogger('stats.log.gz')
+        self.transitionslogger = stats.StatsLogger('cell-transitions.log.gz')
 
         self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
         self.system     = system
