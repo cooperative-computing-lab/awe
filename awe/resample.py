@@ -164,9 +164,9 @@ class MultiColor(OneColor):
         self.partition   = partition
         ncolors          = partition.ncolors
         self.transitions = np.zeros((ncolors, ncolors))
-	self.iteration = 1
-	of = open('output.dat','w')
-	of.write('%iteration,cellid,color,total_weight \n')
+        self.iteration = 1
+        of = open('output.dat','w')
+        of.write('%iteration,cellid,color,total_weight \n')
 
     def resample(self, system):
 
@@ -204,12 +204,12 @@ class MultiColor(OneColor):
 
         of = open('output.dat','a')
         for cell in newsystem.cells:
-	    thiscell = system.filter_by_cell(cell)
-	    for color in thiscell.colors:
-	        thiscolor = thiscell.filter_by_color(color)
-		of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
-	of.close()
-	self.iteration += 1
+            thiscell = system.filter_by_cell(cell)
+            for color in thiscell.colors:
+                thiscolor = thiscell.filter_by_color(color)
+                of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
+        of.close()
+        self.iteration += 1
 
         return newsystem
 
