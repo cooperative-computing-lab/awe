@@ -16,12 +16,12 @@ cfg.debug = 'all'
 
 cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('binaries/$OS-$ARCH/pdb2gmx')
-cfg.cache('binaries/$OS-$ARCH/grompp')
-cfg.cache('binaries/$OS-$ARCH/mdrun')
-cfg.cache('binaries/$OS-$ARCH/assign')
+cfg.cache('awedata/binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('awedata/binaries/$OS-$ARCH/grompp')
+cfg.cache('awedata/binaries/$OS-$ARCH/mdrun')
+cfg.cache('awedata/binaries/$OS-$ARCH/assign')
 
-cfg.cache('testinput/gmxtopologies')
+cfg.cache('awedata/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/cells.dat')
