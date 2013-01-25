@@ -95,7 +95,7 @@ copy-gmx() {
 	done
 
 	echo "\`$gmxtop\` -> \`$mygmxtop\`"
-	cp -r $gmxtop $mygmxtop
+	rsync -r $gmxtop/ $mygmxtop
 
 }
 
