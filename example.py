@@ -1,3 +1,4 @@
+# -*- mode: Python; indent-tabs-mode: nil -*-  #
 
 import awe
 
