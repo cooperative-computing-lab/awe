@@ -162,15 +162,10 @@ class AWE(object):
       *iterations* : number of iterations to run
       *resample*   : the implementation of the resampling algorithm, a subclass of awe.resample.IResampler
 
-    Some relevant fields
-
-      *stats*    : the instance of awe.stats.AWEStats
-      *statsdir* : location to save runtime statistics
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
-                 statsdir = 'stats',
                  traxlogger = None, checkpointfreq=1):
 
         self.statslogger = stats.StatsLogger('stats.log.gz')
@@ -184,7 +179,6 @@ class AWE(object):
         self.iteration  = 0
 
         self.stats      = stats.AWEStats(logger=self.statslogger)
-        self.statsdir   = statsdir
 
         self.traxlogger = traxlogger or trax.SimpleTransactional()
         self.checkpointfreq = checkpointfreq
@@ -321,9 +315,6 @@ class AWE(object):
 
         except KeyboardInterrupt:
             pass
-
-        # finally:
-        #     self.save_stats(self.statsdir)
 
 
     # @typecheck(int, int)
