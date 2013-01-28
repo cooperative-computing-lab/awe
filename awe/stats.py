@@ -204,21 +204,6 @@ class WQStats(object):
         self.total_transfer_time     = Statistics()
         self.task_life_time          = Statistics()       # WQ Task.finish_time - Task.submit_time
 
-        ### wq stats
-        self.workers_init            = Statistics()
-        self.workers_ready           = Statistics()
-        self.workers_busy            = Statistics()
-        self.tasks_running           = Statistics()
-        self.tasks_waiting           = Statistics()
-        self.tasks_complete          = Statistics()
-        self.total_tasks_dispatched  = Statistics()
-        self.total_tasks_complete    = Statistics()
-        self.total_workers_joined    = Statistics()
-        self.total_workers_removed   = Statistics()
-        self.total_bytes_sent        = Statistics()
-        self.total_bytes_received    = Statistics()
-        self.total_send_time         = Statistics()
-        self.total_receive_time      = Statistics()
 
 
     @typecheck(workqueue.WQ.Task)
@@ -262,66 +247,6 @@ class WQStats(object):
 
         self.logger.update (t, component, 'turnaround_time'    ,
                             (task.finish_time           - task.submit_time          ) / 10.**6)
-
-
-    @typecheck(workqueue.WQ.WorkQueue)
-    def wq(self, wq):
-
-        # self._wq_times.append(time.time())
-        t = systime.time()
-
-        q = wq.stats
-
-        component = 'WORKQUEUE'
-
-
-        self.logger.update     (t, component, 'workers_init'              , q.workers_init)
-        self.logger.update     (t, component, 'workers_ready'             , q.workers_ready)
-        self.logger.update     (t, component, 'workers_busy'              , q.workers_busy)
-        self.logger.update     (t, component, 'tasks_running'             , q.tasks_running)
-        self.logger.update     (t, component, 'tasks_waiting'             , q.tasks_waiting)
-        self.logger.update     (t, component, 'tasks_complete'            , q.tasks_complete)
-
-
-        self.logger.update     (t, component, 'total_tasks_dispatched'    , q.total_tasks_dispatched)
-        self.logger.update     (t, component, 'total_tasks_complete'      , q.total_tasks_complete)
-        self.logger.update     (t, component, 'total_workers_joined'      , q.total_workers_joined)
-        self.logger.update     (t, component, 'total_workers_removed'     , q.total_workers_removed)
-        self.logger.update     (t, component, 'total_bytes_sent'          , q.total_bytes_sent)
-        self.logger.update     (t, component, 'total_bytes_received'      , q.total_bytes_received)
-
-        # convert to seconds from microseconds
-        self.logger.update     (t, component, 'total_send_time'           , q.total_send_time / 10.**6)
-        self.logger.update     (t, component, 'total_receive_time'        , q.total_receive_time / 10.**6)
-
-        ## newer version of WQ
-        try:
-            self.logger.update (t, component, 'total_workers_connected'   , q.total_workers_connected)
-            self.logger.update (t, component, 'avg_capacity'              , q.avg_capacity)
-            self.logger.update (t, component, 'capacity'                  , q.capacity)
-            self.logger.update (t, component, 'efficiency'                , q.efficiency)
-            self.logger.update (t, component, 'excessive_workers_removed' , q.excessive_workers_removed)
-            self.logger.update (t, component, 'idle_percentage'           , q.idle_percentage)
-            self.logger.update (t, component, 'workers_by_pool'           , q.workers_by_pool)
-        except AttributeError: pass
-        
-
-        # self.workers_ready          .update(q.workers_ready)
-        # self.workers_busy           .update(q.workers_busy)
-        # self.tasks_running          .update(q.tasks_running)
-        # self.tasks_waiting          .update(q.tasks_waiting)
-        # self.tasks_complete         .update(q.tasks_complete)
-
-        # self.total_tasks_dispatched .update(q.total_tasks_dispatched)
-        # self.total_tasks_complete   .update(q.total_tasks_complete)
-        # self.total_workers_joined   .update(q.total_workers_joined)
-        # self.total_workers_removed  .update(q.total_workers_removed)
-        # self.total_bytes_sent       .update(q.total_bytes_sent)
-        # self.total_bytes_received   .update(q.total_bytes_received)
-
-        # # convert all times to seconds from microseconds
-        # self.total_send_time        .update(q.total_send_time    / 10.**6)
-        # self.total_receive_time     .update(q.total_receive_time / 10.**6)
 
 
 

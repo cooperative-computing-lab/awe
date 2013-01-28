@@ -95,6 +95,7 @@ class Config(object):
         self.restarts  = 95 # until restarts are handled on a per-iteration basis
         self.maxreps   = 9
         self.waittime  = 10 # in seconds
+        self.logfile   = 'wq.log'
 
 
         self._executable = None
@@ -119,7 +120,6 @@ class Config(object):
         if _AWE_WORK_QUEUE is not None:
             ### warn
             awe.log('WARNING: using previously created WorkQueue instance')
-            return _AWE_WORK_QUEUE
         else:
             WQ.set_debug_flag(self.debug)
             wq = WQ.WorkQueue(name      = self.name,
@@ -135,7 +135,8 @@ class Config(object):
 
             _AWE_WORK_QUEUE = wq
 
-            return wq
+        _AWE_WORK_QUEUE.specify_log(self.logfile)
+        return _AWE_WORK_QUEUE
 
 
 class TagSet(object):
@@ -251,9 +252,6 @@ class WorkQueue(object):
         # shutil.rmtree(self.tmpdir)
 
 
-    def update_wq_stats(self):
-        self.stats.wq(self.wq)
-
     @awe.typecheck(WQ.Task)
     def update_task_stats(self, task):
         self.stats.task(task)
@@ -335,12 +333,9 @@ class WorkQueue(object):
         while True:
 
             task = self.wait(self.cfg.waittime)
-            self.update_wq_stats()
-
-
-            if task: self.update_task_stats(task)
 
             if task:
+                self.update_task_stats(task)
                 print time.asctime(), 'received task. result =', task.result, 'return_status =', task.return_status, self._tagset, 'tasks in Q =', self.tasks_in_queue(), 'active workers =', self.active_workers()
 
                 self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
