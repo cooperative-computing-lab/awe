@@ -7,12 +7,10 @@ import os
 
 cfg = awe.workqueue.Config()
 cfg.name = 'test-awe'
-cfg.fastabort = 9
+cfg.fastabort = 3
 cfg.restarts = float('inf')
 cfg.maxreps = float('inf')
 cfg.debug = 'all'
-
-# cfg.execute('test.exe')
 
 cfg.execute('testinput/execute-task.sh')
 
@@ -74,7 +72,6 @@ adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
                     resample   = resample,
-                    statsdir   = '/tmp/awe-stats',
                     checkpointfreq = 1)
 
 adaptive.run()
