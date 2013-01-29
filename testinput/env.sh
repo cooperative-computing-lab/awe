@@ -49,7 +49,7 @@ run-md() {
 
 assign() {
 	puts "Assigning trajectory"
-	./assign cells.dat traj.xtc AtomIndices.dat $ASSIGNMENT
+	./assign cells.dat CellIndices.dat traj.xtc StructureIndices.dat $ASSIGNMENT
 	echo
 }
 

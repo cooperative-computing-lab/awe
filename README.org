@@ -20,7 +20,7 @@
   This depends on the MD package used (ie the input to Gromacs differs from that for NAMD), as well as the assignment protocol.
   The example script uses ProtoMol in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
 
-1* Installation
+* Installation
   This assumes the master dependencies have been installed.
 
   #+BEGIN_SRC
@@ -42,7 +42,7 @@
   $ python myscript.py
   #+END_SRC
 
-  Please see examples/example.py in order to get started.
+  Please see example.py in order to get started.
 
 * Licensing
   Please see the COPYING file.

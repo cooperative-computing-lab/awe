@@ -1,3 +1,4 @@
+# -*- mode: Python; indent-tabs-mode: nil -*-  #
 """
 This file is part of AWE
 Copyright (C) 2012- University of Notre Dame

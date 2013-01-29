@@ -1,3 +1,4 @@
+# -*- mode: Python; indent-tabs-mode: nil -*-  #
 """
 This file is part of AWE
 Copyright (C) 2012- University of Notre Dame
@@ -57,8 +58,14 @@ class OneColor(IResampler):
 
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
+#####
+        self.histfile = 'walkerhistory.dat'
+        with open(self.histfile, 'w') as fd:
+            fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
+
+        histfile_fd = open(self.histfile, 'a')
 
         from numpy import floor, argsort, random, sum
 
@@ -124,6 +131,7 @@ class OneColor(IResampler):
                     for _ in itertools.repeat(x, r):
                         w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
+                        histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
 
 
                     ### update the weights for the current walker and mark
@@ -158,10 +166,17 @@ class MultiColor(OneColor):
         self.partition   = partition
         ncolors          = partition.ncolors
         self.transitions = np.zeros((ncolors, ncolors))
+	self.iteration = 1
+	of = open('output.dat','w')
+	of.write('%iteration,cellid,color,total_weight \n')
+        of.close()
 
     def resample(self, system):
 
         ### update colors
+        ncolors          = self.partition.ncolors
+        trans = np.zeros((ncolors,ncolors))
+
         for w in system.walkers:
             cell     = system.cell(w.assignment)
             oldcolor = w.color
@@ -179,7 +194,8 @@ class MultiColor(OneColor):
             else:
                 oldcolor = newcolor = w.color
 
-            self.transitions[oldcolor, newcolor] += w.weight
+            trans[oldcolor, newcolor] += w.weight
+        self.transitions = np.append(self.transitions,trans,axis=0)
 
         ### resample individual colors using OneColor algorithm
         newsystem = aweclasses.System(topology=system.topology)
@@ -189,6 +205,14 @@ class MultiColor(OneColor):
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
 
+        of = open('output.dat','a')
+        for cell in newsystem.cells:
+	    thiscell = system.filter_by_cell(cell)
+	    for color in thiscell.colors:
+	        thiscolor = thiscell.filter_by_color(color)
+		of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
+	of.close()
+	self.iteration += 1
 
         return newsystem
 
@@ -196,6 +220,20 @@ class MultiColor(OneColor):
         print time.asctime(), 'Saving transition matrix to', repr(path)
         np.savetxt(path, self.transitions)
 
+class SuperCell(MultiColor):
+    def __init__(self,nwalkers,partition,cellmapf):
+        MultiColor.__init__(self,nwalkers,partition)
+        self.cellmap = []
+        for line in open(cellmapf):
+            self.cellmap.append(int(line))
+
+    def resample(self,system):
+        cellmap = self.cellmap
+        for w in system.walkers:
+            w.assignment = cellmap[w.assignment]
+        newsystem = MultiColor.resample(self,system)
+        MultiColor.save_transitions(self,'transtions.dat')
+        return newsystem
 
 class IPlotter(IResampler):
 

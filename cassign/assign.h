@@ -19,6 +19,7 @@
 
 
 
+exit_t load_atomindices (const char *mndxpath, gsl_vector **target);
 
 
 

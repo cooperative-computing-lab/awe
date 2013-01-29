@@ -1,2 +1,8 @@
 *.pyc
 build
+*.dat
+*.log
+*.png
+*.tmp
+core.*
+*.bkp

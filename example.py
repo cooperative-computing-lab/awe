@@ -1,4 +1,4 @@
-
+# -*- mode: Python; indent-tabs-mode: nil -*-  #
 
 import awe
 
@@ -6,32 +6,34 @@ import numpy as np
 import os
 
 cfg = awe.workqueue.Config()
-cfg.name = 'awe-badi'
-cfg.port = 9001
-cfg.fastabort = 9
-cfg.restarts = 0 # float('inf')
-
-
-# cfg.execute('test.exe')
+cfg.name = 'test-awe'
+cfg.fastabort = 3
+cfg.restarts = float('inf')
+cfg.maxreps = 50
+cfg.debug = 'all'
 
 cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('binaries/$OS-$ARCH/pdb2gmx')
-cfg.cache('binaries/$OS-$ARCH/grompp')
-cfg.cache('binaries/$OS-$ARCH/mdrun')
-cfg.cache('binaries/$OS-$ARCH/assign')
+cfg.cache('awedata/binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('awedata/binaries/$OS-$ARCH/grompp')
+cfg.cache('awedata/binaries/$OS-$ARCH/mdrun')
+cfg.cache('awedata/binaries/$OS-$ARCH/assign')
 
-cfg.cache('testinput/gmxtopologies')
+cfg.cache('awedata/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/cells.dat')
-cfg.cache('testinput/AtomIndices.dat')
+cfg.cache('testinput/CellIndices.dat')
+cfg.cache('testinput/StructureIndices.dat')
 cfg.cache('testinput/state0.pdb')
 
 
-iterations = 1000
-nwalkers   = 40
+iterations = 5
+nwalkers   = 4
 nstates    = 100
+
+weights = np.random.random((nstates,nwalkers))
+weights /= np.sum(weights.flatten())
 
 system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
@@ -41,8 +43,7 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = 'cell-definitions'
-srcdir = '/afs/crc.nd.edu/user/i/izaguirr/Public/ala2/faw-protomol/PDBs'
+srcdir = 'awedata/pdbs/ala'
 for i in xrange(nstates):
 
     if i < nstates / 3:
@@ -60,7 +61,7 @@ for i in xrange(nstates):
 
         pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
         pdb     = awe.PDB(pdbpath)
-        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=np.random.random())
+        w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j], cellid=cell.id)
         system.add_walker(w)
 
 
@@ -71,9 +72,7 @@ adaptive = awe.AWE( wqconfig   = cfg,
                     system     = system,
                     iterations = iterations,
                     resample   = resample,
-                    statsdir   = '/tmp/awe-stats',
-                    checkpointfile = '/tmp/awe-checkpoint.dat',
-                    checkpointfreq = 100)
+                    checkpointfreq = 1)
 
 adaptive.run()
 
