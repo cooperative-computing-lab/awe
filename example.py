@@ -9,7 +9,7 @@ cfg = awe.workqueue.Config()
 cfg.name = 'test-awe'
 cfg.fastabort = 3
 cfg.restarts = float('inf')
-cfg.maxreps = float('inf')
+cfg.maxreps = 50
 cfg.debug = 'all'
 
 cfg.execute('testinput/execute-task.sh')
