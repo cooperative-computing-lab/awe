@@ -95,7 +95,7 @@ class Config(object):
         self.restarts  = 95 # until restarts are handled on a per-iteration basis
         self.maxreps   = 9
         self.waittime  = 10 # in seconds
-        self.logfile   = 'wq.log'
+        self.wqstats_logfile   = 'wq-stats.log'
 
 
         self._executable = None
@@ -135,7 +135,7 @@ class Config(object):
 
             _AWE_WORK_QUEUE = wq
 
-        _AWE_WORK_QUEUE.specify_log(self.logfile)
+        _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
         return _AWE_WORK_QUEUE
 
 
