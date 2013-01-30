@@ -60,6 +60,7 @@ def getopts():
     return p.parse_args()
 
 def load_wqstats(path):
+    print 'Loading data from', path
     records = np.loadtxt(path, unpack=True)
     stats   = WQStats(*list(records))
     return stats
@@ -67,6 +68,7 @@ def load_wqstats(path):
 def adjust(wqs, history=None):
     s = wqs
 
+    print 'Attempting to adjust history window'
     s = adjust_history(s, history=history)
 
     print 'Converting timestamp to hours'
