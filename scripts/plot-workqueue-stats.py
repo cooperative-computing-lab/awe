@@ -50,6 +50,8 @@ def getopts():
     p.add_argument('-i','--logpath', help='Path to WQ logfile')
     p.add_argument('-o', '--plotpath', help='Where to store the figure')
 
+    p.add_argument('-H', '--history', type=float, help='Number of hours to plot [default: all]')
+
     p.add_argument('-a', '--plot-all', action='store_true', help='Plot all attributes')
 
     for a in PLOT_ATTRS:
@@ -62,18 +64,41 @@ def load_wqstats(path):
     stats   = WQStats(*list(records))
     return stats
 
-def adjust(wqs):
-    # convert to seconds
-    s = wqs._replace(timestamp = (wqs.timestamp - wqs.timestamp[0]) / 10.**6)
+def adjust(wqs, history=None):
+    s = wqs
+
+    s = adjust_history(s, history=history)
+
+    # convert to hours
+    s = s._replace(timestamp = s.timestamp / (10.**6))
 
     return s
+
+def adjust_history(wqs, history=None):
+    if history is None:
+        return wqs
+    else:
+        now = wqs.timestamp[-1]
+        hus = history * 60 * 60 * 10**6
+        ago = now - hus
+        ixs = np.where(wqs.timestamp >= ago)
+        print 'Filtered',  len(wqs.timestamp) - len(wqs.timestamp[ixs]), 'values'
+
+        d = wqs._asdict()
+        for a, v in d.items():
+            d[a] = v[ixs]
+
+        return WQStats(**d)
+
 
 def plot(opts, wqs):
 
     for a in PLOT_ATTRS:
+
         if opts.plot_all or getattr(opts, a):
             print 'Plotting', a
-            plt.plot(wqs.timestamp, getattr(wqs, a), label=a)
+            v = getattr(wqs, a)
+            plt.plot(wqs.timestamp, v, label=a)
 
     plt.legend(loc='upper left')
 
@@ -84,5 +109,6 @@ def plot(opts, wqs):
 if __name__ == '__main__':
     opts = getopts()
     wqstats = load_wqstats(opts.logpath)
-    wqstats = adjust(wqstats)
+    wqstats = adjust(wqstats, history=opts.history)
+
     plot(opts, wqstats)
