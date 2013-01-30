@@ -69,8 +69,11 @@ def adjust(wqs, history=None):
 
     s = adjust_history(s, history=history)
 
-    # convert to hours
-    s = s._replace(timestamp = s.timestamp / (10.**6))
+    print 'Converting timestamp to hours'
+    s = s._replace(timestamp = s.timestamp / (3600. * 10.**6))
+
+    print 'Normalizing to start time'
+    s = s._replace(timestamp = s.timestamp - s.timestamp[0])
 
     return s
 
@@ -79,7 +82,7 @@ def adjust_history(wqs, history=None):
         return wqs
     else:
         now = wqs.timestamp[-1]
-        hus = history * 60 * 60 * 10**6
+        hus = history * 3600 * 10**6  # convert from hours
         ago = now - hus
         ixs = np.where(wqs.timestamp >= ago)
         print 'Filtered',  len(wqs.timestamp) - len(wqs.timestamp[ixs]), 'values'
@@ -102,7 +105,7 @@ def plot(opts, wqs):
 
     plt.legend(loc='upper left')
 
-    plt.xlabel('Time (s)')
+    plt.xlabel('Time (hours)')
 
     plt.savefig(opts.plotpath)
 
