@@ -28,6 +28,9 @@
 * Installation
   This assumes the master dependencies have been installed.
 
+  First, install the dependency (some are provided in the 'extern' directory).
+  Then:
+
   #+BEGIN_SRC
   $ python setup.py install --prefix <path/to/installation/directory>
   #+END_SRC
