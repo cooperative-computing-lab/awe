@@ -89,7 +89,7 @@ class Config(object):
         self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
         self.exclusive = True
         self.catalog   = True
-        self.debug     = 'all'
+        self.debug     = ''
         self.shutdown  = False
         self.fastabort = 3
         self.restarts  = 95 # until restarts are handled on a per-iteration basis
@@ -257,7 +257,7 @@ class WorkQueue(object):
 
     def __del__(self):
         import shutil
-        # shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.tmpdir)
 
 
     @awe.typecheck(WQ.Task)

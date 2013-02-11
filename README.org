@@ -11,7 +11,6 @@
 	The AWE framework defines an IResampler interface. We provide an implementation, but you are free do define your own.
 
 * Master Dependencies
-  - [[https://github.com/badi/trax][Trax (Transactional Logging library in Python)]] (in 'extern')
   - [[http://python.org/][Python 2.7]]
   - [[http://numpy.scipy.org/][Numpy 1.5.1+]]
   - [[http://www.csb.pitt.edu/prody/][ProDy 0.9.4+]]
