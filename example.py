@@ -14,12 +14,12 @@ cfg.debug     = 'all'
 
 cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('awedata/binaries/$OS-$ARCH/pdb2gmx')
-cfg.cache('awedata/binaries/$OS-$ARCH/grompp')
-cfg.cache('awedata/binaries/$OS-$ARCH/mdrun')
-cfg.cache('awedata/binaries/$OS-$ARCH/assign')
+cfg.cache('awesetup/binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('awesetup/binaries/$OS-$ARCH/grompp')
+cfg.cache('awesetup/binaries/$OS-$ARCH/mdrun')
+cfg.cache('awesetup/binaries/$OS-$ARCH/assign')
 
-cfg.cache('awedata/gmxtopologies')
+cfg.cache('awesetup/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/cells.dat')
@@ -43,7 +43,7 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = 'awedata/pdbs/ala'
+srcdir = 'awesetup/pdbs/ala'
 for i in xrange(nstates):
 
     if i < nstates / 3:

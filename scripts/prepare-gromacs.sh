@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ME=$(basename $0)
-PREFIX=awedata
+PREFIX=awesetup
 
 GMXBINARIES=(pdb2gmx grompp mdrun)
 
@@ -9,7 +9,7 @@ usage() {
 	cat <<EOF
 USAGE: $ME [prefix]
 
-  prefix: where the output is stored (default: awedata)
+  prefix: where the output is stored (default: $PREFIX)
 
 SUMMARY:
 
