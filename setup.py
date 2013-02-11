@@ -14,6 +14,7 @@ setup( author       = "Badi' Abdul-Wahid",
        url          = 'https://bitbucket.org/badi/awe',
        name         = 'awe',
        packages     = ['awe', 'trax'],
+       scripts      = ['scripts/awe-verify'],
        platforms    = ['Linux', 'Mac OS X'],
        description  = 'Adaptive Weighted Ensemble method using WorkQueue'
        )

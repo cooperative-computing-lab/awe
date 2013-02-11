@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+import collections, sys
+
+PASS = True
+modules = 'work_queue numpy prody trax awe'.split()
+executables = "pdb2gmx grompp mdrun".split()
+
+
+def lookup_pymodule(module):
+    print 'Looking for', module,
+    try:
+        exec 'import %s ' % module
+    except ImportError:
+        global PASS
+        PASS = False
+        print '...FAIL'
+        return
+    print '...OK'
+
+
+def lookup_executable(name):
+    from distutils.spawn import find_executable
+    print 'Looking for', name,
+    e = find_executable(name)
+    if e:
+        print '...OK'
+    else:
+        global PASS
+        PASS = False
+        print '...FAIL'
+    
+
+checker = collections.defaultdict(list,
+                                  modules  = (modules    , lookup_pymodule),
+                                  binaries = (executables, lookup_executable)
+                                  )
+
+for k,(lst, fn) in checker.iteritems():
+    print 'Checking', k
+    for v in lst:
+        fn(v)
+    print
+
+
+if PASS:
+    sys.exit(0)
+else:
+    sys.exit(1)
+
+
+
+### Local Variables
+###   mode: Python
+###   indent-tabs-mode: nil
+### End
