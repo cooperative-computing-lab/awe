@@ -89,12 +89,13 @@ class Config(object):
         self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
         self.exclusive = True
         self.catalog   = True
-        self.debug     = ''
+        self.debug     = 'all'
         self.shutdown  = False
         self.fastabort = 3
         self.restarts  = 95 # until restarts are handled on a per-iteration basis
         self.maxreps   = 9
         self.waittime  = 10 # in seconds
+        self.wq_logfile = 'wq.log'
         self.wqstats_logfile   = 'wq-stats.log'
 
 
@@ -121,6 +122,9 @@ class Config(object):
             ### warn
             awe.log('WARNING: using previously created WorkQueue instance')
         else:
+            if self.wq_logfile:
+                awe.log('Logging WorkQueue to %s' % self.wq_logfile)
+                WQ.cctools_debug_config_file(self.wq_logfile)
             WQ.set_debug_flag(self.debug)
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
@@ -188,7 +192,6 @@ class TagSet(object):
 
     def discard(self, tag, key=None):
         key = key or self._find_tag_group(tag)
-        print time.asctime(), 'Discarding tag', tag, 'from group', key
         if key is not None:
             self._tags[key].discard(tag)
 
@@ -312,7 +315,7 @@ class WorkQueue(object):
 
     def cancel_tag(self, tagtext):
         while self.wq.cancel_by_tasktag(tagtext):
-            print time.asctime(), 'Canceled tag', tagtext, self._tagset
+            pass
 
     def select_tag(self):
         self._tagset.clean()
@@ -341,15 +344,13 @@ class WorkQueue(object):
 
             if task:
                 self.update_task_stats(task)
-                print time.asctime(), 'received task. result =', task.result, 'return_status =', task.return_status, self._tagset, 'tasks in Q =', self.tasks_in_queue(), 'active workers =', self.active_workers()
+                # print time.asctime(), 'Received result. %d tasks remaining in iteration.' % self.tasks_in_queue()
 
                 self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
                 self.taskoutputlogger.output(task.output)
                 self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
 
             if task and task.result == 0:
-
-                # print time.asctime(), 'recived task', task.tag, task.return_status
 
                 if not task.return_status == 0 and not self.restart(task):
                     raise WorkQueueWorkerException, \
@@ -374,12 +375,6 @@ class WorkQueue(object):
                 return result
 
             elif task and not task.result == 0:
-                ### TODO: issue #32: keep track of task failure
-
-                ### TODO: if restart limit reached, report, but continue
-                ### we don't want an error to complete break the master before we reach 10K workers
-
-
                 if not self.restart(task):
                     raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \
                         (task.tag, self.taskoutput(task))
