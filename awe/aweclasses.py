@@ -168,8 +168,8 @@ class AWE(object):
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
                  traxlogger = None, checkpointfreq=1):
 
-        self.statslogger = stats.StatsLogger('stats.log.gz')
-        self.transitionslogger = stats.StatsLogger('cell-transitions.log.gz')
+        self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
+        self.transitionslogger = stats.StatsLogger('debug/cell-transitions.log.gz')
 
         self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
         self.system     = system
@@ -183,6 +183,8 @@ class AWE(object):
         self.traxlogger = traxlogger or trax.SimpleTransactional()
         self.checkpointfreq = checkpointfreq
 
+        self._firstrun  = True
+
 
     def checkpoint(self):
         cpt = self.traxlogger.cpt_path
@@ -194,6 +196,7 @@ class AWE(object):
                    resample       = self.resample,
                    checkpointfreq = self.checkpointfreq
                    )
+        chk['_firstrun'] = self._firstrun
         self.traxlogger.checkpoint(chk)
 
 
@@ -211,16 +214,6 @@ class AWE(object):
             parms = self.traxlogger.recover(self._trax_log_recover)
             for a in parms.iterkeys():
                 setattr(self, a, parms[a])
-
-
-    def save_stats(self, dirname):
-        if not os.path.exists(dirname):
-            print 'Creating directory', dirname
-            os.makedirs(dirname)
-
-        awestats = os.path.join(dirname, 'awestats.npy')
-        self.stats.save(awestats)
-        self.wq.save_stats(dirname)
 
 
     def _submit(self):
@@ -280,6 +273,10 @@ class AWE(object):
 
         self.recover()
 
+        if self._firstrun:
+            self.resample.save(self.system)
+            self._firstrun = False
+
         assert len(self.system.cells  ) > 0
         assert len(self.system.walkers) > 0
 
@@ -314,10 +311,10 @@ class AWE(object):
         except KeyboardInterrupt:
             pass
 
-        except Exception, e:
-            print 'Failed:', e
-            import sys
-            sys.exit(1)
+        # except Exception, e:
+        #     print 'Failed:', e
+        #     import sys
+        #     sys.exit(1)
 
 
     # @typecheck(int, int)
@@ -381,14 +378,14 @@ class AWE(object):
 
             walker            = pickle.loads(walkerstr)
 
-            selftransition = walker.assignment == cellid
+            transition = walker.assignment != cellid
             print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
                   'Walker', walker.id, \
                   'transition', walker.assignment, '->', cellid, \
                   self.wq.tasks_in_queue(), 'tasks remaining'
             self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                           'iteration %s from %s to %s %s' % \
-                                              (self.iteration, walker.assignment, cellid, selftransition))
+                                              (self.iteration, walker.assignment, cellid, transition))
 
             walker.end        = coords
             walker.assignment = cellid

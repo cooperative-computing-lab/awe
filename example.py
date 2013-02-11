@@ -76,6 +76,4 @@ adaptive   = awe.AWE( wqconfig   = cfg,
 
 adaptive.run()
 
-multicolor.save_transitions('transitions.dat')
-
 print 'Run time:', awe.time.time(), 's'

@@ -97,8 +97,8 @@ class Config(object):
         self.restarts        = 95 # until restarts are handled on a per-iteration basis
         self.maxreps         = 9
         self.waittime        = 10 # in seconds
-        self.wq_logfile      = 'wq.log'
-        self.wqstats_logfile = 'wq-stats.log'
+        self.wq_logfile      = 'debug/wq.log'
+        self.wqstats_logfile = 'debug/wq-stats.log'
 
 
         self._executable = None
@@ -125,6 +125,7 @@ class Config(object):
             awe.log('WARNING: using previously created WorkQueue instance')
         else:
             if self.wq_logfile:
+                awe.util.makedirs_parent(self.wq_logfile)
                 awe.log('Logging WorkQueue to %s' % self.wq_logfile)
                 WQ.cctools_debug_config_file(self.wq_logfile)
             WQ.set_debug_flag(self.debug)
@@ -141,6 +142,7 @@ class Config(object):
 
             _AWE_WORK_QUEUE = wq
 
+        awe.util.makedirs_parent(self.wqstats_logfile)
         _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
         return _AWE_WORK_QUEUE
 
