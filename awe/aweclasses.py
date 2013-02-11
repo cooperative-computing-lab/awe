@@ -245,9 +245,7 @@ class AWE(object):
             i += 1
             if i > 20: break
             tag    = self.wq.select_tag()
-            print time.asctime(), 'Trying to duplicate tag:', tag
             if tag is None: break
-            print time.asctime(), 'Duplicating tag', tag
             wid    = self.decode_from_task_tag(tag)['walkerid']
             walker = self.system.walker(wid)
             task   = self._new_task(walker)
@@ -379,7 +377,10 @@ class AWE(object):
             walker            = pickle.loads(walkerstr)
 
             selftransition = walker.assignment == cellid
-            print time.asctime(), 'Walker', walker.id, 'cell', walker.assignment, '->', cellid, selftransition
+            print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
+                  'Walker', walker.id, \
+                  'transition', walker.assignment, '->', cellid, \
+                  self.wq.tasks_in_queue(), 'tasks remaining'
             self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                           'iteration %s from %s to %s %s' % \
                                               (self.iteration, walker.assignment, cellid, selftransition))

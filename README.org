@@ -11,14 +11,19 @@
 	The AWE framework defines an IResampler interface. We provide an implementation, but you are free do define your own.
 
 * Master Dependencies
+  - [[https://github.com/badi/trax][Trax (Transactional Logging library in Python)]] (in 'extern')
   - [[http://python.org/][Python 2.7]]
   - [[http://numpy.scipy.org/][Numpy 1.5.1+]]
   - [[http://www.csb.pitt.edu/prody/][ProDy 0.9.4+]]
-  - [[http://cse.nd.edu/~ccl/software/workqueue/][WorkQueue (CCTools 3.4.2)]]
+  - [[http://cse.nd.edu/~ccl/software/workqueue/][WorkQueue (CCTools)]]
+
+** Optional
+  - Gromacs (tested)
+  - NAMD (untested)
 
 * Worker Dependencies
   This depends on the MD package used (ie the input to Gromacs differs from that for NAMD), as well as the assignment protocol.
-  The example script uses ProtoMol in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
+  The example script uses Gromacs in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
 
 * Installation
   This assumes the master dependencies have been installed.
@@ -39,7 +44,7 @@
 
   The end result is that you run your script like so:
   #+BEGIN_SRC
-  $ python myscript.py
+  $ python example.py
   #+END_SRC
 
   Please see example.py in order to get started.
