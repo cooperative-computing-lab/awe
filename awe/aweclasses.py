@@ -314,6 +314,11 @@ class AWE(object):
         except KeyboardInterrupt:
             pass
 
+        except Exception, e:
+            print 'Failed:', e
+            import sys
+            sys.exit(1)
+
 
     # @typecheck(int, int)
     # @returns(str)

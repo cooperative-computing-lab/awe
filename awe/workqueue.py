@@ -67,6 +67,8 @@ class WQFile(object):
         return self._cached
 
     def add_to_task(self, task):
+        if '$' not in self.masterpath and not os.path.exists(self.masterpath):
+            raise IOError, 'Cannot find file to send to worker: %s' % self.masterpath
         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
 
     def __str__(self):
