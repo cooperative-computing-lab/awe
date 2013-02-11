@@ -1,6 +1,8 @@
 
 import base
 
+import os
+
 try:
 	import cPickle as pickle
 except ImportError:
@@ -27,6 +29,8 @@ class SimpleTransactional(base.AbstractTransactional):
 		return open(self.cpt_path, mode)
 
 	def _impl_log_recover_open(self):
+		if not os.path.exists(self.log_path):
+			open(self.log_path,'w').close()
 		return open(self.log_path)
 
 	def recover(self, value_handler):
