@@ -5,12 +5,12 @@ import awe
 import numpy as np
 import os
 
-cfg = awe.workqueue.Config()
-cfg.name = 'test-awe'
+cfg           = awe.workqueue.Config()
+cfg.name      = 'test-awe'
 cfg.fastabort = 3
-cfg.restarts = float('inf')
-cfg.maxreps = 50
-cfg.debug = 'all'
+cfg.restarts  = float('inf')
+cfg.maxreps   = 50
+cfg.debug     = 'all'
 
 cfg.execute('testinput/execute-task.sh')
 
@@ -32,10 +32,10 @@ iterations = 5
 nwalkers   = 4
 nstates    = 100
 
-weights = np.random.random((nstates,nwalkers))
-weights /= np.sum(weights.flatten())
+weights   = np.random.random((nstates,nwalkers))
+weights  /= np.sum(weights.flatten())
 
-system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
+system    = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
 partition = awe.SinkStates()
 partition.add(0, *range(0,50))
@@ -67,12 +67,12 @@ for i in xrange(nstates):
 
 
 multicolor = awe.resample.MultiColor(nwalkers, partition)
-resample = awe.resample.SaveWeights(multicolor)
-adaptive = awe.AWE( wqconfig   = cfg,
-                    system     = system,
-                    iterations = iterations,
-                    resample   = resample,
-                    checkpointfreq = 1)
+resample   = awe.resample.SaveWeights(multicolor)
+adaptive   = awe.AWE( wqconfig   = cfg,
+                      system     = system,
+                      iterations = iterations,
+                      resample   = resample,
+                      checkpointfreq = 1)
 
 adaptive.run()
 

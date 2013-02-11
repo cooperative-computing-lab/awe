@@ -86,19 +86,19 @@ class Config(object):
 
     def __init__(self):
 
-        self.name      = 'awe'
-        self.port      = WQ.WORK_QUEUE_RANDOM_PORT
-        self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
-        self.exclusive = True
-        self.catalog   = True
-        self.debug     = ''
-        self.shutdown  = False
-        self.fastabort = 3
-        self.restarts  = 95 # until restarts are handled on a per-iteration basis
-        self.maxreps   = 9
-        self.waittime  = 10 # in seconds
-        self.wq_logfile = 'wq.log'
-        self.wqstats_logfile   = 'wq-stats.log'
+        self.name            = 'awe'
+        self.port            = WQ.WORK_QUEUE_RANDOM_PORT
+        self.schedule        = WQ.WORK_QUEUE_SCHEDULE_TIME
+        self.exclusive       = True
+        self.catalog         = True
+        self.debug           = ''
+        self.shutdown        = False
+        self.fastabort       = 3
+        self.restarts        = 95 # until restarts are handled on a per-iteration basis
+        self.maxreps         = 9
+        self.waittime        = 10 # in seconds
+        self.wq_logfile      = 'wq.log'
+        self.wqstats_logfile = 'wq-stats.log'
 
 
         self._executable = None
@@ -222,7 +222,7 @@ class WorkQueue(object):
         self.restarts = dict()
 
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
-        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='task_output.log.gz', buffersize=42)
+        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
 
     @property
     def empty(self):
@@ -246,16 +246,6 @@ class WorkQueue(object):
         self.statslogger.open()
         self.taskoutputlogger.open()
 
-        # self.wq = self.cfg._mk_wq()
-
-    def save_stats(self, dirname):
-        if not os.path.exists(dirname):
-            print 'Creating directory', dirname
-            os.makedirs(dirname)
-
-        wqstats   = os.path.join(dirname, 'wqstats.npy')
-        taskstats = os.path.join(dirname, 'taskstats.npy')
-        self.stats.save(wqstats, taskstats)
 
     def __del__(self):
         import shutil
