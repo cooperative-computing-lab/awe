@@ -5,20 +5,21 @@ import awe
 import numpy as np
 import os
 
-cfg = awe.workqueue.Config()
-cfg.name = 'test-awe'
+cfg           = awe.workqueue.Config()
+cfg.name      = 'test-awe'
 cfg.fastabort = 3
-cfg.restarts = float('inf')
-cfg.maxreps = 50
+cfg.restarts  = float('inf')
+cfg.maxreps   = 50
+cfg.debug     = 'all'
 
 cfg.execute('testinput/execute-task.sh')
 
-cfg.cache('awedata/binaries/$OS-$ARCH/pdb2gmx')
-cfg.cache('awedata/binaries/$OS-$ARCH/grompp')
-cfg.cache('awedata/binaries/$OS-$ARCH/mdrun')
-cfg.cache('awedata/binaries/$OS-$ARCH/assign')
+cfg.cache('awesetup/binaries/$OS-$ARCH/pdb2gmx')
+cfg.cache('awesetup/binaries/$OS-$ARCH/grompp')
+cfg.cache('awesetup/binaries/$OS-$ARCH/mdrun')
+cfg.cache('awesetup/binaries/$OS-$ARCH/assign')
 
-cfg.cache('awedata/gmxtopologies')
+cfg.cache('awesetup/gmxtopologies')
 cfg.cache('testinput/sim.mdp')
 cfg.cache('testinput/env.sh')
 cfg.cache('testinput/cells.dat')
@@ -31,10 +32,10 @@ iterations = 5
 nwalkers   = 4
 nstates    = 100
 
-weights = np.random.random((nstates,nwalkers))
-weights /= np.sum(weights.flatten())
+weights   = np.random.random((nstates,nwalkers))
+weights  /= np.sum(weights.flatten())
 
-system = awe.System(topology = awe.PDB('testinput/state0.pdb'))
+system    = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
 partition = awe.SinkStates()
 partition.add(0, *range(0,50))
@@ -42,7 +43,7 @@ partition.add(1, *range(50,100))
 
 
 print 'Loading cells and walkers'
-srcdir = 'awedata/pdbs/ala'
+srcdir = 'awesetup/pdbs/ala'
 for i in xrange(nstates):
 
     if i < nstates / 3:
@@ -66,15 +67,13 @@ for i in xrange(nstates):
 
 
 multicolor = awe.resample.MultiColor(nwalkers, partition)
-resample = awe.resample.SaveWeights(multicolor)
-adaptive = awe.AWE( wqconfig   = cfg,
-                    system     = system,
-                    iterations = iterations,
-                    resample   = resample,
-                    checkpointfreq = 1)
+resample   = awe.resample.SaveWeights(multicolor)
+adaptive   = awe.AWE( wqconfig   = cfg,
+                      system     = system,
+                      iterations = iterations,
+                      resample   = resample,
+                      checkpointfreq = 1)
 
 adaptive.run()
-
-multicolor.save_transitions('transitions.dat')
 
 print 'Run time:', awe.time.time(), 's'

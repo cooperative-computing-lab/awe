@@ -67,6 +67,8 @@ class WQFile(object):
         return self._cached
 
     def add_to_task(self, task):
+        if '$' not in self.masterpath and not os.path.exists(self.masterpath):
+            raise IOError, 'Cannot find file to send to worker: %s' % self.masterpath
         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
 
     def __str__(self):
@@ -84,19 +86,19 @@ class Config(object):
 
     def __init__(self):
 
-        self.name      = 'awe'
-        self.port      = WQ.WORK_QUEUE_RANDOM_PORT
-        self.schedule  = WQ.WORK_QUEUE_SCHEDULE_TIME
-        self.exclusive = True
-        self.catalog   = True
-        self.debug     = 'all'
-        self.shutdown  = False
-        self.fastabort = 3
-        self.restarts  = 95 # until restarts are handled on a per-iteration basis
-        self.maxreps   = 9
-        self.waittime  = 10 # in seconds
-        self.wq_logfile = 'wq.log'
-        self.wqstats_logfile   = 'wq-stats.log'
+        self.name            = 'awe'
+        self.port            = WQ.WORK_QUEUE_RANDOM_PORT
+        self.schedule        = WQ.WORK_QUEUE_SCHEDULE_TIME
+        self.exclusive       = True
+        self.catalog         = True
+        self.debug           = ''
+        self.shutdown        = False
+        self.fastabort       = 3
+        self.restarts        = 95 # until restarts are handled on a per-iteration basis
+        self.maxreps         = 9
+        self.waittime        = 10 # in seconds
+        self.wq_logfile      = 'debug/wq.log'
+        self.wqstats_logfile = 'debug/wq-stats.log'
 
 
         self._executable = None
@@ -123,6 +125,7 @@ class Config(object):
             awe.log('WARNING: using previously created WorkQueue instance')
         else:
             if self.wq_logfile:
+                awe.util.makedirs_parent(self.wq_logfile)
                 awe.log('Logging WorkQueue to %s' % self.wq_logfile)
                 WQ.cctools_debug_config_file(self.wq_logfile)
             WQ.set_debug_flag(self.debug)
@@ -139,6 +142,7 @@ class Config(object):
 
             _AWE_WORK_QUEUE = wq
 
+        awe.util.makedirs_parent(self.wqstats_logfile)
         _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
         return _AWE_WORK_QUEUE
 
@@ -220,7 +224,7 @@ class WorkQueue(object):
         self.restarts = dict()
 
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
-        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='task_output.log.gz', buffersize=42)
+        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
 
     @property
     def empty(self):
@@ -244,20 +248,10 @@ class WorkQueue(object):
         self.statslogger.open()
         self.taskoutputlogger.open()
 
-        # self.wq = self.cfg._mk_wq()
-
-    def save_stats(self, dirname):
-        if not os.path.exists(dirname):
-            print 'Creating directory', dirname
-            os.makedirs(dirname)
-
-        wqstats   = os.path.join(dirname, 'wqstats.npy')
-        taskstats = os.path.join(dirname, 'taskstats.npy')
-        self.stats.save(wqstats, taskstats)
 
     def __del__(self):
         import shutil
-        # shutil.rmtree(self.tmpdir)
+        shutil.rmtree(self.tmpdir)
 
 
     @awe.typecheck(WQ.Task)

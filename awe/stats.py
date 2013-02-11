@@ -345,28 +345,6 @@ class AWEStats(object):
     def time_barrier(self, state):
         self._timeit(state, self.barrier, 'barrier time')
 
-    def save(self, path):
-        print 'Saving to', path
-        with open(path, 'w') as fd:
-            data = dict()
-
-            print '\t','iteration data'
-            ts, vs = self.iteration.data
-            data['iteration_time'] = ts
-            data['iteration_values'] = vs
-
-            print '\t','resample data'
-            ts, vs = self.resample.data
-            data['resample_time'] = ts
-            data['resample_values'] = vs
-
-            print '\t','barrier data'
-            ts, vs = self.barrier.data
-            data['barrier_time'] = ts
-            data['barrier_values'] = vs
-
-            np.savez(fd, **data)
-
     def close(self):
         self.logger.close()
 
@@ -376,7 +354,11 @@ class AWEStats(object):
 
 class StatsLogger (object):
 
-    def __init__(self, path='stats.log.gz', buffersize=9):
+    def __init__(self, path='debug/stats.log.gz', buffersize=9):
+
+        prefix = os.path.dirname(os.path.abspath(os.path.expanduser(path)))
+        if not os.path.exists(prefix):
+            os.makedirs(prefix)
 
         print 'StatsLogger opening', path
         self._fd = None

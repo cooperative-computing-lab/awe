@@ -7,12 +7,14 @@ See the file COPYING for details.
 """
 
 
-from util import typecheck, returns
+from util import typecheck, returns, makedirs_parent
 import aweclasses
 
 import numpy as np
 import itertools
-import time
+import time, os
+
+OUTPUT_DIR = 'resample'
 
 
 class IResampler(object):
@@ -59,8 +61,9 @@ class OneColor(IResampler):
     def __init__(self, targetwalkers):
         self.targetwalkers = targetwalkers
 #####
-        self.histfile = 'walkerhistory.dat'
-        with open(self.histfile, 'w') as fd:
+        self.histfile = os.path.join(OUTPUT_DIR, 'walker-history.csv')
+        makedirs_parent(self.histfile)
+        with open(self.histfile, 'a') as fd:
             fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
@@ -167,7 +170,10 @@ class MultiColor(OneColor):
         ncolors          = partition.ncolors
         self.transitions = np.zeros((ncolors, ncolors))
 	self.iteration = 1
-	of = open('output.dat','w')
+
+        self.cellweights_path = os.path.join(OUTPUT_DIR, 'cell-weights.csv')
+        makedirs_parent(self.cellweights_path)
+	of = open(self.cellweights_path,'a')
 	of.write('%iteration,cellid,color,total_weight \n')
         of.close()
 
@@ -205,7 +211,7 @@ class MultiColor(OneColor):
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
 
-        of = open('output.dat','a')
+        of = open(self.cellweights_path,'a')
         for cell in newsystem.cells:
 	    thiscell = system.filter_by_cell(cell)
 	    for color in thiscell.colors:
@@ -218,7 +224,7 @@ class MultiColor(OneColor):
 
     def save_transitions(self, path):
         print time.asctime(), 'Saving transition matrix to', repr(path)
-        np.savetxt(path, self.transitions)
+        np.savetxt(path, self.transitions, delimiter=',')
 
 class SuperCell(MultiColor):
     def __init__(self,nwalkers,partition,cellmapf):
@@ -232,7 +238,9 @@ class SuperCell(MultiColor):
         for w in system.walkers:
             w.assignment = cellmap[w.assignment]
         newsystem = MultiColor.resample(self,system)
-        MultiColor.save_transitions(self,'transtions.dat')
+        tmat = os.path.join(OUTPUT_DIR, 'transition-matrix.csv')
+        makedirs_parent(tmat)
+        MultiColor.save_transitions(tmat)
         return newsystem
 
 class IPlotter(IResampler):
@@ -259,13 +267,16 @@ class ISaver(IResampler):
     """
 
     @typecheck(IResampler, datfile=str)
-    def __init__(self, resampler, datfile='save.dat'):
+    def __init__(self, resampler, datfile='isaver.dat'):
         self.resampler = resampler
         self.datfile   = datfile
         self.iteration = 0
 
     @typecheck(aweclasses.System, mode=str)
     def save(self, system, mode='a'):
+        if self.iteration == 0:
+            with open(self.datfile, 'a') as fd:
+                fd.write(self.heading())
         self._save(system, mode=mode)
 
     @returns(str)
@@ -281,9 +292,6 @@ class ISaver(IResampler):
     @typecheck(aweclasses.System)
     @returns(aweclasses.System)
     def resample(self, system):
-        if self.iteration == 0:
-            with open(self.datfile, 'w') as fd:
-                fd.write(self.heading())
 
         newsystem = self.resampler.resample(system)
         self.iteration += 1
@@ -293,13 +301,14 @@ class ISaver(IResampler):
 
 class SaveWeights(ISaver):
 
-    def __init__(self, resampler, datfile='weights.dat'):
+    def __init__(self, resampler, datfile=None):
+        datfile = datfile or os.path.join(OUTPUT_DIR, 'walker-weights.csv')
         ISaver.__init__(self, resampler, datfile=datfile)
 
     def _heading(self):
         return \
             '# Each line represents a walker at:\n' + \
-            '# walkerid iteration cell weight color\n'
+            '# walkerid,iteration,cell,weight,color\n'
 
     def _save(self, system, mode='a'):
         print time.asctime(), 'Saving weights to', self.datfile
@@ -309,7 +318,7 @@ class SaveWeights(ISaver):
 
         with open(self.datfile, mode) as fd:
             for i, w in enumerate(system.walkers):
-                s = '%(wid)d\t%(iteration)d\t%(cell)d\t%(weight)f\t%(color)s\n' % {
+                s = '%(wid)d,%(iteration)d,%(cell)d,%(weight)f,%(color)s\n' % {
                     'wid'       : w.id           ,
                     'iteration' : self.iteration ,
                     'cell'      : w.assignment   ,

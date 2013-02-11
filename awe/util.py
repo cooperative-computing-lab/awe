@@ -8,6 +8,7 @@ See the file COPYING for details.
 
 
 import traceback
+import os
 
 class TypeException (Exception): pass
 
@@ -127,3 +128,12 @@ def checkpicklable(d):
             d2 = d.__dict__
             checkpicklable(d2)
         except AttributeError: pass
+
+
+def abspath(p): return os.path.abspath(os.path.expanduser(os.path.expandvars(p)))
+
+def makedirs_parent(p):
+    path = abspath(p)
+    d    = os.path.dirname(path)
+    if not os.path.exists(d):
+        os.makedirs(d)
