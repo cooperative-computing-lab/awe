@@ -1,58 +1,58 @@
+Adaptive Weighted Ensemble or AWE package provides a Python library for
+adaptive sampling of molecular dynamics. The framework decomposes the
+resampling computations and the molecular dynamics simulations into tasks that
+are dispatched to Work Queue for distribution and execution across allocated
+resources.
+
+REQUIREMENTS
+-------------------------------------------------------------------------------
+  - Python 2.6 or higher
+  - Numpy 1.5 or higher 
+  - Prody 0.9.4
+  - Gromacs
+
+INSTALLATION
+-------------------------------------------------------------------------------
+Run the setup script as: 
+  $ python setup.py install --prefix <path/to/installation/directory>
+
+RUNNING  
+-------------------------------------------------------------------------------
+The example program, awe-alanine-example.py, is a Work Queue master application
+runs the awe sampling algorithm on the Alanine DiPeptide protein molecules. To
+run this example: 
+  $ python awe-alanine-example.py
+
+You will see this right away:
+  Running on port 9123...
+  Loading cells and walkers
+ 
+The master program successfully started and is loading the cells and walkers
+for running the simulations.
+
+Note the master by default assigns a unique project name by subsituting
+YOURUSERNAME with the username that invoked the master. For example, if the
+username that invoked the example is jdoe, the default project name will be:
+awe-jdoe
+
+The master then waits for workers to connect so it can dispatch the simulations
+tasks for execution by the connected workers.  
+
+To start a worker for this master, do:
+  $ work_queue_worker -a -N awe-YOURUSERNAME 
+and substitute your username for YOURUERNAME
+
+simply dothe following components need to be setup and configured. 
+  - WorkQueue parameters 
+  - System definition that describes the cells and their walkers. 
+  - Resampler implementation. 
 
 
-* Description
-  AWE provides a framework for adaptive sampling of molecular dynamics using WorkQueue to execute tasks.
-  The framework decouples the resampling algorithm and the molecular dynamics from the task distribution.
-
-* Capabilities
-  - Any MD package (Gromacs, NAMD, ProtoMol, CHARMM, AMBER, ...)
-	Tasks that run on the worker are defined as scripts that are cached on each worker, so they are only sent once.
-  - Flexible resampling
-	The AWE framework defines an IResampler interface. We provide an implementation, but you are free do define your own.
-
-* Master Dependencies
-  - [[http://python.org/][Python 2.7]]
-  - [[http://numpy.scipy.org/][Numpy 1.5.1+]]
-  - [[http://www.csb.pitt.edu/prody/][ProDy 0.9.4+]]
-  - [[http://cse.nd.edu/~ccl/software/workqueue/][WorkQueue (CCTools)]]
-
-** Optional
-  - Gromacs (tested)
-  - NAMD (untested)
-
+INPUTS
+-------------------------------------------------------------------------------
 * Worker Dependencies
   This depends on the MD package used (ie the input to Gromacs differs from that for NAMD), as well as the assignment protocol.
   The example script uses Gromacs in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
-
-* Installation
-  This assumes the master dependencies have been installed.
-
-  First, install the dependency (some are provided in the 'extern' directory).
-  Then:
-
-  #+BEGIN_SRC
-  $ python setup.py install --prefix <path/to/installation/directory>
-  #+END_SRC
-
-* Running
-  AWE is provided as a python library, therefore in order to run, you need to create the appropriate python objects and run a python script.
-  There are four major components:
-	1. The WorkQueue configuration
-	2. A System definition.
-	   This is done by defining Cells and adding Walkers to the cells.
-	3. An IResampler instance.
-	   Use one of the provided algorithms or define you own.
-	4. A global structure that then runs the algorithms.
-
-  The end result is that you run your script like so:
-  #+BEGIN_SRC
-  $ python example.py
-  #+END_SRC
-
-  Please see example.py in order to get started.
-
-* Licensing
-  Please see the COPYING file.
 
 * Contributers
   Please see the AUTHORS file.
