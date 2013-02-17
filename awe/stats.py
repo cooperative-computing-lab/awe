@@ -360,7 +360,6 @@ class StatsLogger (object):
         if not os.path.exists(prefix):
             os.makedirs(prefix)
 
-        print 'StatsLogger opening', path
         self._fd = None
         self._path = path
         self._buffersize = buffersize
