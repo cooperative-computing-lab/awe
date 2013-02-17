@@ -19,11 +19,11 @@ To install AWE, execute the following.
 In order to run AWE
 
   1) Ensure that Numpy and Prody are installed and
-	 that Python can find them. For instance, adding the python modules to
-	 the PYTHONPATH environment variable:
-	   # make sure numpy and prody are usable
-	   $ export PYTHONPATH=/opt/numpy/1.6.1/lib/python2.7/site-packages:$PYTHONPATH
-	   $ export PYTHONPATH=/opt/prody/1.3/lib/python2.7/site-packages:$PYTHONPATH
+     that Python can find them. For instance, adding the python modules to
+     the PYTHONPATH environment variable:
+       # make sure numpy and prody are usable
+       $ export PYTHONPATH=/opt/numpy/1.6.1/lib/python2.7/site-packages:$PYTHONPATH
+       $ export PYTHONPATH=/opt/prody/1.3/lib/python2.7/site-packages:$PYTHONPATH
   2) Make sure that Gromacs is installed
 
 RUNNING  
@@ -79,16 +79,16 @@ INPUTS
 
   A protocol for running AWE should consist of the following
     1) State partitioning into C cells
-	2) Walker initialization: W walkers should start from each cell, with associated weight
+    2) Walker initialization: W walkers should start from each cell, with associated weight
     3) Run AWE using a resampling algorithm for several iterations.
 
   Steps performed on the Master:
     * Walker initialization
-	* resampling
+    * resampling
 
   Steps performed on the Worker:
     * Molecular Dynamics
-	* Assignment
+    * Assignment
 
   The master therefore transfers to workers the required files for MD
   (Gromacs binaries and associated topology files) and the cell
