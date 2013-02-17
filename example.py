@@ -23,12 +23,12 @@ wq_debug_flag = None
 #-----Main Program------
 if __name__ == "__main__":
 
-	help_str = "Usage: %s" % sys.argv[0]
+	help_str = "Usage: %s\n" % sys.argv[0]
 	help_str += "-i		-	specify the number of iterations\n"
 	help_str += "-w		-	specify the number of walkers\n"
 	help_str += "-s		-	specify the number of states\n"
 	help_str += "-r		-	specify the number of restarts allowed\n"
-	help_str = "-n		-	specify a project name for Work Queue to use\n"
+	help_str += "-n		-	specify a project name for Work Queue to use\n"
 	help_str += "-f		-	specify the Work Queue fast abort multipler\n"
 	help_str += "-d		-	print Work Queue debug messages \n"
 	help_str += "-h		-	help"
@@ -91,8 +91,8 @@ if __name__ == "__main__":
 	system    = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
 	partition = awe.SinkStates()
-	partition.add(0, *range(0,50))
-	partition.add(1, *range(50,100))
+	partition.add(0, *range(0,nstates/2))
+	partition.add(1, *range(nstates/2,nstates))
 
 	srcdir = 'awesetup/pdbs/ala'
 	for i in xrange(nstates):
