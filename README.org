@@ -9,19 +9,39 @@ REQUIREMENTS
   - Python 2.6 or higher
   - Numpy 1.5 or higher 
   - Prody 0.9.4
-  - Gromacs
+  - Gromacs 4.5
 
 INSTALLATION
 -------------------------------------------------------------------------------
-Run the setup script as: 
+To install AWE, execute the following.
   $ python setup.py install --prefix <path/to/installation/directory>
+
+In order to run AWE
+
+  1) Ensure that Numpy and Prody are installed and
+	 that Python can find them. For instance, adding the python modules to
+	 the PYTHONPATH environment variable:
+	   # make sure numpy and prody are usable
+	   $ export PYTHONPATH=/opt/numpy/1.6.1/lib/python2.7/site-packages:$PYTHONPATH
+	   $ export PYTHONPATH=/opt/prody/1.3/lib/python2.7/site-packages:$PYTHONPATH
+  2) Make sure that Gromacs is installed
 
 RUNNING  
 -------------------------------------------------------------------------------
-The example program, awe-alanine-example.py, is a Work Queue master application
-runs the awe sampling algorithm on the Alanine DiPeptide protein molecules. To
+
+In order to run the example, AWE will need to know where the Gromacs
+binaries pdb2gmx, grompp, and mdrun, as well as the topology files are
+located. A script (awe-prepare-gromacs) is provided that copies the
+required files into a directory ('awesetup' by default).
+
+  $ awe-prepare-gromacs
+
+
+The example program, example.py, is a Work Queue master application
+runs the awe sampling algorithm on the Alanine DiPeptide molecule. To
 run this example: 
-  $ python awe-alanine-example.py
+
+  $ python example.py
 
 You will see this right away:
   Running on port 9123...
@@ -38,11 +58,12 @@ awe-jdoe
 The master then waits for workers to connect so it can dispatch the simulations
 tasks for execution by the connected workers.  
 
-To start a worker for this master, do:
-  $ work_queue_worker -a -N awe-YOURUSERNAME 
-and substitute your username for YOURUERNAME
+To start a worker for this master, use the 'work_queue_worker' command.
+The form is: work_queue_worker <master hostname> <port>.
+In out case, both master and worker(s) run on the localhost, and the port (see above) is 9123:
+  $ work_queue_worker localhost 9123
 
-simply dothe following components need to be setup and configured. 
+Simply do the following components need to be setup and configured. 
   - WorkQueue parameters 
   - System definition that describes the cells and their walkers. 
   - Resampler implementation. 
@@ -50,9 +71,31 @@ simply dothe following components need to be setup and configured.
 
 INPUTS
 -------------------------------------------------------------------------------
-* Worker Dependencies
-  This depends on the MD package used (ie the input to Gromacs differs from that for NAMD), as well as the assignment protocol.
-  The example script uses Gromacs in order to run MD and depends on MSMBuilder 2 to assign the resulting trajectories to the cell definitions.
 
-* Contributers
+  AWE consists of three components:
+    1) short MD (walkers)
+    2) assignment of walkers to cells (assign)
+    3) adjust the weights of the walkers (resample).
+
+  A protocol for running AWE should consist of the following
+    1) State partitioning into C cells
+	2) Walker initialization: W walkers should start from each cell, with associated weight
+    3) Run AWE using a resampling algorithm for several iterations.
+
+  Steps performed on the Master:
+    * Walker initialization
+	* resampling
+
+  Steps performed on the Worker:
+    * Molecular Dynamics
+	* Assignment
+
+  The master therefore transfers to workers the required files for MD
+  (Gromacs binaries and associated topology files) and the cell
+  definitions. The worker returns the assignment of the final MD
+  conformation to the cell definitions.
+
+
+CONTRIBUTERS
+-------------------------------------------------------------------------------
   Please see the AUTHORS file.
