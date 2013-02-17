@@ -69,7 +69,9 @@ abspath() {
 }
 
 find-gmxroot() {
-	abspath $(which pdb2gmx)/../..
+	gmx_bin_dir=$(dirname $(which pdb2gmx))
+	gmx_top_dir=$(dirname $gmx_bin_dir)
+	echo $gmx_top_dir
 }
 
 find-gmxtop() {
@@ -77,7 +79,10 @@ find-gmxtop() {
 		echo $GMXLIB
 	else
 		local top=$(find-gmxroot)/share/gromacs/top
-		[ file "$top" ] || die "Cannot find gromacs topology directory" 2
+		if [ ! -e "$top" ] 
+		then
+			return
+		fi
 		echo $top
 	fi
 }
@@ -86,6 +91,10 @@ copy-gmx() {
 	local prefix=$1
 	local path=$prefix/binaries/`uname`-`arch`
 	local gmxtop=$(find-gmxtop)
+	if [ -z "$gmxtop" ] 
+	then
+		die "Cannot find gromacs topology directory" 2
+	fi	
 	local mygmxtop=$prefix/gmxtopologies
 
 	[ ! -d $path ] && mkdir -vp $path
