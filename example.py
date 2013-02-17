@@ -70,30 +70,35 @@ if __name__ == "__main__":
 	if wq_debug_flag:
 		cfg.debug     =	wq_debug_flag 
 
+        # The "main" function of the worker
 	cfg.execute('testinput/execute-task.sh')
 
+        # Binaries to run MD and assignment steps
 	cfg.cache('awesetup/binaries/$OS-$ARCH/pdb2gmx')
 	cfg.cache('awesetup/binaries/$OS-$ARCH/grompp')
 	cfg.cache('awesetup/binaries/$OS-$ARCH/mdrun')
 	cfg.cache('awesetup/binaries/$OS-$ARCH/assign')
 
-	cfg.cache('awesetup/gmxtopologies')
-	cfg.cache('testinput/sim.mdp')
-	cfg.cache('testinput/env.sh')
-	cfg.cache('testinput/cells.dat')
-	cfg.cache('testinput/CellIndices.dat')
-	cfg.cache('testinput/StructureIndices.dat')
-	cfg.cache('testinput/state0.pdb')
+	cfg.cache('awesetup/gmxtopologies')  # required for running gromacs for MD
+	cfg.cache('testinput/sim.mdp') # Gromacs simulation parameters
+	cfg.cache('testinput/env.sh') # setting up the worker execution environment
+	cfg.cache('testinput/cells.dat') # cell definitions
+	cfg.cache('testinput/CellIndices.dat') # cell atoms to use when assigning
+	cfg.cache('testinput/StructureIndices.dat') # walker atoms to use when assigning
 
+        # initialize the weights randomly
 	weights   = np.random.random((nstates,nwalkers))
 	weights  /= np.sum(weights.flatten())
 
+        # load a topology file
 	system    = awe.System(topology = awe.PDB('testinput/state0.pdb'))
 
+        # 2-color awe needs states assigned to a region
 	partition = awe.SinkStates()
 	partition.add(0, *range(0,nstates/2))
 	partition.add(1, *range(nstates/2,nstates))
 
+        # load the initial cells and walkers
 	srcdir = 'awesetup/pdbs/ala'
 	for i in xrange(nstates):
 
@@ -115,6 +120,7 @@ if __name__ == "__main__":
 		w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j], cellid=cell.id)
 		system.add_walker(w)
 
+        # define the AWE resampling algorithm to use
 	multicolor = awe.resample.MultiColor(nwalkers, partition)
 	resample   = awe.resample.SaveWeights(multicolor)
 	adaptive   = awe.AWE( wqconfig   = cfg,
