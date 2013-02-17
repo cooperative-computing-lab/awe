@@ -86,11 +86,11 @@ class Config(object):
 
     def __init__(self):
 
-        self.name            = 'awe'
-        self.port            = WQ.WORK_QUEUE_RANDOM_PORT
+        self.name            = ''
+        self.port            = WQ.WORK_QUEUE_DEFAULT_PORT
         self.schedule        = WQ.WORK_QUEUE_SCHEDULE_TIME
         self.exclusive       = True
-        self.catalog         = True
+        self.catalog         = False
         self.debug           = ''
         self.shutdown        = False
         self.fastabort       = 3
@@ -124,17 +124,25 @@ class Config(object):
             ### warn
             awe.log('WARNING: using previously created WorkQueue instance')
         else:
-            if self.wq_logfile:
-                awe.util.makedirs_parent(self.wq_logfile)
-                awe.log('Logging WorkQueue to %s' % self.wq_logfile)
-                WQ.cctools_debug_config_file(self.wq_logfile)
-            WQ.set_debug_flag(self.debug)
+            if self.debug:
+                WQ.set_debug_flag(self.debug)
+                if self.wq_logfile:
+                     awe.util.makedirs_parent(self.wq_logfile)
+                     WQ.cctools_debug_config_file(self.wq_logfile)
+            if self.name:
+                self.catalog = True
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
                               shutdown  = self.shutdown,
                               catalog   = self.catalog,
                               exclusive = self.exclusive)
             wq.specify_algorithm(self.schedule)
+            
+            awe.log('Running on port %d...' % wq.port)
+            if wq.name:
+                awe.log('Using project name %s' % wq.name)
+            if self.debug and self.wq_logfile:
+                awe.log('Logging WorkQueue to %s' % self.wq_logfile)
 
             typ = type(self.fastabort)
             if typ is float or typ is int:

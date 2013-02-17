@@ -366,29 +366,31 @@ class AWE(object):
     def marshal_from_task(self, result):
 
         import tarfile
-        with tarfile.open(result.tag) as tar:
-
+        tar = tarfile.open(result.tag)
+        try:
             walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
             pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
             cellstring        = tar.extractfile(workqueue.RESULT_CELL     ).read()
+        finally:
+            tar.close()
 
-            pdb               = structures.PDB(pdbstring)
-            coords            = pdb.coords
-            cellid            = int(cellstring)
+        pdb               = structures.PDB(pdbstring)
+        coords            = pdb.coords
+        cellid            = int(cellstring)
 
-            walker            = pickle.loads(walkerstr)
+        walker            = pickle.loads(walkerstr)
 
-            transition = walker.assignment != cellid
-            print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
-                  'Walker', walker.id, \
-                  'transition', walker.assignment, '->', cellid, \
-                  self.wq.tasks_in_queue(), 'tasks remaining'
-            self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
-                                          'iteration %s from %s to %s %s' % \
-                                              (self.iteration, walker.assignment, cellid, transition))
+        transition = walker.assignment != cellid
+        print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
+              'Walker', walker.id, \
+              'transition', walker.assignment, '->', cellid, \
+              self.wq.tasks_in_queue(), 'tasks remaining'
+        self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
+                                      'iteration %s from %s to %s %s' % \
+                                          (self.iteration, walker.assignment, cellid, transition))
 
-            walker.end        = coords
-            walker.assignment = cellid
+        walker.end        = coords
+        walker.assignment = cellid
 
         os.unlink(result.tag)
         return walker
