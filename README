@@ -50,23 +50,14 @@ You will see this right away:
 The master program successfully started and is loading the cells and walkers
 for running the simulations.
 
-Note the master by default assigns a unique project name by subsituting
-YOURUSERNAME with the username that invoked the master. For example, if the
-username that invoked the example is jdoe, the default project name will be:
-awe-jdoe
-
 The master then waits for workers to connect so it can dispatch the simulations
 tasks for execution by the connected workers.  
 
 To start a worker for this master, use the 'work_queue_worker' command.
 The form is: work_queue_worker <master hostname> <port>.
-In out case, both master and worker(s) run on the localhost, and the port (see above) is 9123:
-  $ work_queue_worker localhost 9123
-
-Simply do the following components need to be setup and configured. 
-  - WorkQueue parameters 
-  - System definition that describes the cells and their walkers. 
-  - Resampler implementation. 
+In our case, both master and worker(s) run on the localhost, and the port here 
+(see above) is 9123: 
+$ work_queue_worker localhost 9123
 
 
 INPUTS
