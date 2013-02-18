@@ -53,12 +53,11 @@ for running the simulations.
 The master then waits for workers to connect so it can dispatch the simulations
 tasks for execution by the connected workers.  
 
-To start a worker for this master, use the 'work_queue_worker' command.
-The form is: work_queue_worker <master hostname> <port>.
-In our case, both master and worker(s) run on the localhost, and the port here 
-(see above) is 9123: 
+To start a worker for this master, use the 'work_queue_worker' command.  The
+format is: work_queue_worker <master hostname> <port>.  In our case, both
+master and worker(s) run on the localhost, and the port here (see above) is
+9123: 
 $ work_queue_worker localhost 9123
-
 
 INPUTS
 -------------------------------------------------------------------------------
