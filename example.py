@@ -24,10 +24,10 @@ wq_debug_flag = None
 if __name__ == "__main__":
 
 	help_str = "Usage: %s\n" % sys.argv[0]
-	help_str += "-i		-	specify the number of iterations\n"
-	help_str += "-w		-	specify the number of walkers\n"
-	help_str += "-s		-	specify the number of states\n"
-	help_str += "-r		-	specify the number of restarts allowed\n"
+	help_str += "-i		-	specify the number of iterations (default: %d)\n" % iterations
+	help_str += "-w		-	specify the number of walkers (default: %d)\n" % nwalkers
+	help_str += "-s		-	specify the number of states (default: %d)\n" % nstates
+	help_str += "-r		-	specify the number of restarts allowed (default: %f)\n" % restarts
 	help_str += "-n		-	specify a project name for Work Queue to use\n"
 	help_str += "-f		-	specify the Work Queue fast abort multipler\n"
 	help_str += "-d		-	print Work Queue debug messages \n"
@@ -59,7 +59,6 @@ if __name__ == "__main__":
 			restarts = int(a) 
 		elif o in ("-d"):
 			wq_debug_flag = a 
-
 
 	cfg           = awe.workqueue.Config()
 	cfg.fastabort = wq_fast_abort_multiplier 
