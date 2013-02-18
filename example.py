@@ -16,6 +16,7 @@ restarts   = float('inf')
 maxreps    = 50
 
 #-----WQ Default Values-----
+wq_port = 0
 wq_fast_abort_multiplier = -1.0
 wq_proj_name = None 
 wq_debug_flag = None
@@ -28,43 +29,47 @@ if __name__ == "__main__":
 	help_str += "-w		-	specify the number of walkers (default: %d)\n" % nwalkers
 	help_str += "-s		-	specify the number of states (default: %d)\n" % nstates
 	help_str += "-r		-	specify the number of restarts allowed (default: %f)\n" % restarts
+	help_str += "-p		-	specify the port to use for Work Queue (default: arbitrary)\n"
 	help_str += "-n		-	specify a project name for Work Queue to use\n"
 	help_str += "-f		-	specify the Work Queue fast abort multipler\n"
 	help_str += "-d		-	print Work Queue debug messages \n"
 	help_str += "-h		-	help"
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "d:f:i:n:r:s:w:h", ["help"])
+		opts, args = getopt.getopt(sys.argv[1:], "d:f:hi:n:p:r:s:w", ["help"])
 	except getopt.GetoptError, err:
 		print str(err) 
-		print usage_str
+		print help_str
 		sys.exit(1)
 
 	#Parse command line arguments.
 	for o, a in opts:
-		if o in ("-h", "--help"):
-			print help_str
-			sys.exit(0)
-		elif o in ("-n"):
-			wq_proj_name = a
-		elif o == "-i":
-			iterations = int(a)
-		elif o in ("-w"):
-			nwalkers = int(a)
-		elif o in ("-s"):
-			nstates = int(a) 
+		if o in ("-d"):
+			wq_debug_flag = a 
 		elif o in ("-f"):
 			wq_fast_abort_multiplier = float(a) 
+		elif o in ("-h", "--help"):
+			print help_str
+			sys.exit(0)
+		elif o == "-i":
+			iterations = int(a)
+		elif o in ("-n"):
+			wq_proj_name = a
+		elif o in ("-p"):
+			wq_port = int(a) 
 		elif o in ("-r"):
 			restarts = int(a) 
-		elif o in ("-d"):
-			wq_debug_flag = a 
+		elif o in ("-s"):
+			nstates = int(a) 
+		elif o in ("-w"):
+			nwalkers = int(a)
 
 	cfg           = awe.workqueue.Config()
 	cfg.fastabort = wq_fast_abort_multiplier 
 	cfg.restarts  = restarts 
 	cfg.maxreps   = maxreps
 	cfg.name      = wq_proj_name 
+	cfg.port      = wq_port
 	
 	if wq_debug_flag:
 		cfg.debug     =	wq_debug_flag 
