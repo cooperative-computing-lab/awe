@@ -51,11 +51,11 @@ if __name__ == '__main__':
     bflux = calFlux(btrans,inter)
     agfflux = calAgFlux(fflux)
     agbflux = calAgFlux(bflux)
-    fd = open(odir+'/instan-forward-flux.csv','w')
+    fd = open(odir+'/instan-forward-flux.dat','w')
     for data in fflux:
         fd.write(str(data)+'\n')
     fd.close()
-    fd = open(odir+'/instan-backward-flux.csv','w')
+    fd = open(odir+'/instan-backward-flux.dat','w')
     for data in bflux:
         fd.write(str(data)+'\n')
     fd.close()
