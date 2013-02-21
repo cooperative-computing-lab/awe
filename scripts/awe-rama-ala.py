@@ -104,6 +104,6 @@ if __name__ == '__main__':
     plt.scatter(X,Y)
     axes.add_collection(p)
     plt.colorbar(p)
-    plt.savefig('rama.png')
+    plt.savefig('awe-rama-ala.png')
 
 
