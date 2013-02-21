@@ -68,6 +68,41 @@ Simply do the following components need to be setup and configured.
   - System definition that describes the cells and their walkers. 
   - Resampler implementation. 
 
+ANALYSIS
+-------------------------------------------------------------------------------
+After running the example, a Ramachandran plot (free energy landscape
+on phi-psi space) can be generated according to AWE output
+"resample/cell-weights.csv" with the following command.
+
+  $ python awe-rama-ala.py \
+        -w <project dir>/resample/cell-weights.csv \
+        -p <projectdir>/testinput/state0.pdb \
+        -c <project dir>/testinput/cells.dat -n 100
+
+The options are:
+-w: csv file recording cell weights (cell-weights.csv)
+-p: structure file of simulation target (.pdb)
+-c: data file recording coordinates of cell centers 
+-n: number of cells
+
+Output:
+awe-rama-ala.png: Ramachandran plot
+
+To generate and visualize forward and backward fluxes using AWE output
+"transitions.dat", run script awe-flux.py.
+
+  $  python awe-flux.py -i <project dir>/transitions.dat -l 0.01 -o flux 
+
+The options are:
+-i: data file recording transitions at every iteration (transitions.dat)
+-l: scale iteration length to actual unit (micro-/nano-/pico-/femto- seconds)
+-o: output directory 
+
+Output:
+<output dir>/instan-forward-flux.dat: instantaneous forward flux
+<output dir>/instan-backward-flux.dat: instantaneous backward flux
+<output dir>/forward-flux.png: plot of forward flux
+<output dir>/backward-flux.png: plot of backward flux
 
 INPUTS
 -------------------------------------------------------------------------------
