@@ -7,3 +7,6 @@
 [submodule "cctools.git"]
 	path = cctools.git
 	url = git@bitbucket.org:badi/cctools-trunk-mirror.git
+[submodule "trax.git"]
+	path = trax.git
+	url = git@github.com:badi/trax.git
