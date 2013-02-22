@@ -11,6 +11,10 @@ PYTHON_SRC = awe/*.py executables/*.py
 
 PY_SUBMODULES = trax.git
 
+PY_INSTALL_ARGS = --prefix $(PREFIX) --install-data $(PREFIX)/share/awe
+
+AWE_DATAFILES = awe-generic-data.tar.bz2 awe-instance-data.tar.bz2
+
 
 .PHONY: assign
 assign : $(ASSIGN)
@@ -21,6 +25,14 @@ $(ASSIGN) : $(CASSIGN)
 
 $(CASSIGN) : cassign
 	make -C $^
+
+
+$(AWE_DATAFILES) :
+	$(eval dname = $(@:.tar.bz2=))
+	tar cf $@ $(dname)
+
+.PHONY: datafiles
+datafiles : $(AWE_DATAFILES)
 
 
 .PHONY: build
@@ -34,11 +46,11 @@ install.submodules : install.submodules.trax
 .PHONY: install.submodules.trax
 install.submodules.trax : trax.git
 	cd $^
-	python setup.py install --prefix $(PREFIX)
+	python setup.py install $(PY_INSTALL_ARGS)
 
 .PHONY: install
-install : build install.submodules  $(ASSIGN)
-	python setup.py install --prefix $(PREFIX)
+install : build install.submodules  $(ASSIGN) $(AWE_DATAFILES)
+	python setup.py install $(PY_INSTALL_ARGS)
 
 
 

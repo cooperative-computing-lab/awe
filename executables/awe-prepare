@@ -49,6 +49,19 @@ check-args() {
 }
 
 
+awe-unpack() {
+	prefix=$(dirname $(dirname $(which $(basename $0))))
+	share=$prefix/share/awe
+	for archive in $share/*.tar*; do
+		echo Decompressing $archive
+		tar xf $archive
+	done
+
+	echo Copying example
+	cp $share/example.py .
+}
+
+
 check-binaries() {
 	for b in ${BINARIES[@]}; do
 		which $b >/dev/null 2>&1
@@ -111,5 +124,6 @@ copy-binaries() {
 
 
 check-args $@
+awe-unpack
 check-binaries
 copy-binaries $PREFIX

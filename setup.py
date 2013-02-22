@@ -8,14 +8,14 @@ See the file COPYING for details.
 
 from distutils.core import setup
 
-import os.path
-
+import os
+import glob
 
 def get_executables():
-    import glob
     return glob.glob(os.path.join('executables', '*'))
 
-
+datafiles = glob.glob('*.tar.bz2')
+datafiles.append('example.py')
 
 setup( author       = "Badi' Abdul-Wahid",
        author_email = 'abdulwahidc@gmail.com',
@@ -23,6 +23,7 @@ setup( author       = "Badi' Abdul-Wahid",
        name         = 'awe',
        packages     = ['awe'],
        scripts      = get_executables(),
+       data_files   = datafiles,
        platforms    = ['Linux', 'Mac OS X'],
        description  = 'Adaptive Weighted Ensemble method using WorkQueue'
        )
