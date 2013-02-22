@@ -23,33 +23,43 @@ REQUIREMENTS
 INSTALLATION
 -------------------------------------------------------------------------------
 To install AWE, execute the following.
-  $ python setup.py install --prefix <path/to/installation/directory>
+  $ AWE_PREFIX=/path/to/installation
+  $ ./configure [--prefix $AWE_PREFIX]
+  $ make install
 
-In order to run AWE
+Then add $AWE_PREFIX/bin and $AWE_PREFIX/lib/pythonA.B/site-packages
+to your PATH and PYTHONPATH (respectively). The A.B in the PYTHONPATH
+path should correspond to the major and minor version numbers of the
+python interpreter that was used to install. Common values are 2.6 or 2.7.
 
-  1) Ensure that Numpy and Prody are installed and
-     that Python can find them. For instance, adding the python modules to
-     the PYTHONPATH environment variable:
-       # make sure numpy and prody are usable
-       $ export PYTHONPATH=/opt/numpy/1.6.1/lib/python2.7/site-packages:$PYTHONPATH
-       $ export PYTHONPATH=/opt/prody/1.3/lib/python2.7/site-packages:$PYTHONPATH
-  2) Make sure that Gromacs is installed
+You can check your installation of AWE by running:
+  $ awe-verify
 
 RUNNING  
 -------------------------------------------------------------------------------
 
-In order to run the example, AWE will need to know where the Gromacs
-binaries pdb2gmx, grompp, and mdrun, as well as the topology files are
-located. A script (awe-prepare-gromacs) is provided that copies the
-required files into a directory ('awesetup' by default).
+Start by executing
+  $ awe-prepare
 
-  $ awe-prepare-gromacs
+This instantiates a runnable AWE example in the current
+directory. There are two main input directories: awe-generic-data and
+awe-instance-data.
+
+The former contains files that all AWE runs will require (namely the
+binaries and Gromacs forcefield files).
+
+The latter contains files that are particular to a protein system. The
+includes the state definitions, initial protein coordinates, and so
+forth.
+
+Finally, there is now an example.py file is the main entry point to
+running AWE.
+
+Cutomization of AWE can be done by modifying the files in
+awe-instance-data and the example.py
 
 
-The example program, example.py, is a Work Queue master application
-runs the awe sampling algorithm on the Alanine DiPeptide molecule. To
-run this example: 
-
+In order to run the example, you may execute:
   $ python example.py
 
 You will see this right away:
