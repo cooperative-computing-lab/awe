@@ -168,7 +168,9 @@ class AWE(object):
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
                  traxlogger = None, checkpointfreq=1):
 
-        self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
+        self._print_start_screen()
+        
+	self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
         self.transitionslogger = stats.StatsLogger('debug/cell-transitions.log.gz')
 
         self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
@@ -185,6 +187,26 @@ class AWE(object):
 
         self._firstrun  = True
 
+    def _print_start_screen(self):
+        start_str = "*****************************************************************\n"
+        start_str += "AUTHORS:\n"
+        start_str += "  Badi' Abdul-Wahid\n"
+        start_str += "  Haoyun Feng\n"
+        start_str += "  Jesus Izaguirre\n"
+        start_str += "  Eric Darve\n"
+        start_str += "  Dinesh Rajan\n"
+        start_str += "  Douglas Thain\n"
+        start_str += "\n"
+        start_str += "CITATION:\n"
+        start_str += "  Badi Abdul-Wahid, Li Yu, Dinesh Rajan, Haoyun Feng, Eric Darve, Douglas Thain, Jesus A Izaguirre,\n"
+        start_str += "  Folding Proteins at 500 ns/hour with Work Queue,\n" 
+        start_str += "  8th IEEE International Conference on eScience (eScience 2012), October, 2012.\n"
+        start_str += "\n"
+        start_str += "WEB PAGE:\n"
+        start_str += "  www.nd.edu/~ccl/software/awe\n"
+        start_str += "*****************************************************************\n"
+
+        print start_str
 
     def checkpoint(self):
         cpt = self.traxlogger.cpt_path
