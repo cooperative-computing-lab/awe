@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-ERROR_MSG=
+ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
 
 EXECUTABLES=(
 	work_queue_status      # check cctools installation
@@ -11,17 +11,18 @@ EXECUTABLES=(
 PYMODS=(work_queue numpy prody trax awe)
 
 
-fail() {
-	ERROR_MSG="$@"
-	return 0
+
+get-python-version() {
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
 }
 
-
-die() {
-	echo "$ERROR_MSG"
-	exit $1
+check-python-version() {
+	pv=$(get-python-version)
+	for v in ${ACCEPTABLE_PYTHON_VERSION[@]}; do
+		test  $pv == $v && return 0
+	done
+	return 1
 }
-
 
 check-exe() {
 	local name=$1
@@ -33,6 +34,10 @@ check-pymodule() {
 	python -c "import $name" >/dev/null 2>&1
 }
 
+
+
+printf "Checking for compatible python..."
+(check-python-version && echo OK) || echo "FAIL: found $(get-python-version) is not one of ${ACCEPTABLE_PYTHON_VERSION[@]}"
 
 for n in ${EXECUTABLES[@]}; do
 	printf "Checking for executable $n..."
