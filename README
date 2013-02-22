@@ -6,10 +6,19 @@ resources.
 
 REQUIREMENTS
 -------------------------------------------------------------------------------
-  - Python 2.6 or higher
-  - Numpy 1.5 or higher 
-  - Prody 0.9.4
-  - Gromacs 4.5
+  - Python 2.6 or higher [0]
+  - Numpy 1.5 or higher [1]
+  - Prody [2]
+  - Gromacs 4.5 [3]
+  - GNU Scientific Library [4]
+  - Gromacs XTC library [5]
+
+  [0] http://python.org/
+  [1] http://www.numpy.org/
+  [2] http://www.csb.pitt.edu/prody
+  [3] http://www.gromacs.org/
+  [4] http://www.gnu.org/software/gsl/
+  [5] http://www.gromacs.org/Developer_Zone/Programming_Guide/XTC_Library
 
 INSTALLATION
 -------------------------------------------------------------------------------
