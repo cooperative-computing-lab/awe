@@ -45,8 +45,7 @@ install.submodules : install.submodules.trax
 
 .PHONY: install.submodules.trax
 install.submodules.trax : trax.git
-	cd $^
-	python setup.py install $(PY_INSTALL_ARGS)
+	cd $^ && python setup.py install $(PY_INSTALL_ARGS)
 
 .PHONY: install
 install : build install.submodules  $(ASSIGN) $(AWE_DATAFILES)
