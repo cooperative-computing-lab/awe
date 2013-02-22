@@ -1,0 +1,47 @@
+
+constraints        = hbonds
+integrator         = sd
+
+dt                 = 0.002    ; ps !
+nsteps             = 5000
+ns_type            = grid
+nstlist            = 10
+
+coulombtype        = cut-off
+vdwtype            = cut-off
+
+rlist              = 0
+rcoulomb           = 0
+rvdw               = 0
+rgbradii           = 0
+
+pbc                = no
+epsilon_rf         = 0
+comm_mode          = Angular
+
+nstcomm            = 1000
+nstxout            = 500
+nstfout            = 500
+nstvout            = 500
+nstxtcout          = 500
+nstlog             = 500
+nstenergy          = 500
+nstcalcenergy      = 500
+
+
+tcoupl             = no
+tc-grps            = system
+tau_t              = 0.02
+ref_t              = 300
+
+; GBSA
+implicit_solvent   = GBSA
+gb_algorithm       = OBC
+gb_epsilon_solvent = 78.3
+sa_algorithm       = ace-approximation ; default
+sa_surface_tension = 2.25936
+
+
+ld-seed            = -1
+gen_seed           = -1
+andersen_seed      = -1

@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	partition.add(1, *range(nstates/2,nstates))
 
         # load the initial cells and walkers
-	srcdir = 'awe-generic-data/pdbs/ala'
+	srcdir = 'awe-instance-data/pdbs/ala'
 	for i in xrange(nstates):
 
 	    if i < nstates / 3:
