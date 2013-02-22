@@ -50,6 +50,11 @@ You will see this right away:
 The master program successfully started and is loading the cells and walkers
 for running the simulations.
 
+Note the master by default assigns a unique project name by subsituting
+YOURUSERNAME with the username that invoked the master. For example, if the
+username that invoked the example is jdoe, the default project name will be:
+awe-jdoe
+
 The master then waits for workers to connect so it can dispatch the simulations
 tasks for execution by the connected workers.  
 
