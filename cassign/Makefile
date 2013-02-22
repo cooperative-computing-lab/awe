@@ -37,5 +37,5 @@ gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
 clean :
-	rm *.o assign
+	rm -f *.o assign
 
