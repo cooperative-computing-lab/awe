@@ -1,57 +1,46 @@
-#!/usr/bin/env python
-
-from __future__ import with_statement, generators
-import collections, sys
-
-PASS = True
-modules = 'work_queue numpy prody trax awe'.split()
-executables = "pdb2gmx grompp mdrun".split()
+#!/usr/bin/env bash
 
 
-def lookup_pymodule(module):
-    print 'Looking for', module,
-    try:
-        exec 'import %s ' % module
-    except ImportError:
-        global PASS
-        PASS = False
-        print '...FAIL'
-        return
-    print '...OK'
+ERROR_MSG=
+
+EXECUTABLES=(
+	work_queue_status      # check cctools installation
+	pdb2gmx grompp mdrun   # check gromacs installation
+)
+
+PYMODS=(work_queue numpy prody trax awe)
 
 
-def lookup_executable(name):
-    from distutils.spawn import find_executable
-    print 'Looking for', name,
-    e = find_executable(name)
-    if e:
-        print '...OK'
-    else:
-        global PASS
-        PASS = False
-        print '...FAIL'
-    
-
-checker = collections.defaultdict(list,
-                                  modules  = (modules    , lookup_pymodule),
-                                  binaries = (executables, lookup_executable)
-                                  )
-
-for k,(lst, fn) in checker.iteritems():
-    print 'Checking', k
-    for v in lst:
-        fn(v)
-    print
+fail() {
+	ERROR_MSG="$@"
+	return 0
+}
 
 
-if PASS:
-    sys.exit(0)
-else:
-    sys.exit(1)
+die() {
+	echo "$ERROR_MSG"
+	exit $1
+}
 
 
+check-exe() {
+	local name=$1
+	which $name >/dev/null 2>&1
+}
 
-### Local Variables
-###   mode: Python
-###   indent-tabs-mode: nil
-### End
+check-pymodule() {
+	local name=$1
+	python -c "import $name" >/dev/null 2>&1
+}
+
+
+for n in ${EXECUTABLES[@]}; do
+	printf "Checking for executable $n..."
+	(check-exe $n && echo OK) || echo FAIL
+
+done
+
+for n in ${PYMODS[@]}; do
+	printf "Checking for python module $n..."
+	(check-pymodule $n && echo OK) || echo FAIL
+done
