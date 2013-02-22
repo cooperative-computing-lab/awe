@@ -40,3 +40,8 @@ gb_algorithm       = OBC
 gb_epsilon_solvent = 78.3
 sa_algorithm       = ace-approximation ; default
 sa_surface_tension = 2.25936
+
+
+ld-seed            = -1
+gen_seed           = -1
+andersen_seed      = -1
