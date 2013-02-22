@@ -4,10 +4,12 @@ include Makefile.config
 
 EXES = executables
 
-ASSIGN = $(EXES)/assign
+ASSIGN = $(EXES)/awe-assign
 CASSIGN = cassign/assign
 
-PYTHON_SRC = awe/*.py trax/*.py executables/*.py
+PYTHON_SRC = awe/*.py executables/*.py
+
+PY_SUBMODULES = trax.git
 
 
 .PHONY: assign
@@ -26,6 +28,14 @@ build : $(PYTHON_SRC)
 	python setup.py build
 
 
+.PHONY: install.submodules
+install.submodules : install.submodules.trax
+
+.PHONY: install.submodules.trax
+install.submodules.trax : trax.git
+	cd $^
+	python setup.py install --prefix $(PREFIX)
+
 .PHONY: install
-install : build
+install : build install.submodules
 	python setup.py install --prefix $(PREFIX)
