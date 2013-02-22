@@ -81,7 +81,7 @@ if __name__ == "__main__":
 	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/pdb2gmx')
 	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/grompp')
 	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/mdrun')
-	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/assign')
+	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/awe-assign')
 
 	cfg.cache('awe-generic-data/gmxtopologies')  # required for running gromacs for MD
 	cfg.cache('awe-instance-data/sim.mdp') # Gromacs simulation parameters

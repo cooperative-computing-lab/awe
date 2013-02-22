@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 ME=$(basename $0)
-PREFIX=awesetup
+PREFIX=awe-generic-data
 
-GMXBINARIES=(pdb2gmx grompp mdrun)
+BINARIES=(awe-assign pdb2gmx grompp mdrun)
 
 usage() {
 	cat <<EOF
@@ -49,8 +49,8 @@ check-args() {
 }
 
 
-check-gmx() {
-	for b in ${GMXBINARIES[@]}; do
+check-binaries() {
+	for b in ${BINARIES[@]}; do
 		which $b >/dev/null 2>&1
 		[ $? -eq 0 ] || die "Cannot find $b" 2
 	done
@@ -87,7 +87,7 @@ find-gmxtop() {
 	fi
 }
 
-copy-gmx() {
+copy-binaries() {
 	local prefix=$1
 	local path=$prefix/binaries/`uname`-`arch`
 	local gmxtop=$(find-gmxtop)
@@ -99,7 +99,7 @@ copy-gmx() {
 
 	[ ! -d $path ] && mkdir -vp $path
 
-	for b in ${GMXBINARIES[@]}; do
+	for b in ${BINARIES[@]}; do
 		cp -v `which $b` $path
 	done
 
@@ -110,5 +110,5 @@ copy-gmx() {
 
 
 check-args $@
-check-gmx
-copy-gmx $PREFIX
+check-binaries
+copy-binaries $PREFIX
