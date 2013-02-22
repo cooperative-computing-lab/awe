@@ -37,7 +37,7 @@ install.submodules.trax : trax.git
 	python setup.py install --prefix $(PREFIX)
 
 .PHONY: install
-install : build install.submodules
+install : build install.submodules  $(ASSIGN)
 	python setup.py install --prefix $(PREFIX)
 
 
