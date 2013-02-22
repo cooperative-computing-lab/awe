@@ -39,3 +39,10 @@ install.submodules.trax : trax.git
 .PHONY: install
 install : build install.submodules
 	python setup.py install --prefix $(PREFIX)
+
+
+
+.PHONY: clean
+clean :
+	make -C cassign clean
+	rm -rf *-workers debug resample transactional.*
