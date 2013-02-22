@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+
+MAKEFILE_CFG=Makefile.config
+
+### for error reporting on failures
+FAILURE_MSG=
+
+### for the Makefile.config
+SUBDIRS=(extern assign)
+PREFIX=/usr/local
+
+
+usage() {
+	cat <<EOF
+$0 [OPTIONS]
+
+OPTIONS:
+  --prefix PATH
+EOF
+}
+
+fail() {
+	FAILURE_MSG="$@"
+	return 1
+}
+
+die() {
+	local ecode=$1
+	shift
+	local msg="$@ $FAILURE_MSG"
+	FAILURE_MSG=
+	echo $msg
+	exit $ecode
+}
+
+set-args() {
+
+	local args=($@)
+	local opt=
+	local val=
+
+	while [ ! -z $1 ]; do
+		opt="$1"
+		shift
+
+		case $opt in
+			--prefix)
+				val="$1"; shift
+				test ! -z "$val" || fail
+				PREFIX="$val";;
+			--help)
+				usage; fail;;
+			-h)
+				usage; fail;;
+			*)
+				usage; fail;;
+		esac
+	done
+
+}
+
+
+makefile-cfg-array() {
+	local name=$1
+	local array="${name}[@]"
+	echo "$name = ${!array}"
+}
+
+makefile-cfg-var() {
+	local name=$1
+	local val=
+	eval val=\$$name
+	echo "$name = $val"
+}
+
+set-args $@ || die 1
+
+rm -f $MAKEFILE_CFG
+makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
+makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
