@@ -75,27 +75,27 @@ if __name__ == "__main__":
 		cfg.debug     =	wq_debug_flag 
 
         # The "main" function of the worker
-	cfg.execute('testinput/execute-task.sh')
+	cfg.execute('awe-instance-data/execute-task.sh')
 
         # Binaries to run MD and assignment steps
-	cfg.cache('awesetup/binaries/$OS-$ARCH/pdb2gmx')
-	cfg.cache('awesetup/binaries/$OS-$ARCH/grompp')
-	cfg.cache('awesetup/binaries/$OS-$ARCH/mdrun')
-	cfg.cache('awesetup/binaries/$OS-$ARCH/assign')
+	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/pdb2gmx')
+	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/grompp')
+	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/mdrun')
+	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/assign')
 
-	cfg.cache('awesetup/gmxtopologies')  # required for running gromacs for MD
-	cfg.cache('testinput/sim.mdp') # Gromacs simulation parameters
-	cfg.cache('testinput/env.sh') # setting up the worker execution environment
-	cfg.cache('testinput/cells.dat') # cell definitions
-	cfg.cache('testinput/CellIndices.dat') # cell atoms to use when assigning
-	cfg.cache('testinput/StructureIndices.dat') # walker atoms to use when assigning
+	cfg.cache('awe-generic-data/gmxtopologies')  # required for running gromacs for MD
+	cfg.cache('awe-instance-data/sim.mdp') # Gromacs simulation parameters
+	cfg.cache('awe-instance-data/env.sh') # setting up the worker execution environment
+	cfg.cache('awe-instance-data/cells.dat') # cell definitions
+	cfg.cache('awe-instance-data/CellIndices.dat') # cell atoms to use when assigning
+	cfg.cache('awe-instance-data/StructureIndices.dat') # walker atoms to use when assigning
 
         # initialize the weights randomly
 	weights   = np.random.random((nstates,nwalkers))
 	weights  /= np.sum(weights.flatten())
 
         # load a topology file
-	system    = awe.System(topology = awe.PDB('testinput/state0.pdb'))
+	system    = awe.System(topology = awe.PDB('awe-instance-data/state0.pdb'))
 
         # 2-color awe needs states assigned to a region
 	partition = awe.SinkStates()
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	partition.add(1, *range(nstates/2,nstates))
 
         # load the initial cells and walkers
-	srcdir = 'awesetup/pdbs/ala'
+	srcdir = 'awe-generic-data/pdbs/ala'
 	for i in xrange(nstates):
 
 	    if i < nstates / 3:
