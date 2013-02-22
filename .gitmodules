@@ -3,4 +3,4 @@
 	url = https://github.com/abakan/ProDy.git
 [submodule "trax.git"]
 	path = trax.git
-	url = git@github.com:badi/trax.git
+	url = git://github.com/badi/trax.git
