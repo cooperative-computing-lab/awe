@@ -53,7 +53,7 @@ awe-unpack() {
 	prefix=$(dirname $(dirname $(which $(basename $0))))
 	share=$prefix/share/awe
 	for archive in $share/*.tar*; do
-		echo Decompressing $archive
+		echo Decompressing $(basename $archive)
 		tar xf $archive
 	done
 
@@ -112,12 +112,14 @@ copy-binaries() {
 
 	[ ! -d $path ] && mkdir -vp $path
 
+	echo "Copying binaries:"
 	for b in ${BINARIES[@]}; do
 		test -f $b && continue
-		cp -v `which $b` $path
+		echo "...$b"
+		cp `which $b` $path
 	done
 
-	echo "\`$gmxtop\` -> \`$mygmxtop\`"
+	echo "Copying Gromacs forcefield files to $mygmxtop"
 	rsync -r $gmxtop/ $mygmxtop
 
 }
