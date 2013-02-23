@@ -67,3 +67,4 @@ update.trax : trax.git
 
 .PHONY: update
 update : update.trax
+	git pull
