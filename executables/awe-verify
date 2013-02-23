@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+EXITCODE=0
+
 
 ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
 
@@ -41,11 +43,14 @@ printf "Checking for compatible python..."
 
 for n in ${EXECUTABLES[@]}; do
 	printf "Checking for executable $n..."
-	(check-exe $n && echo OK) || echo FAIL
+	(check-exe $n && echo OK) || (echo FAIL; EXITCODE=1)
 
 done
 
 for n in ${PYMODS[@]}; do
 	printf "Checking for python module $n..."
-	(check-pymodule $n && echo OK) || echo FAIL
+	(check-pymodule $n && echo OK) || (echo FAIL; EXITCODE=1)
 done
+
+
+exit $EXITCODE
