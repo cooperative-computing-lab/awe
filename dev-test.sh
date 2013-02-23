@@ -54,8 +54,8 @@ export PYTHONPATH=$pyp:$PYTHONPATH
 
 ### go to sandbox
 pushd $workarea
-mkdir test
-cd test
+mkdir ala-example
+cd ala-example
 
 ### run awe
 awe-prepare
