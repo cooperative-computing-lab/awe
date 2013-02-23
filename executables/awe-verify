@@ -43,14 +43,22 @@ printf "Checking for compatible python..."
 
 for n in ${EXECUTABLES[@]}; do
 	printf "Checking for executable $n..."
-	(check-exe $n && echo OK) || (echo FAIL; EXITCODE=1)
-
+	if check-exe $n; then
+		echo OK
+	else
+		echo FAIL
+		EXITCODE=1
+	fi
 done
 
 for n in ${PYMODS[@]}; do
 	printf "Checking for python module $n..."
-	(check-pymodule $n && echo OK) || (echo FAIL; EXITCODE=1)
+	if check-pymodule $n; then
+		echo OK
+	else
+		echo FAIL
+		EXITCODE=1
+	fi
 done
-
 
 exit $EXITCODE
