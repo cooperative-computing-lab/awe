@@ -38,7 +38,7 @@ mark-cleanup-pid() {
 	KILL_PIDS="$KILL_PIDS $p"
 }
 
-trap cleanup SIGINT SIGTERM SIGKILL
+trap cleanup EXIT
 
 
 #################################################################################
@@ -70,6 +70,3 @@ for i in `seq 20`; do
 done
 
 wait $pid
-
-
-cleanup
