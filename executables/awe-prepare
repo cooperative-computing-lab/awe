@@ -124,6 +124,7 @@ copy-binaries() {
 
 
 check-args $@
-awe-unpack
+awe-verify || die 1 "AWE is not installed correctly"
+awe-unpack || die 2 "Could not unpack input files"
 check-binaries
-copy-binaries $PREFIX
+copy-binaries $PREFIX || die 3 "Failed to copy binaries to $PREFIX"
