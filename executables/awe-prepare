@@ -112,14 +112,15 @@ copy-binaries() {
 
 	[ ! -d $path ] && mkdir -vp $path
 
-	echo "Copying binaries:"
+	echo "Copying binaries"
 	for b in ${BINARIES[@]}; do
-		test -f $b && continue
+		dst=$path/$b
+		test -f $dst && continue
 		echo "...$b"
-		cp `which $b` $path
+		cp `which $b` $dst
 	done
 
-	echo "Copying Gromacs forcefield files to $mygmxtop"
+	echo "Copying Gromacs forcefield files"
 	rsync -r $gmxtop/ $mygmxtop
 
 }
