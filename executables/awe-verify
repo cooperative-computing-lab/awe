@@ -8,6 +8,7 @@ ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
 EXECUTABLES=(
 	work_queue_status      # check cctools installation
 	pdb2gmx grompp mdrun   # check gromacs installation
+	awe-assign
 )
 
 PYMODS=(work_queue numpy prody trax awe)
