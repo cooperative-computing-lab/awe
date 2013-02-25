@@ -103,8 +103,8 @@ EOF
 
 
 check-build-depends() {
-	check-clib xdrfile/xdrfile.h xdrfile
-	check-clib gsl/gsl_matrix.h  gsl gslcblas
+	check-clib xdrfile/xdrfile.h xdrfile        || return 1
+	check-clib gsl/gsl_matrix.h  gsl gslcblas   || return 1
 }
 
 trap cleanup EXIT SIGINT SIGKILL SIGTERM
