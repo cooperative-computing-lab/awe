@@ -2,12 +2,12 @@
 include Makefile.config
 
 
-EXES = executables
+EXES = scripts
 
 ASSIGN = $(EXES)/awe-assign
 CASSIGN = cassign/assign
 
-PYTHON_SRC = awe/*.py executables/*.py
+PYTHON_SRC = awe/*.py scripts/*
 
 PY_SUBMODULES = trax.git
 

@@ -12,7 +12,7 @@ import os
 import glob
 
 def get_executables():
-    return glob.glob(os.path.join('executables', '*'))
+    return glob.glob(os.path.join('scripts', '*'))
 
 datafiles = glob.glob('*.tar.bz2')
 datafiles.append('example.py')

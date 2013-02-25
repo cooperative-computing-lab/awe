@@ -128,7 +128,7 @@ check-build-depends() {
 }
 
 check-run-depends() {
-	./executables/awe-verify
+	./scripts/awe-verify
 
 	if test $? -eq 0; then
 		return 0
