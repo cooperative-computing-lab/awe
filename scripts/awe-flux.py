@@ -30,8 +30,8 @@ def extractTrans(trans):
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option('-i','--inputfile',dest='infile',help='input file name, default:transitions.dat',default='transitions.dat')
-    parser.add_option('-l','--interval',type='float',dest='interval',help='micro-/nano-/pico-/femto- seconds per frame, default:1',default=1)
+    parser.add_option('-i','--inputfile',dest='infile',help='input file name, default:color-transition-matrix.csv',default='color-transition-matrix.csv')
+    parser.add_option('-l','--interval',type='float',dest='interval',help='micro-/nano-/pico-/femto- seconds per iteration, default:1',default=1)
     parser.add_option('-o','--outputdir',dest='odir',help='directory of output file,default:./',default='./')
 
     args = parser.parse_args()
@@ -44,9 +44,12 @@ if __name__ == '__main__':
     trans = []
     fd = open(infile,'r')
     for line in fd:
-	linec = line.split()
-        tmp = [float(linec[0]),float(linec[1])]
-	trans.append(tmp)
+	linec = line.split(',')
+        try:
+            tmp = [float(linec[0]),float(linec[1])]
+	except ValueError:
+            continue
+        trans.append(tmp)
     colorTrans = np.array(trans)
     ftrans,btrans = extractTrans(colorTrans)
     fflux = calFlux(ftrans,inter)
