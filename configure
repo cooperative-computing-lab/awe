@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 MAKEFILE_CFG=Makefile.config
+REQUIRE_RUNTIME=1
 
 ### for error reporting on failures
 FAILURE_MSG=
@@ -16,6 +17,7 @@ $0 [OPTIONS]
 
 OPTIONS:
   --prefix PATH
+  --require-runtime
 EOF
 }
 
@@ -48,6 +50,9 @@ set-args() {
 				val="$1"; shift
 				test ! -z "$val" || return 1
 				PREFIX="$val";;
+			--require-runtime)
+				REQUIRE_RUNTIME=0
+				;;
 			*)
 				usage; exit 1;;
 		esac
@@ -109,8 +114,15 @@ check-build-depends() {
 
 check-run-depends() {
 	./executables/awe-verify
-	if test ! $? -eq 0; then
+
+	if test $? -eq 0; then
+		return 0
+	elif test $REQUIRE_RUNTIME -eq 0; then
+		echo "ERROR: could not find runtime dependencies"
+		return 1
+	else
 		echo "WARNING: could not find runtime dependencies"
+		return 0
 	fi
 }
 
@@ -119,6 +131,6 @@ set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
 check-build-depends || die 2
-check-run-depends
+check-run-depends || die 3
 makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
 makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
