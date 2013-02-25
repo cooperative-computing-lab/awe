@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from prody import *
 import os
 import numpy as np
