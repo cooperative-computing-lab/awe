@@ -77,7 +77,7 @@ makefile-cfg-var() {
 
 check-clib() {
 	local include="$1"; shift
-	local libnames="$@"
+	local libs="$@"
 	local tmpfile=$(mktemp)
 	trap "rm -f '$tmpfile'" RETURN EXIT
 
@@ -85,20 +85,25 @@ check-clib() {
 
 	test -z "$include" || include_stmt="#include \"$include\""
 
-	local libs=
-	for n in $libnames; do
-		libs="$libs -l$n"
-	done
-
-	printf "Checking for $libnames..."
-	cat <<EOF | gcc -xc $libs -o $tmpfile -
+	printf "Checking for $libs..."
+	build="gcc -xc $libs -o $tmpfile -"
+	prog=$(cat <<EOF
 $include_stmt
 int main (void) { return 0; }
 EOF
+)
+
+	printf "$prog" | $build
+
 	ecode=$?
 
 	if test ! $ecode -eq 0; then
 		echo FAIL
+		echo "PROGRAM"
+		echo "========================================"
+		echo "$prog"
+		echo "========================================"
+		echo "Build command: $build"
 		return 1
 	else
 		echo OK
@@ -122,9 +127,9 @@ check-python-version() {
 }
 
 check-build-depends() {
-	check-clib xdrfile/xdrfile.h xdrfile        || return 1
-	check-clib gsl/gsl_matrix.h  gsl gslcblas   || return 1
-	check-python-version                        || return 1
+	check-clib xdrfile/xdrfile.h -lxdrfile          || return 1
+	check-clib gsl/gsl_matrix.h  -lgsl -lgslcblas   || return 1
+	check-python-version                            || return 1
 }
 
 check-run-depends() {
