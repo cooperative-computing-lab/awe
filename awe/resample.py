@@ -15,7 +15,7 @@ import itertools
 import time, os
 import textwrap
 
-OUTPUT_DIR = 'resample'
+OUTPUT_DIR = os.getcwd()
 
 
 class IResampler(object):
