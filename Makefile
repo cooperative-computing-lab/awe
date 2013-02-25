@@ -53,8 +53,13 @@ install : build install.submodules  $(ASSIGN) $(AWE_DATAFILES)
 
 
 
+
+.PHONY: clean.trax
+clean.trax : trax.git
+	rm -rf $^/build
+
 .PHONY: clean
-clean :
+clean : clean.trax
 	make -C cassign clean
 	rm -rf *-workers debug resample transactional.*
 
