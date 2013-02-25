@@ -4,7 +4,7 @@ from prody import *
 import os
 import sys
 import numpy as np
-import voronoi as vn
+import awe.voronoi as vn
 from optparse import OptionParser
 import matplotlib
 import matplotlib.pyplot as plt
