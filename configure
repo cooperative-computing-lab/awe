@@ -16,8 +16,8 @@ usage() {
 $0 [OPTIONS]
 
 OPTIONS:
-  --prefix PATH
-  --require-runtime
+  --prefix PATH           Set the install PREFIX
+  --require-runtime       Make the configure step fail if the runtime dependencies cannot be found
 EOF
 }
 
