@@ -73,8 +73,48 @@ makefile-cfg-var() {
 	echo "$name = $val"
 }
 
+
+check-clib() {
+	local include="$1"; shift
+	local libnames="$@"
+	local tmpfile=$(mktemp)
+	trap "rm -f '$tmpfile'" RETURN EXIT
+
+	local include_stmt=
+
+	test -z "$include" || include_stmt="#include \"$include\""
+
+	local libs=
+	for n in $libnames; do
+		libs="$libs -l$n"
+	done
+
+	printf "Checking for $libnames..."
+	cat <<EOF | gcc -xc $libs -o $tmpfile -
+$include_stmt
+int main (void) { return 0; }
+EOF
+	ecode=$?
+
+	if test ! $ecode -eq 0; then
+		echo FAIL
+		return 1
+	else
+		echo OK
+		return 0
+	fi
+}
+
+
+check-build-depends() {
+	check-clib xdrfile/xdrfile.h xdrfile
+	check-clib gsl/gsl_matrix.h  gsl gslcblas
+}
+
+trap cleanup EXIT SIGINT SIGKILL SIGTERM
 set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
+check-build-depends || die 2
 makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
 makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
