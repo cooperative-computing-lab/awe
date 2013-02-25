@@ -2,6 +2,7 @@
 
 from prody import *
 import os
+import sys
 import numpy as np
 import voronoi as vn
 from optparse import OptionParser
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 
+setVerbosity('none')
 #input: pdb file name, cell.dat file name
 #output: phi and psi angels in a two dimensional list
 def parseCenter(pdbf,cellf):
@@ -28,7 +30,7 @@ def parseCenter(pdbf,cellf):
 	    coords.append(res)
 	    res = []
 	if len(coords) == 22:
-	    ala.setCoords(np.array(coords))
+            ala.setCoords(np.array(coords))
 	    writePDB('tmp.pdb',ala)
 	    os.system('g_chi -s tmp.pdb -f tmp.pdb -rama >& tmp.log')
             phipsif = open('ramaPhiPsiALA2.xvg')
@@ -86,10 +88,13 @@ if __name__ == '__main__':
     ncell = args[0].ncell
 
     maxfe = 10
+    print 'Converting coordinates to phi-psi angles'
     cellcenter = parseCenter(pdbf,cellf)
+    print 'Reading cell weights'
     cellw = extractWeight(weightf,ncell)
     colorw = ramaColor(cellw,maxfe)
 
+    print 'Plotting Ramachandran'
     X = cellcenter[0]
     Y = cellcenter[1]
     cells = vn.voronoi(X,Y)
