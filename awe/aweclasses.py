@@ -268,7 +268,7 @@ class AWE(object):
 
     def _recv(self):
 
-        print time.asctime(), 'Recieving tasks'
+        print time.asctime(), 'Receiving tasks'
         system = self.system
         self.stats.time_barrier('start')
         while not self.wq.empty:
