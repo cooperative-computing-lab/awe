@@ -182,7 +182,8 @@ class AWE(object):
 
         self.stats      = stats.AWEStats(logger=self.statslogger)
 
-        self.traxlogger = traxlogger or trax.SimpleTransactional()
+        self.traxlogger = traxlogger or trax.SimpleTransactional(checkpoint = 'debug/trax.cpt',
+                                                                 log        = 'debug/trax.log')
         self.checkpointfreq = checkpointfreq
 
         self._firstrun  = True
