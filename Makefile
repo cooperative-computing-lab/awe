@@ -61,6 +61,7 @@ clean.trax : trax.git
 .PHONY: clean
 clean : clean.trax
 	make -C cassign clean
+	rm -rf build
 	rm -rf *-workers debug resample transactional.*
 
 
