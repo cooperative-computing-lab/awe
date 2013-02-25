@@ -21,6 +21,8 @@ from workqueue import Config
 from stats import time
 from structures import PDB
 
+import voronoi
+
 import prody
 prody.setVerbosity('error')
 

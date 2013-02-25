@@ -13,6 +13,7 @@ import aweclasses
 import numpy as np
 import itertools
 import time, os
+import textwrap
 
 OUTPUT_DIR = 'resample'
 
@@ -177,6 +178,18 @@ class MultiColor(OneColor):
 	of.write('%iteration,cellid,color,total_weight \n')
         of.close()
 
+        self.tmat_path = os.path.join(OUTPUT_DIR, 'transition-matrix.csv')
+        self.tmat_header = textwrap.dedent(
+            """\
+            # An ((N+1)*2, 2, 2) matrix, where N is the number of iterations
+            # Can be loaded like:
+            #   m = np.loadtxt("transitions-matrix.csv",delimiter=",")
+            #   itrs = m.shape[0] / 2
+            #   T = m.reshape((itrs, 2, 2))
+            """
+            )
+
+
     def resample(self, system):
 
         ### update colors
@@ -220,11 +233,18 @@ class MultiColor(OneColor):
 	of.close()
 	self.iteration += 1
 
+        self.save_transitions(self.tmat_path)
+
         return newsystem
 
     def save_transitions(self, path):
         print time.asctime(), 'Saving transition matrix to', repr(path)
-        np.savetxt(path, self.transitions, delimiter=',')
+        fd = open(path, 'w')
+        try:
+            fd.write(self.tmat_header)
+            np.savetxt(fd, self.transitions, delimiter=',')
+        finally:
+            fd.close()
 
 class SuperCell(MultiColor):
     def __init__(self,nwalkers,partition,cellmapf):

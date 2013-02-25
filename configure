@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 MAKEFILE_CFG=Makefile.config
+REQUIRE_RUNTIME=1
 
 ### for error reporting on failures
 FAILURE_MSG=
@@ -16,6 +17,7 @@ $0 [OPTIONS]
 
 OPTIONS:
   --prefix PATH
+  --require-runtime
 EOF
 }
 
@@ -46,14 +48,13 @@ set-args() {
 		case $opt in
 			--prefix)
 				val="$1"; shift
-				test ! -z "$val" || fail
+				test ! -z "$val" || return 1
 				PREFIX="$val";;
-			--help)
-				usage; fail;;
-			-h)
-				usage; fail;;
+			--require-runtime)
+				REQUIRE_RUNTIME=0
+				;;
 			*)
-				usage; fail;;
+				usage; exit 1;;
 		esac
 	done
 
@@ -73,8 +74,77 @@ makefile-cfg-var() {
 	echo "$name = $val"
 }
 
+
+check-clib() {
+	local include="$1"; shift
+	local libnames="$@"
+	local tmpfile=$(mktemp)
+	trap "rm -f '$tmpfile'" RETURN EXIT
+
+	local include_stmt=
+
+	test -z "$include" || include_stmt="#include \"$include\""
+
+	local libs=
+	for n in $libnames; do
+		libs="$libs -l$n"
+	done
+
+	printf "Checking for $libnames..."
+	cat <<EOF | gcc -xc $libs -o $tmpfile -
+$include_stmt
+int main (void) { return 0; }
+EOF
+	ecode=$?
+
+	if test ! $ecode -eq 0; then
+		echo FAIL
+		return 1
+	else
+		echo OK
+		return 0
+	fi
+}
+
+
+get-python-version() {
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+}
+
+check-python-version() {
+	printf "Checking for compatible python installation..."
+	pv=$(get-python-version)
+	for v in 2.6 2.7; do
+		test  $pv == $v && echo OK && return 0
+	done
+	echo FAIL
+	return 1
+}
+
+check-build-depends() {
+	check-clib xdrfile/xdrfile.h xdrfile        || return 1
+	check-clib gsl/gsl_matrix.h  gsl gslcblas   || return 1
+	check-python-version                        || return 1
+}
+
+check-run-depends() {
+	./executables/awe-verify
+
+	if test $? -eq 0; then
+		return 0
+	elif test $REQUIRE_RUNTIME -eq 0; then
+		echo "ERROR: could not find runtime dependencies"
+		return 1
+	else
+		echo "WARNING: could not find runtime dependencies"
+		return 0
+	fi
+}
+
 set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
+check-build-depends || die 2
+check-run-depends || die 3
 makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
 makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
