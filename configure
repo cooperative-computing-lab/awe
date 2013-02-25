@@ -141,7 +141,6 @@ check-run-depends() {
 	fi
 }
 
-trap cleanup EXIT SIGINT SIGKILL SIGTERM
 set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
