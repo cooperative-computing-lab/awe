@@ -119,7 +119,7 @@ if __name__ == "__main__":
 	resample   = awe.resample.SaveWeights(multicolor)
 	adaptive   = awe.AWE( wqconfig   = cfg,
 			      system     = system,
-			      iterations = iterations,
+			      iterations = opts.iterations,
 			      resample   = resample,
 			      checkpointfreq = 1)
 
