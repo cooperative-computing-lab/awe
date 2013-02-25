@@ -127,12 +127,17 @@ check-python-version() {
 }
 
 check-build-depends() {
+	echo "=================================================="
+	echo "Checking build dependencies"
 	check-clib xdrfile/xdrfile.h -lxdrfile          || return 1
 	check-clib gsl/gsl_matrix.h  -lgsl -lgslcblas   || return 1
 	check-python-version                            || return 1
 }
 
 check-run-depends() {
+	echo "=================================================="
+	echo "Checking runtime dependencies"
+
 	./scripts/awe-verify
 
 	if test $? -eq 0; then
