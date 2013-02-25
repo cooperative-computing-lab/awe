@@ -73,11 +73,11 @@ if __name__ == "__main__":
 	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/mdrun')
 	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/awe-assign')
 
-	cfg.cache('awe-generic-data/gmxtopologies')  # required for running gromacs for MD
-	cfg.cache('awe-instance-data/sim.mdp') # Gromacs simulation parameters
-	cfg.cache('awe-instance-data/env.sh') # setting up the worker execution environment
-	cfg.cache('awe-instance-data/cells.dat') # cell definitions
-	cfg.cache('awe-instance-data/CellIndices.dat') # cell atoms to use when assigning
+	cfg.cache('awe-generic-data/gmxtopologies')         # required for running gromacs for MD
+	cfg.cache('awe-instance-data/sim.mdp')              # Gromacs simulation parameters
+	cfg.cache('awe-instance-data/env.sh')               # setting up the worker execution environment
+	cfg.cache('awe-instance-data/cells.dat')            # cell definitions
+	cfg.cache('awe-instance-data/CellIndices.dat')      # cell atoms to use when assigning
 	cfg.cache('awe-instance-data/StructureIndices.dat') # walker atoms to use when assigning
 
         # initialize the weights randomly
