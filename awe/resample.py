@@ -178,12 +178,12 @@ class MultiColor(OneColor):
 	of.write('%iteration,cellid,color,total_weight \n')
         of.close()
 
-        self.tmat_path = os.path.join(OUTPUT_DIR, 'transition-matrix.csv')
+        self.tmat_path = os.path.join(OUTPUT_DIR, 'color-transition-matrix.csv')
         self.tmat_header = textwrap.dedent(
             """\
             # An ((N+1)*2, 2, 2) matrix, where N is the number of iterations
             # Can be loaded like:
-            #   m = np.loadtxt("transitions-matrix.csv",delimiter=",")
+            #   m = np.loadtxt("color-transitions-matrix.csv",delimiter=",")
             #   itrs = m.shape[0] / 2
             #   T = m.reshape((itrs, 2, 2))
             """
