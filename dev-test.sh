@@ -65,7 +65,7 @@ mark-cleanup-pid $pid
 
 ### start some workers
 for i in `seq 20`; do
-	work_queue_worker localhost 1024 &
+	work_queue_worker localhost 9123 &
 	mark-cleanup-pid $!
 done
 
