@@ -46,14 +46,10 @@ set-args() {
 		case $opt in
 			--prefix)
 				val="$1"; shift
-				test ! -z "$val" || fail
+				test ! -z "$val" || return 1
 				PREFIX="$val";;
-			--help)
-				usage; fail;;
-			-h)
-				usage; fail;;
 			*)
-				usage; fail;;
+				usage; exit 1;;
 		esac
 	done
 
