@@ -107,10 +107,18 @@ check-build-depends() {
 	check-clib gsl/gsl_matrix.h  gsl gslcblas   || return 1
 }
 
+check-run-depends() {
+	./executables/awe-verify
+	if test ! $? -eq 0; then
+		echo "WARNING: could not find runtime dependencies"
+	fi
+}
+
 trap cleanup EXIT SIGINT SIGKILL SIGTERM
 set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
 check-build-depends || die 2
+check-run-depends
 makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
 makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
