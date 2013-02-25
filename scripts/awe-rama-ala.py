@@ -15,6 +15,14 @@ setVerbosity('none')
 #input: pdb file name, cell.dat file name
 #output: phi and psi angels in a two dimensional list
 def parseCenter(pdbf,cellf):
+
+    def cleanup():
+        paths ='tmp.pdb chi.log ramaPhiPsiALA2.xvg tmp.log order.xvg'.split()
+        for p in paths:
+            if os.path.exists(p):
+                os.unlink(p)
+
+
     ala = parsePDB(pdbf)
     phi = []
     psi = []
@@ -32,7 +40,11 @@ def parseCenter(pdbf,cellf):
 	if len(coords) == 22:
             ala.setCoords(np.array(coords))
 	    writePDB('tmp.pdb',ala)
-	    os.system('g_chi -s tmp.pdb -f tmp.pdb -rama >& tmp.log')
+            try:
+                os.system('g_chi -s tmp.pdb -f tmp.pdb -rama >& tmp.log')
+            except KeyboardInterrupt:
+                cleanup()
+                raise
             phipsif = open('ramaPhiPsiALA2.xvg')
 	    fcontent = phipsif.readlines()
 	    phipsil = fcontent[len(fcontent)-1]
@@ -40,7 +52,7 @@ def parseCenter(pdbf,cellf):
 	    phi.append(float(phipsitext[0]))
             psi.append(float(phipsitext[1]))
             phipsif.close()
-            os.system('rm tmp.pdb chi.log ramaPhiPsiALA2.xvg tmp.log order.xvg')
+            cleanup()
 	    #phipsi.append([calcPhi(alacenter),calcPsi(alacenter)])
 	    coords = []
     return np.array([phi,psi])
