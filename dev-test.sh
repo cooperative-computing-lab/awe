@@ -14,7 +14,7 @@ module use /afs/crc.nd.edu/user/c/cabdulwa/Public/modulefiles
 module load xdrfile gsl 
 
 # runtime dependencies
-module load python/2.7.1 numpy/1.5.1 prody/0.9.4 gromacs/4.5.5
+module load python/2.7.1 numpy/1.5.1 prody/0.9.4 gromacs/4.5.5 matplotlib
 module load /afs/nd.edu/user37/ccl/software/modulefiles/cctools/autobuild
 
 
