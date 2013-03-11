@@ -138,8 +138,6 @@ check-run-depends() {
 	echo "=================================================="
 	echo "Checking runtime dependencies"
 
-	./scripts/awe-verify
-
 	if test $? -eq 0; then
 		return 0
 	elif test $REQUIRE_RUNTIME -eq 0; then
