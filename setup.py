@@ -15,7 +15,7 @@ def get_executables():
     return glob.glob(os.path.join('scripts', '*'))
 
 datafiles = glob.glob('*.tar.bz2')
-datafiles.append('example.py')
+datafiles.append('awe-ala.py')
 
 setup( author       = "Badi' Abdul-Wahid",
        author_email = 'abdulwahidc@gmail.com',

@@ -58,7 +58,7 @@ awe-unpack() {
 	done
 
 	echo Copying example
-	cp $share/example.py .
+	cp $share/awe-ala.py .
 }
 
 
