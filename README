@@ -83,6 +83,59 @@ master and worker(s) run on the localhost, and the port here (see above) is
 9123: 
 $ work_queue_worker localhost 9123
 
+ANALYSIS
+-------------------------------------------------------------------------------
+After running the example, a Ramachandran plot (free energy landscape
+on phi-psi space) can be generated according to AWE output
+"resample/cell-weights.csv" with the following command.
+
+  $ python awe-rama-ala.py \
+        -w <project dir>/resample/cell-weights.csv \
+        -p <projectdir>/testinput/state0.pdb \
+        -c <project dir>/testinput/cells.dat -n 100
+
+The options are:
+-w: csv file recording cell weights (cell-weights.csv)
+-p: structure file of simulation target (.pdb)
+-c: data file recording coordinates of cell centers 
+-n: number of cells
+
+Output:
+awe-rama-ala.png: Ramachandran plot
+
+To generate and visualize forward and backward fluxes from AWE output
+"transitions.dat", run script awe-flux.py.
+
+  $ python awe-flux.py -i <project dir>/transitions.dat -l 0.01 -o flux 
+
+The options are:
+-i: data file recording transitions at every iteration (transitions.dat)
+-l: scale iteration length to actual unit (micro-/nano-/pico-/femto- seconds)
+-o: output directory 
+
+Output:
+<output dir>/instan-forward-flux.dat: instantaneous forward flux
+<output dir>/instan-backward-flux.dat: instantaneous backward flux
+<output dir>/forward-flux.png: plot of forward flux
+<output dir>/backward-flux.png: plot of backward flux
+
+To generate transition probability matrix from AWE output, run script awe-transMatrix.py
+
+  $ python awe-transMatrix.py -p <project dir>/resample/walker-history.dat 
+        -w <project dir>/resample/walker-weights.dat
+        -t 1 -n 100
+
+The options are:
+-p: data file recording dependencies of walkers (resample/walker-history.csv)
+-w: data file recording weights and cell ID of walkers (resample/walker-weights.csv) 
+-t: time lag (number of iterations) for calculating transition matrix
+-n: number of cells 
+-o: output file name
+-s: specify the nth iteration, start from which transition matrix is built
+
+Output:
+trans.csv: transition probability matrix
+
 INPUTS
 -------------------------------------------------------------------------------
 

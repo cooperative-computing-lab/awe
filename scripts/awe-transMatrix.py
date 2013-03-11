@@ -122,12 +122,12 @@ def writeCSV(data,filename):
 
 if __name__ == '__main__':
     parser = OptionParser()
-    parser.add_option('-p','--whistoryfile',dest='whistory_f',default='walkerhistory.dat',help='file that tracks walker id history')
-    parser.add_option('-w','--weightsfile',dest='wweight_f',default='weights.dat',help='file that records walkerid,iteration,cell,weight,color')
+    parser.add_option('-p','--whistoryfile',dest='whistory_f',default='walker-history.csv',help='file that tracks walker id history,defult=walker-history.csv')
+    parser.add_option('-w','--weightsfile',dest='wweight_f',default='walker-weights.csv',help='file that records walkerid,iteration,cell,weight,color, defult=walker-weights.csv')
     parser.add_option('-n','--numcell',dest='numcell',type='int',default=-1,help='number of cells')
-    parser.add_option('-t','--timelag',dest='tlag',type='int',default=1,help='iterations apart for calculating transition matrix')
-    parser.add_option('-o','--output',dest='ofile',default='./trans.csv',help='output file name')
-    parser.add_option('-s','--subpath',dest='splength',type='int',default=-1,help='iteration start from which transition matrix is built')
+    parser.add_option('-t','--timelag',dest='tlag',type='int',default=1,help='iterations apart for calculating transition matrix,default=1')
+    parser.add_option('-o','--output',dest='ofile',default='./trans.csv',help='output file name, default=./trans.csv')
+    parser.add_option('-s','--subpath',dest='splength',type='int',default=-1,help='iteration start from which transition matrix is built,default=0')
 
     args = parser.parse_args()
     wh_f = args[0].whistory_f
