@@ -75,7 +75,7 @@ abspath() {
 			readlink -f $@
 			;;
 		*)
-			echo "Cannot determin `abspath` on $(uname)"
+			echo "Cannot determine `abspath` on $(uname)"
 			exit 2
 			;;
 	esac
