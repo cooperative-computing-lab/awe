@@ -8,7 +8,7 @@ FAILURE_MSG=
 
 ### for the Makefile.config
 SUBDIRS=(extern assign)
-PREFIX=/usr/local
+PREFIX=$PWD
 
 
 usage() {
