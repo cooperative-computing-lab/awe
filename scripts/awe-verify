@@ -22,8 +22,9 @@ get-python-version() {
 check-python-version() {
 	pv=$(get-python-version)
 	for v in ${ACCEPTABLE_PYTHON_VERSION[@]}; do
-		test  $pv == $v && return 0
+		test  $pv == $v && echo OK && return 0
 	done
+	echo FAIL
 	EXITCODE=1
 	return 1
 }
@@ -41,7 +42,7 @@ check-pymodule() {
 
 
 printf "Checking for compatible python..."
-(check-python-version && echo OK) || echo "FAIL: found $(get-python-version) is not one of ${ACCEPTABLE_PYTHON_VERSION[@]}"
+check-python-version
 test $EXITCODE -eq 0 || exit $EXITCODE
 
 for n in ${EXECUTABLES[@]}; do
