@@ -163,6 +163,26 @@ INPUTS
   conformation to the cell definitions.
 
 
+SYSTEM PREPARATION
+-------------------------------------------------------------------------------
+
+  In order to run AWE on some protein system, you need to first:
+    * Prepare the state definitions
+	* Define initial coordinates for the walkers
+	* Define the initial weights
+
+  The example provides the input files in the awe-instance-data directory.
+    * cells.dat: the state definitions
+	* pdbs/ala/State$i-$j.pdb: the conformation for the jth walker in state i
+	* the initial weights are defined from a random distribution in the example program driver
+
+  One protocol to run AWE is as follows:
+    1) Sample the conformations space (eg, ensemble simulations, replica exchange).
+	2) Cluster the data to obtain the cell definitions.
+	3) Exctract j conformations from each cluster. These are your walkers.
+
+
+
 CONTRIBUTERS
 -------------------------------------------------------------------------------
   Please see the AUTHORS file.
