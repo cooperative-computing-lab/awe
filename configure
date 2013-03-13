@@ -11,6 +11,7 @@ SUBDIRS=(extern assign)
 PREFIX=$PWD
 
 
+
 usage() {
 	cat <<EOF
 $0 [OPTIONS]
@@ -134,25 +135,10 @@ check-build-depends() {
 	check-python-version                            || return 1
 }
 
-check-run-depends() {
-	echo "=================================================="
-	echo "Checking runtime dependencies"
-
-	if test $? -eq 0; then
-		return 0
-	elif test $REQUIRE_RUNTIME -eq 0; then
-		echo "ERROR: could not find runtime dependencies"
-		return 1
-	else
-		echo "WARNING: could not find runtime dependencies"
-		return 0
-	fi
-}
 
 set-args $@ || die 1
 
 rm -f $MAKEFILE_CFG
 check-build-depends || die 2
-check-run-depends || die 3
 makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
 makefile-cfg-var PREFIX    >>$MAKEFILE_CFG
