@@ -173,8 +173,13 @@ SYSTEM PREPARATION
 
   The example provides the input files in the awe-instance-data directory.
     * cells.dat: the state definitions
+    * CellIndices.dat, StructureIndices.dat: list the subset of atoms
+      from the cell definitions and walker coordinates to use when
+      assign a walker to a cell
     * pdbs/ala/State$i-$j.pdb: the conformation for the jth walker in state i
-    * the initial weights are defined from a random distribution in the example program driver
+    * the initial weights are defined from a random distribution in
+      the example program driver
+    * topol.pdb: the atom topology
 
   One protocol to run AWE is as follows:
     1) Sample the conformations space (eg, ensemble simulations, replica exchange).

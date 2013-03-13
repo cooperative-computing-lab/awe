@@ -85,7 +85,7 @@ if __name__ == "__main__":
 	weights  /= np.sum(weights.flatten())
 
         # load a topology file
-	system    = awe.System(topology = awe.PDB('awe-instance-data/state0.pdb'))
+	system    = awe.System(topology = awe.PDB('awe-instance-data/topol.pdb'))
 
         # 2-color awe needs states assigned to a region
 	partition = awe.SinkStates()
