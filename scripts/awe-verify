@@ -11,7 +11,7 @@ EXECUTABLES=(
 	awe-assign
 )
 
-PYMODS=(work_queue numpy prody trax awe pylab)
+PYMODS=(work_queue numpy prody pylab trax awe)
 
 
 
