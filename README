@@ -60,7 +60,7 @@ awe-instance-data and the example.py
 
 
 In order to run the example, you may execute:
-  $ python example.py
+  $ python awe-ala.py
 
 You will see this right away:
   Running on port 9123...
