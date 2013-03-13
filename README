@@ -6,7 +6,7 @@ resources.
 
 REQUIREMENTS
 -------------------------------------------------------------------------------
-  - Python 2.6 or higher [0]
+  - Python 2.6 or 2.7 [0]
   - Numpy 1.5 or higher [1]
   - Prody [2]
   - Gromacs 4.5 [3]
