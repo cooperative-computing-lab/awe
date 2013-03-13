@@ -63,6 +63,7 @@ clean : clean.trax
 	make -C cassign clean
 	rm -rf build
 	rm -rf *-workers debug resample transactional.*
+	rm -f awe-generic-data.tar.bz2 awe-instance-data.tar.bz2
 
 
 .PHONY: update.trax
