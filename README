@@ -180,6 +180,7 @@ SYSTEM PREPARATION
     * the initial weights are defined from a random distribution in
       the example program driver
     * topol.pdb: the atom topology
+    * sim.mdp: the walker simulation parameters for gromacs
 
   One protocol to run AWE is as follows:
     1) Sample the conformations space (eg, ensemble simulations, replica exchange).
