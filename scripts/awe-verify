@@ -4,6 +4,7 @@ EXITCODE=0
 
 
 ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
+ACCEPTABLE_GROMACS_VERSION=4.5
 
 EXECUTABLES=(
 	work_queue_status      # check cctools installation
@@ -17,6 +18,13 @@ PYMODS=(work_queue numpy prody pylab trax awe)
 
 get-python-version() {
 	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+}
+
+check-gromacs-version() {
+	local gmx_ver=$(pdb2gmx -h 2>&1 | grep $ACCEPTABLE_GROMACS_VERSION)
+	ecode=1
+	test ! -z "$gmx_ver" && ecode=0
+	return $ecode
 }
 
 check-python-version() {
@@ -55,6 +63,12 @@ for n in ${EXECUTABLES[@]}; do
 	fi
 	test $EXITCODE -eq 0 || exit $EXITCODE
 done
+
+printf "Checking for compatible Gromacs..."
+check-gromacs-version
+test ! $? -eq 0 && printf "FAIL\nCannot find gromacs $ACCEPTABLE_GROMACS_VERSION\n" && exit 1
+echo OK
+
 
 for n in ${PYMODS[@]}; do
 	printf "Checking for python module $n..."
