@@ -83,7 +83,7 @@ awe-rama-ala.py \
 test -f awe-rama-ala.png
 
 ### visualize forward and backward fluxes
-awe-flux.py -i transitions.dat -l 0.01
+awe-flux.py -i color-transition-matrix.csv -l 0.01
 
 fluxoutputs=(
 	instan-forward-flux.dat
@@ -97,6 +97,6 @@ for p in ${fluxoutputs[@]}; do
 done
 
 ### generate transition probability matrix
-awe-transMatrix.py -p walker-history.csv -w walker-weights.dat -t 1 -n 100
+awe-transMatrix.py -p walker-history.csv -w walker-weights.csv -t 1 -n 100
 
-test -f trans.csv
+test -f trans-probability-matrix.csv
