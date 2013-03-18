@@ -61,7 +61,7 @@ cd ala-example
 
 ### run awe
 awe-prepare
-python awe-ala.py -r 0 -i 1 -d all &
+python awe-ala.py -r 0 -i 5 -d all &
 pid=$!
 mark-cleanup-pid $pid
 
