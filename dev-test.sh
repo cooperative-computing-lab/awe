@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o errexit
+
 #################################################################################
 #############################  setting up the test  #############################
 
@@ -70,3 +72,31 @@ for i in `seq 20`; do
 done
 
 wait $pid
+
+### generate the ramachandran plot
+awe-rama-ala.py \
+	-w cell-weights.csv \
+	-p awe-instance-data/topol.pdb \
+	-c awe-instance-data/cells.dat \
+	-n 100
+
+test -f awe-rama-ala.png
+
+### visualize forward and backward fluxes
+awe-flux.py -i transitions.dat -l 0.01
+
+fluxoutputs=(
+	instan-forward-flux.dat
+	instan-backward-flux.dat
+	forward-flux.png
+	backward-flux.png
+)
+
+for p in ${fluxoutputs[@]}; do
+	test -f $p
+done
+
+### generate transition probability matrix
+awe-transMatrix.py -p walker-history.csv -w walker-weights.dat -t 1 -n 100
+
+test -f trans.csv
