@@ -90,9 +90,9 @@ on phi-psi space) can be generated according to AWE output
 "resample/cell-weights.csv" with the following command.
 
   $ python awe-rama-ala.py \
-        -w <project dir>/resample/cell-weights.csv \
-        -p <projectdir>/testinput/state0.pdb \
-        -c <project dir>/testinput/cells.dat -n 100
+        -w <project dir>/cell-weights.csv \
+        -p <projectdir>/awe-instance-data/topol.pdb \
+        -c <project dir>/awe-instance-data/cells.dat -n 100
 
 The options are:
 -w: csv file recording cell weights (cell-weights.csv)
@@ -106,7 +106,7 @@ awe-rama-ala.png: Ramachandran plot
 To generate and visualize forward and backward fluxes from AWE output
 "transitions.dat", run script awe-flux.py.
 
-  $ python awe-flux.py -i <project dir>/transitions.dat -l 0.01 -o flux 
+  $ python awe-flux.py -i <project dir>/color-transition-matrix.csv -l 0.01  
 
 The options are:
 -i: data file recording transitions at every iteration (transitions.dat)
@@ -114,15 +114,15 @@ The options are:
 -o: output directory 
 
 Output:
-<output dir>/instan-forward-flux.dat: instantaneous forward flux
-<output dir>/instan-backward-flux.dat: instantaneous backward flux
-<output dir>/forward-flux.png: plot of forward flux
-<output dir>/backward-flux.png: plot of backward flux
+instan-forward-flux.dat: instantaneous forward flux
+instan-backward-flux.dat: instantaneous backward flux
+forward-flux.png: plot of forward flux
+backward-flux.png: plot of backward flux
 
 To generate transition probability matrix from AWE output, run script awe-transMatrix.py
 
-  $ python awe-transMatrix.py -p <project dir>/resample/walker-history.dat 
-        -w <project dir>/resample/walker-weights.dat
+  $ python awe-transMatrix.py -p <project dir>/walker-history.dat 
+        -w <project dir>/walker-weights.dat
         -t 1 -n 100
 
 The options are:
