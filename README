@@ -134,7 +134,7 @@ The options are:
 -s: specify the nth iteration, start from which transition matrix is built
 
 Output:
-trans.csv: transition probability matrix
+trans-probability-marix.csv: transition probability matrix
 
 INPUTS
 -------------------------------------------------------------------------------
