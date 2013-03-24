@@ -6,15 +6,15 @@ running an AWE instance.
 
 The files described here are, in brief:
 
-| FILE					 | SUMMARY										 |
-| cells.dat				 | cell definitions								 |
-| CellIndices.dat		 | atom indices of the cells					 |
-| StructureIndices.dat	 | subset of walker atoms to assign				 |
-| env.sh				 | shell definitions for the Task execution		 |
-| execute-task.sh		 | the WQ Task command							 |
-| sim.mdp				 | gromacs simulation configuration				 |
-| topol.pdb				 | walker topology								 |
-| pdbs					 | initial walker definitions					 |
+| FILE                   | SUMMARY                                       |
+| cells.dat              | cell definitions                              |
+| CellIndices.dat        | atom indices of the cells                     |
+| StructureIndices.dat   | subset of walker atoms to assign              |
+| env.sh                 | shell definitions for the Task execution      |
+| execute-task.sh        | the WQ Task command                           |
+| sim.mdp                | gromacs simulation configuration              |
+| topol.pdb              | walker topology                               |
+| pdbs                   | initial walker definitions                    |
 
 
 
@@ -103,13 +103,13 @@ Worker. When the Task is created, the command to execute is
 
 The various components of a Task involve:
 
-  prelude		 : any environment setup if needed
-  check-initial	 : an initial check of the worker state
-  run-md		 : prepare and run the MD trajectory for the walker definition
-  assign		 : assign the final walker coords to a cell
-  check-result	 : a sanity check
-  package		 : collect the files to be returned to the AWE master
-  cleanup		 : cleanup the worker workarea
+  prelude        : any environment setup if needed
+  check-initial  : an initial check of the worker state
+  run-md         : prepare and run the MD trajectory for the walker definition
+  assign         : assign the final walker coords to a cell
+  check-result   : a sanity check
+  package        : collect the files to be returned to the AWE master
+  cleanup        : cleanup the worker workarea
 
 
 These functions are called in execute-task.sh and defined in env.sh
