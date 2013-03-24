@@ -46,22 +46,22 @@ For example, 2 cells of 3 atoms in 3 dimensions could be defined as:
   ndims: 3
 
   1.11  \
-  1.12  |--> Cell 1, atom 1
+  1.12  |--> Cell 1, atom 1, x, y, z coords
   1.13  /
   1.21  \
-  1.22  |--> Cell 1, atom 2
+  1.22  |--> Cell 1, atom 2, x, y, z coords
   1.23  /
   1.31  \
-  1.32  |--> Cell 1, atom 3
+  1.32  |--> Cell 1, atom 3, x, y, z coords
   1.33  /
   1.11  \
-  2.12  |--> Cell 2, atom 1
+  2.12  |--> Cell 2, atom 1, x, y, z coords
   2.13  /
   2.21  \
-  2.22  |--> Cell 2, atom 2
+  2.22  |--> Cell 2, atom 2, x, y, z coords
   2.23  /
   2.31  \
-  2.32  |--> Cell 2, atom 3
+  2.32  |--> Cell 2, atom 3, x, y, z coords
   2.33  /
 
 
