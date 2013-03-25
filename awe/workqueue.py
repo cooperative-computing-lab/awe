@@ -330,7 +330,7 @@ class WorkQueue(object):
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
 
     def active_workers(self):
-        return self.wq.stats.workers_busy + self.wq.stats.workers_ready + self.wq.stats.workers_cancelling
+        return self.wq.stats.workers_busy + self.wq.stats.workers_ready
 
     def can_duplicate_tasks(self):
         return  self.tasks_in_queue() < self.active_workers() \
