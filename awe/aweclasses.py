@@ -180,6 +180,8 @@ class AWE(object):
 
         self.iteration  = 0
 
+	self.currenttask = 0
+
         self.stats      = stats.AWEStats(logger=self.statslogger)
 
         self.traxlogger = traxlogger or trax.SimpleTransactional(checkpoint = 'debug/trax.cpt',
@@ -245,6 +247,7 @@ class AWE(object):
     @typecheck(Walker)
     @returns(workqueue.WQ.Task)
     def _new_task(self, walker):
+	self.currenttask += 1
         task = self.wq.new_task()
         tag  = self.encode_task_tag(walker)
         task.specify_tag(tag)
@@ -370,15 +373,15 @@ class AWE(object):
 
         ### send walker to worker
         wdat = pickle.dumps(walker)
-        task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME, cache=False)
-        task.specify_buffer(wdat  , workqueue.WORKER_WALKER_NAME   , cache=False)
+        task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME+"."+str(self.currenttask), cache=False)
+        task.specify_buffer(wdat  , workqueue.WORKER_WALKER_NAME+"."+str(self.currenttask)   , cache=False)
 
         ### specify output
         self.specify_task_output_file(task)
 
     def specify_task_output_file(self, task):
         output = os.path.join(self.wq.tmpdir, task.tag)
-        task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME, cache=False)
+        task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME+"."+str(self.currenttask), cache=False)
 
     @typecheck(workqueue.WQ.Task)
     @returns(Walker)
