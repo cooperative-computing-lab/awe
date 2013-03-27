@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+
+ME=$(basename $0)
+PREFIX=awe-generic-data
+
+BINARIES=(awe-assign pdb2gmx grompp mdrun)
+
+usage() {
+	cat <<EOF
+USAGE: $ME [prefix]
+
+  prefix: where the output is stored (default: $PREFIX)
+
+SUMMARY:
+
+  Scan the environment for gromacs and prepare binaries and
+  forcefields for AWE use. Run this on the master node.
+
+DESCRIPTION:
+
+  AWE runs gromacs binaries (pdb2gmx, grompp) on the workers. In order
+  for these commands to work, they require the forcefield parameters
+  to be transferred as well.
+
+  $ME scans the environemt for gromacs, then populates the <prefix>
+  directory with the necessary files.
+
+EOF
+}
+
+die() {
+	echo "$1"
+	exit $2
+}
+
+check-args() {
+	case $1 in
+
+		-h|--help|-?)
+			usage
+			exit 1
+			;;
+
+		*)
+			[ ! -z $1 ] && PREFIX="$1"
+			;;
+
+	esac
+}
+
+
+awe-unpack() {
+	prefix=$(dirname $(dirname $(which $(basename $0))))
+	share=$prefix/share/awe
+	for archive in $share/*.tar*; do
+		echo Decompressing $(basename $archive)
+		tar xf $archive
+	done
+
+	echo Copying example
+	cp $share/awe-ala.py .
+}
+
+
+check-binaries() {
+	for b in ${BINARIES[@]}; do
+		which $b >/dev/null 2>&1
+		[ $? -eq 0 ] || die "Cannot find $b" 2
+	done
+}
+
+abspath() {
+	case `uname` in
+		Linux)
+			readlink -f $@
+			;;
+		*)
+			echo "Cannot determine `abspath` on $(uname)"
+			exit 2
+			;;
+	esac
+}
+
+find-gmxroot() {
+	gmx_bin_dir=$(dirname $(which pdb2gmx))
+	gmx_top_dir=$(dirname $gmx_bin_dir)
+	echo $gmx_top_dir
+}
+
+find-gmxtop() {
+	if [ ! -z $GMXLIB ]; then
+		echo $GMXLIB
+	else
+		local top=$(find-gmxroot)/share/gromacs/top
+		if [ ! -e "$top" ] 
+		then
+			return
+		fi
+		echo $top
+	fi
+}
+
+copy-binaries() {
+	local prefix=$1
+	local path=$prefix/binaries/`uname`-`arch`
+	local gmxtop=$(find-gmxtop)
+	if [ -z "$gmxtop" ] 
+	then
+		die "Cannot find gromacs topology directory" 2
+	fi	
+	local mygmxtop=$prefix/gmxtopologies
+
+	[ ! -d $path ] && mkdir -vp $path
+
+	echo "Copying binaries"
+	for b in ${BINARIES[@]}; do
+		dst=$path/$b
+		test -f $dst && continue
+		echo "...$b"
+		cp `which $b` $dst
+	done
+
+	echo "Copying Gromacs forcefield files"
+	rsync -r $gmxtop/ $mygmxtop
+
+}
+
+
+check-args $@
+awe-verify || die "AWE is not installed correctly" 1
+awe-unpack || die "Could not unpack input files" 2
+check-binaries
+copy-binaries $PREFIX || die "Failed to copy binaries to $PREFIX" 3

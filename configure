@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+
+MAKEFILE_CFG=Makefile.config
+REQUIRE_RUNTIME=1
+
+### for error reporting on failures
+FAILURE_MSG=
+
+### for the Makefile.config
+SUBDIRS=(extern assign)
+PREFIX=$PWD
+
+
+
+usage() {
+	cat <<EOF
+$0 [OPTIONS]
+
+OPTIONS:
+  --prefix PATH           Set the install PREFIX
+  --require-runtime       Make the configure step fail if the runtime dependencies cannot be found
+EOF
+}
+
+fail() {
+	FAILURE_MSG="$@"
+	return 1
+}
+
+die() {
+	local ecode=$1
+	shift
+	local msg="$@ $FAILURE_MSG"
+	FAILURE_MSG=
+	echo $msg
+	exit $ecode
+}
+
+set-args() {
+
+	local args=($@)
+	local opt=
+	local val=
+
+	while [ ! -z $1 ]; do
+		opt="$1"
+		shift
+
+		case $opt in
+			--prefix)
+				val="$1"; shift
+				test ! -z "$val" || return 1
+				PREFIX="$val";;
+			--require-runtime)
+				REQUIRE_RUNTIME=0
+				;;
+			*)
+				usage; exit 1;;
+		esac
+	done
+
+}
+
+
+makefile-cfg-array() {
+	local name=$1
+	local array="${name}[@]"
+	echo "$name = ${!array}"
+}
+
+makefile-cfg-var() {
+	local name=$1
+	local val=
+	eval val=\$$name
+	echo "$name = $val"
+}
+
+
+check-clib() {
+	local include="$1"; shift
+	local libs="$@"
+	local tmpfile=$(mktemp)
+	trap "rm -f '$tmpfile'" RETURN EXIT
+
+	local include_stmt=
+
+	test -z "$include" || include_stmt="#include \"$include\""
+
+	printf "Checking for $libs..."
+	build="gcc -xc $libs -o $tmpfile -"
+	prog=$(cat <<EOF
+$include_stmt
+int main (void) { return 0; }
+EOF
+)
+
+	printf "$prog" | $build
+
+	ecode=$?
+
+	if test ! $ecode -eq 0; then
+		echo FAIL
+		echo "PROGRAM"
+		echo "========================================"
+		echo "$prog"
+		echo "========================================"
+		echo "Build command: $build"
+		return 1
+	else
+		echo OK
+		return 0
+	fi
+}
+
+
+get-python-version() {
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+}
+
+check-python-version() {
+	printf "Checking for compatible python installation..."
+	pv=$(get-python-version)
+	for v in 2.6 2.7; do
+		test  $pv == $v && echo OK && return 0
+	done
+	echo FAIL
+	return 1
+}
+
+check-build-depends() {
+	echo "=================================================="
+	echo "Checking build dependencies"
+	check-clib xdrfile/xdrfile.h -lxdrfile          || return 1
+	check-clib gsl/gsl_matrix.h  -lgsl -lgslcblas   || return 1
+	check-python-version                            || return 1
+}
+
+
+set-args $@ || die 1
+
+rm -f $MAKEFILE_CFG
+check-build-depends || die 2
+makefile-cfg-array SUBDIRS >>$MAKEFILE_CFG
+makefile-cfg-var PREFIX    >>$MAKEFILE_CFG

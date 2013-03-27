@@ -1,0 +1,206 @@
+OVERVIEW
+-------------------------------------------------------------------------------
+Adaptive Weighted Ensemble or AWE package provides a Python library for
+adaptive sampling of molecular dynamics. The framework decomposes the
+resampling computations and the molecular dynamics simulations into tasks that
+are dispatched to Work Queue for execution on resources allocated from
+clusters, clouds, grids, or any idle machines.
+
+AWE is part of the Cooperating Computing Tools.  
+
+REQUIREMENTS
+-------------------------------------------------------------------------------
+  - Python 2.6 or 2.7 [1]
+  - Gromacs 4.5 or higher [2]
+  - Gromacs XTC library 1.1 or higher [3]
+  - Numpy 1.5 or higher [4]
+  - Prody 0.9.4 or higher [5]
+  - GNU Scientific Library [6]
+  - Matplotlib [7]
+
+  [1] http://python.org/
+  [2] http://www.gromacs.org/
+  [3] http://www.gromacs.org/Developer_Zone/Programming_Guide/XTC_Library
+  [4] http://www.numpy.org/
+  [5] http://www.csb.pitt.edu/prody
+  [6] http://www.gnu.org/software/gsl/
+  [7] http://matplotlib.org/ 
+
+BUILDING AND INSTALLING 
+-------------------------------------------------------------------------------
+First, determine the location where AWE is to be installed. For example: 
+  % export AWE_INSTALL_PATH=$HOME/awe
+
+Compile and install AWE in the location pointed by $AWE_INSTALL_PATH using: 
+  % cd cctools-xxx-src
+  % cd apps/awe
+  % ./configure --prefix $AWE_INSTALL_PATH
+  % make install
+
+Next, set PATH to include the installed AWE binaries:
+  % export PATH=${AWE_INSTALL_PATH}/bin:${PATH} 
+
+Finally, set PYTHONPATH to include the installed AWE Python modules: 
+  % export PYTHONPATH=${AWE_INSTALL_PATH}/lib/python2.6/site-packages:${PYTHONPATH}  
+
+You also check if AWE was correctly installed by running:
+  % awe-verify
+
+RUNNING 
+-------------------------------------------------------------------------------
+
+First, create a directory from which you want to instantiate and run the AWE
+program. Here, we are going to run AWE to sample the state transitions of the
+Alanine Dipeptide protein using the code in awe-ala.py.
+  % cd $HOME
+  % mkdir awe-alanine 
+  % cd awe-alanine 
+
+To run AWE to sample a protein molecule, you will need to have the files
+describing the topology of atoms in that molecule, the coordinates of the
+walkers, and the coordinates of the cells. In addition, AWE transfers the
+executables from the GROMACS package required for running the simulations of
+each walker. 
+
+These files and executables can be fetched to the current working directory by
+running:
+  % awe-prepare
+
+This will create two directories named awe-generic-data and awe-instance-data.
+awe-generic-data will contain files that all AWE runs will require, such as the
+task executables and Gromacs forcefield files.  awe-instance-data will contain
+files that are particular to a protein system such as the state definitions,
+initial protein coordinates, etc.  Note that awe-prepare, by default, will
+transfer the files for the Alanine Dipeptide protein molecule.  Further,
+awe-prepare will also copy the example program awe-ala.py provided in the AWE
+source that samples the state transitions for the Alanine Dipeptide protein.
+
+To run the example in awe-ala.py, do
+  % python awe-ala.py
+
+You will see this output right away:
+  % python awe-ala.py
+    Running on port 9123...
+    Loading cells and walkers
+
+The AWE master program successfully started and began loading the cells and
+walkers for running the simulations. After that, the master waits for workers
+to connect so it can dispatch the simulation tasks for execution by the
+connected workers.
+
+Now, start a worker for this master on the same machine:
+  % work_queue_worker localhost 9123
+
+However, to run a really large sampling, you will need to run as many workers
+as possible.  A simple (but tiresome) way of doing so is to log into several
+machines and manually run work_queue_worker as above.  But, if you have access
+to a batch system like Condor or SGE, you can use them to start many workers
+with a single submit command.
+
+We have provided some scripts to make this easy.  For example, to submit 10
+workers to your local Condor pool:
+  % condor_submit_workers master.somewhere.edu 9123 10
+    Submitting job(s)..........
+    Logging submit event(s)..........
+    10 job(s) submitted to cluster 298.
+
+Or, to submit 10 worker processes to your SGE cluster:
+   % sge_submit_workers master.somewhere.edu 9123 10
+     Your job 1054781 ("worker.sh") has been submitted
+     Your job 1054782 ("worker.sh") has been submitted
+     Your job 1054783 ("worker.sh") has been submitted
+     ...
+
+Once the workers begin running, the AWE master can dispatch tasks to each one
+very quickly.  It's ok if a machine running a worker crashes or is turned off;
+the work will be silently sent elsewhere to run.
+
+When the AWE master process completes, your workers will still be available, so
+you can either run another master with the same workers, remove them from the
+batch system, or wait for them to expire.  If you do nothing for 15 minutes,
+they will automatically exit.
+
+OUTPUT 
+-------------------------------------------------------------------------------
+The AWE master creates the following output files on completion:
+
+ - cell-weights.csv describing the weight of the cells
+ - walker-history.csv describing the cells that were visited by the walkers
+ - color-transition-matrix.csv that describes the number of transitions between
+   the defined cell groups
+ - walker-weights.csv that describes the weights of the walkers
+
+You can use these output files to generate different plots that visualize the
+output of the AWE run. To generate a Ramachandran plot (free energy landscape
+on phi-psi space) using cell-weights.csv, run the following command. 
+
+   % python awe-rama-ala.py -w cell-weights.csv -p awe-instance-data/topol.pdb -c awe-instance-data/cells.dat -n 100
+
+where, -w specifies the csv file recording cell weights, -p the structure file
+of simulation target, -c the data file recording coordinates of cell centers,
+and -n the number of cells
+
+This produces an output file named awe-rama-ala.png that contains the
+Ramachandran plot.
+
+To generate and visualize forward and backward fluxes from output
+color-transition-matrix.csv, use the script awe-flux.py.
+
+   % python awe-flux.py -i color-transition-matrix.csv -l 0.01  
+
+where -i specifies the data file recording transitions at every iteration, -l
+specifies the scale iteration length to actual unit (nano/pico/femto-seconds),
+and -o specifies the output directory 
+
+This will produce the following outputs:
+instan-forward-flux.dat: instantaneous forward flux
+instan-backward-flux.dat: instantaneous backward flux
+forward-flux.png: plot of forward flux
+backward-flux.png: plot of backward flux
+
+Finally, to generate transition probability matrix from AWE output, run script
+awe-transMatrix.py
+
+   % python awe-transMatrix.py -p walker-history.dat -w walker-weights.dat -t 1 -n 100
+
+where the options
+-p specifies the data file recording dependencies of walkers 
+-w specifies the data file recording weights and cell ID of walkers 
+-t specifies the time lag (number of iterations) for calculating transition matrix
+-n specifies the number of cells 
+
+This prints the matrix to a file called trans-probability-matrix.csv. 
+
+
+RUNNING AWE ON DIFFERENT PROTEIN SYSTEMS 
+-------------------------------------------------------------------------------
+
+You can run AWE to sample a different protein system by following the steps
+below: 
+    1. Sample the conformations space using ensemble simulations, replica
+       exchange, etc.
+    2. Cluster the data to obtain the cell definitions.
+    3. Extract the conformations from each cluster as individual walkers.
+
+Specifically, these steps translate to the following: 
+    1. Describe the topology of the system in topol.pdb.
+    2. Prepare the state definitions and list them in cells.dat.
+    3. Select the subset of atoms from the cell definitions cells.dat and list
+       them in CellIndices.dat.
+    4. Select the subset of atoms from the walker topology file topol.pdb and
+       list them in StructureIndices.dat.
+    5. Define the initial coordinates for the walkers in State$i-$j.pdb where i
+       is the index of the cell and j is the index of the walker.
+    6. Specify the parameters for the walker simulation by GROMACS in sim.mdp. 
+
+    
+CONTRIBUTERS
+-------------------------------------------------------------------------------
+  Please see the AUTHORS file.
+
+
+FOR MORE INFORMATION
+-------------------------------------------------------------------------------
+For the latest information about AWE, please visit our web site at
+http://www.nd.edu/~ccl/software/awe and subscribe to our mailing list at
+http://www.nd.edu/~ccl/software/help.shtml 

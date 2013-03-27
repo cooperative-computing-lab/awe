@@ -1,0 +1,105 @@
+# -*- mode: Python; indent-tabs-mode: nil -*- #
+
+import awe
+import work_queue as wq
+
+import numpy as np
+
+import sys
+import os
+
+join = os.path.join
+
+GENERIC_INPUT  = 'awe-generic-data'
+INSTANCE_INPUT = 'awe-instance-data'
+
+
+def getopts():
+        import optparse
+        p = optparse.OptionParser()
+
+        # AWE params ------------------------------------------------------------------------------
+        p.add_option('-c', '--numcells', help='Required. Number of cells')
+        p.add_option('-w', '--numwalkers', help='Required. Number of walkers in each cell')
+        p.add_option('-i', '--iterations', default=float('inf'), type=int,
+                     help='Number of AWE iterations [%default]')
+        p.add_option('-r', '--restarts', default=float('inf'), type=int,
+                     help='Number of times to restart a failed task [%default]')
+        p.add_option('-R', '--maxreps', default=19, type=int,
+                     help='Number of times to replicate a task [%default]')
+
+        # WQ params --------------------------------------------------------------------------------
+        p.add_option('-p', '--port', default=wq.WORK_QUEUE_DEFAULT_PORT, type=int,
+                     help='Port for Work Queue to use [%default]')
+        p.add_option('-n', '--name',
+                     help='A project name to use with the catalog server [standalone mode]')
+        p.add_option('-f', '--fastabort', type=float,
+                     help='Set the Work Queue fast abort multipler [off]')
+        p.add_option('-d', '--debug',
+                     help='Print Work Queue debug messages (off]')
+
+        # Input data params  ----------------------------------------------------------------------
+        p.add_option('-B', '--binaries-root', default=join(GENERIC_INPUT, 'binaries'),
+                     help='Where to find the binaries cache on the worker [%default])')
+        p.add_option('-T', '--gmxtopologies-root', default=join(GENERIC_INPUT, 'gmxtopologies'),
+                     help='Where to find the gromacs forcefield topology files [%default]')
+        p.add_option('-I', '--instance-root', default=INSTANCE_INPUT,
+                     help='Where to find the input files for a Task [%default]')
+        p.add_option('-W', '--walker-weights',
+                     help='CSV in INSTANCE_ROOT containing initial walker weights '
+                          + 'line formatted as (cell, walker, weight) [use random weights]')
+        p.add_option('-t', '--topologyname', default='topology.pdb',
+                     help='Name of the topology file found in INSTANCE_ROOT [%default]')
+
+
+        opts, args = p.parse_args()
+
+        return opts
+
+
+def build_config(opts):
+
+    cfg                       = awe.workqueue.Config()
+    cfg.fastabort             = opts.fastabort
+    cfg.restarts              = opts.restarts
+    cfg.maxreps               = opts.maxreps
+    cfg.port                  = opts.port
+
+    if opts.name  : cfg.name  = opts.name
+    if opts.debug : cfg.debug = opts.debug
+
+    cfg.execute(join(opts.instance_root, 'execute-task.sh'))
+
+    for name in 'pdb2gmx grompp mdrun awe-assign'.split():
+        cfg.cache(join(opts.binaries_root, '$OS-$ARCH', name))
+
+    cfg.cache(opts.gmxtopologies_root)
+
+    for name in 'sim.mdp env.sh cells.dat CellIndices.dat StructureIndices.dat'.split():
+        cfg.cache(join(opts.instance_root, name))
+
+
+    return cfg
+
+
+
+
+def main(opts):
+
+    cfg = build_config(opts)
+
+    if opts.walker_weights:
+        weights = np.loadtxt(opts.walker_weights, delimiter=',', unpack=True)[-1]
+    else:
+        weights  = np.random.random((opts.numcells, opts.numwalkers))
+        weights /= np.sum(weights.flatten())
+
+
+    system = awe.System(topology = awe.PDB(join(opts.instance_root, opts.topologyname)))
+
+    
+    
+
+
+if __name__ == '__main__':
+    opts = getopts()
