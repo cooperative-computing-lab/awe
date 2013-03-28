@@ -18,7 +18,6 @@ maxreps    = 50
 #-----WQ Default Values-----
 wq_port = 9123
 wq_fast_abort_multiplier = -1.0
-wq_proj_name = None 
 wq_debug_flag = None
 
 #-----Get user options-----
@@ -41,7 +40,11 @@ def getopts():
                      help='A project name to use with the catalog server (default=standalone mode)')
         p.add_option('-f', '--fastabort', default=wq_fast_abort_multiplier, type=float,
                      help='Set the Work Queue fast abort multipler')
-        p.add_option('-d', '--debug',
+        p.add_option('-M', '--monitor', 
+                     help='Enable monitoring of resource usage of tasks (default=disabled)')
+        p.add_option('-S', '--summaryfile', default=None, type='string', metavar="<file>",
+                     help='Print resource usage summary of tasks to <file>. Must be used with -M option. (default=wq-<pid>-resource-usage)')
+        p.add_option('-d', '--debug', default=wq_debug_flag,
                      help='Print Work Queue debug messages')
 
         opts, args = p.parse_args()
@@ -62,7 +65,13 @@ if __name__ == "__main__":
 	cfg.port      = opts.port
 	
 	if opts.debug:
-		cfg.debug = wq_debug_flag
+		cfg.debug = wq_debug_flag 
+
+	if opts.monitor:
+		cfg.monitor = True 
+
+	if opts.summaryfile:
+		cfg.summaryfile = opts.summaryfile
 
         # The "main" function of the worker
 	cfg.execute('awe-instance-data/execute-task.sh')
