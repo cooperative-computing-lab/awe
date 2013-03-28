@@ -99,7 +99,8 @@ class Config(object):
         self.waittime        = 10 # in seconds
         self.wq_logfile      = 'debug/wq.log'
         self.wqstats_logfile = 'debug/wq-stats.log'
-
+        self.monitor         = False	
+        self.summaryfile     = ''
 
         self._executable = None
         self._cache = set()
@@ -137,7 +138,9 @@ class Config(object):
                               catalog   = self.catalog,
                               exclusive = self.exclusive)
             wq.specify_algorithm(self.schedule)
-            
+            if self.monitor: 
+                wq.enable_monitoring(self.summaryfile)
+ 
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
                 awe.log('Using project name %s' % wq.name)
