@@ -6,7 +6,7 @@ set -o errexit
 #############################  setting up the test  #############################
 
 ### be able to use modules in bash
-source /afs/crc.nd.edu/x86_64_linux/Modules/current/init/bash
+# source /afs/crc.nd.edu/x86_64_linux/Modules/current/init/bash
 
 ### load external dependencies
 module purge
@@ -21,7 +21,7 @@ module load /afs/nd.edu/user37/ccl/software/modulefiles/cctools/autobuild
 
 
 ### need a sandbox to work in
-workarea=$(mktemp -d)
+workarea=$(mktemp -d /tmp/awe-dev-test.XXX)
 pref=$workarea/awe-install
 pyp=$pref/lib/python2.7/site-packages
 

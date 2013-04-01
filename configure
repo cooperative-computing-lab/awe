@@ -80,7 +80,7 @@ check-clib() {
 	local desc="$1"; shift
 	local include="$1"; shift
 	local libs="$@"
-	local tmpfile=$(mktemp)
+	local tmpfile=$(mktemp /tmp/awe-configure.XXX)
 	trap "rm -f '$tmpfile'" RETURN EXIT
 
 	local include_stmt=
