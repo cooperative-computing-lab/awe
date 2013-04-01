@@ -101,6 +101,7 @@ class Config(object):
         self.wqstats_logfile = 'debug/wq-stats.log'
         self.monitor         = False	
         self.summaryfile     = ''
+        self.save_task_output = None
 
         self._executable = None
         self._cache = set()
@@ -235,7 +236,12 @@ class WorkQueue(object):
         self.restarts = dict()
 
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
-        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
+
+        if type(self.cfg.save_task_output) is str and self.cfg.save_task_output:
+            tasklogfile = self.cfg.save_task_output
+        else:
+            tasklogfile = '/dev/null'
+        self.taskoutputlogger = awe.stats.StatsLogger(path=tasklogfile, buffersize=42)
 
     @property
     def empty(self):
