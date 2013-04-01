@@ -57,6 +57,17 @@ Finally, set PYTHONPATH to include the installed AWE Python modules:
 $ export PYTHONPATH=${AWE_INSTALL_PATH}/lib/python2.6/site-packages:${PYTHONPATH}  
 ```
 
+> Make sure you use the correct version of python in the PYTHONPATH (eg python2.6 or python2.7).
+> One way to get it programmatically is by:
+> ```$ python -c 'import sys;print sys.version[:3]'```.
+>
+> In my case:
+> ```
+> $ python -c 'import sys;print sys.version[:3]'
+>   2.7
+> ```
+
+
 You also check if AWE was correctly installed by running:
 
 ```
@@ -180,9 +191,12 @@ on phi-psi space) using cell-weights.csv, run the following command.
 $ python awe-rama-ala.py -w cell-weights.csv -p awe-instance-data/topol.pdb -c awe-instance-data/cells.dat -n 100
 ```
 
-where, -w specifies the csv file recording cell weights, -p the structure file
-of simulation target, -c the data file recording coordinates of cell centers,
-and -n the number of cells
+where
+
+*   -w specifies the csv file recording cell weights
+*   -p the structure file of simulation target
+*   -c the data file recording coordinates of cell centers
+*   -n the number of cells
 
 This produces an output file named awe-rama-ala.png that contains the
 Ramachandran plot.
@@ -194,15 +208,18 @@ color-transition-matrix.csv, use the script awe-flux.py.
  python awe-flux.py -i color-transition-matrix.csv -l 0.01  
 ```
 
-where -i specifies the data file recording transitions at every iteration, -l
-specifies the scale iteration length to actual unit (nano/pico/femto-seconds),
-and -o specifies the output directory 
+where
+
+*   -i specifies the data file recording transitions at every iteration
+*   -l specifies the scale iteration length to actual unit (nano/pico/femto-seconds)
+*   -o specifies the output directory 
 
 This will produce the following outputs:
-instan-forward-flux.dat: instantaneous forward flux
-instan-backward-flux.dat: instantaneous backward flux
-forward-flux.png: plot of forward flux
-backward-flux.png: plot of backward flux
+
+*   instan-forward-flux.dat: instantaneous forward flux
+*   instan-backward-flux.dat: instantaneous backward flux
+*   forward-flux.png: plot of forward flux
+*   backward-flux.png: plot of backward flux
 
 Finally, to generate transition probability matrix from AWE output, run script
 awe-transMatrix.py
