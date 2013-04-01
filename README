@@ -1,6 +1,6 @@
 # OVERVIEW
 
-Adaptive Weighted Ensemble or AWE package provides a Python library for
+Accelerated Weighted Ensemble or AWE package provides a Python library for
 adaptive sampling of molecular dynamics. The framework decomposes the
 resampling computations and the molecular dynamics simulations into tasks that
 are dispatched to Work Queue for execution on resources allocated from
