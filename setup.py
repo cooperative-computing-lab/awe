@@ -25,5 +25,5 @@ setup( author       = "Badi' Abdul-Wahid",
        scripts      = get_executables(),
        data_files   = datafiles,
        platforms    = ['Linux', 'Mac OS X'],
-       description  = 'Adaptive Weighted Ensemble method using WorkQueue'
+       description  = 'Accelerated Weighted Ensemble method for Molecular Dynamics using WorkQueue'
        )
