@@ -32,6 +32,13 @@ prelude() {
 	echo
 }
 
+prepare-filenames() {
+	structure=`ls $CONF_IN.*`
+	id="${structure##*.}"
+	mv -f "$CONF_IN.$id" $CONF_IN
+	mv -f "$WALKER.$id" $WALKER
+}
+
 check-initial() {
 	puts "Initial file listing"
 	ls
@@ -63,8 +70,8 @@ check-result() {
 
 package() {
 	puts "Packaging results"
-	tar cvf $RESULTFILE $CONF_OUT $ASSIGNMENT $WALKER
-	ls $RESULTFILE
+	tar cvf "$RESULTFILE.$id" $CONF_OUT $ASSIGNMENT $WALKER
+	ls "$RESULTFILE.$id"
 	echo
 }
 

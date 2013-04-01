@@ -99,7 +99,8 @@ class Config(object):
         self.waittime        = 10 # in seconds
         self.wq_logfile      = 'debug/wq.log'
         self.wqstats_logfile = 'debug/wq-stats.log'
-
+        self.monitor         = False	
+        self.summaryfile     = ''
 
         self._executable = None
         self._cache = set()
@@ -137,7 +138,9 @@ class Config(object):
                               catalog   = self.catalog,
                               exclusive = self.exclusive)
             wq.specify_algorithm(self.schedule)
-            
+            if self.monitor: 
+                wq.enable_monitoring(self.summaryfile)
+ 
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
                 awe.log('Using project name %s' % wq.name)
@@ -330,7 +333,7 @@ class WorkQueue(object):
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
 
     def active_workers(self):
-        return self.wq.stats.workers_busy + self.wq.stats.workers_ready + self.wq.stats.workers_cancelling
+        return self.wq.stats.workers_busy + self.wq.stats.workers_ready 
 
     def can_duplicate_tasks(self):
         return  self.tasks_in_queue() < self.active_workers() \
