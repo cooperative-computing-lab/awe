@@ -19,7 +19,7 @@ datafiles.append('awe-ala.py')
 
 setup( author       = "Badi' Abdul-Wahid",
        author_email = 'abdulwahidc@gmail.com',
-       url          = 'https://bitbucket.org/badi/awe',
+       url          = 'http://lcls.github.com/AWE/',
        name         = 'awe',
        packages     = ['awe'],
        scripts      = get_executables(),
