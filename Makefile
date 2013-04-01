@@ -9,7 +9,7 @@ CASSIGN = cassign/assign
 
 PYTHON_SRC = awe/*.py scripts/*
 
-PY_SUBMODULES = trax.git
+PY_SUBMODULES = trax
 
 PY_INSTALL_ARGS = --prefix $(PREFIX) --install-data $(PREFIX)/share/awe
 
@@ -44,7 +44,7 @@ build : $(PYTHON_SRC)
 install.submodules : install.submodules.trax
 
 .PHONY: install.submodules.trax
-install.submodules.trax : trax.git
+install.submodules.trax : trax
 	cd $^ && python setup.py install $(PY_INSTALL_ARGS)
 
 .PHONY: install
@@ -55,7 +55,7 @@ install : build install.submodules  $(ASSIGN) $(AWE_DATAFILES)
 
 
 .PHONY: clean.trax
-clean.trax : trax.git
+clean.trax : trax
 	rm -rf $^/build
 
 .PHONY: clean
@@ -64,14 +64,3 @@ clean : clean.trax
 	rm -rf build
 	rm -rf *-workers debug resample transactional.*
 	rm -f awe-generic-data.tar.bz2 awe-instance-data.tar.bz2
-
-
-.PHONY: update.trax
-update.trax : trax.git
-	git submodule init   $^
-	git submodule update $^
-
-
-.PHONY: update
-update : update.trax
-	git pull
