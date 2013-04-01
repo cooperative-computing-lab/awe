@@ -77,6 +77,7 @@ makefile-cfg-var() {
 
 
 check-clib() {
+	local desc="$1"; shift
 	local include="$1"; shift
 	local libs="$@"
 	local tmpfile=$(mktemp)
@@ -94,17 +95,17 @@ int main (void) { return 0; }
 EOF
 )
 
-	printf "$prog" | $build
+	printf "$prog" | $build >/dev/null 2>&1
 
 	ecode=$?
 
 	if test ! $ecode -eq 0; then
-		echo FAIL
-		echo "PROGRAM"
-		echo "========================================"
-		echo "$prog"
-		echo "========================================"
-		echo "Build command: $build"
+		echo cannot find $desc FAIL
+		# echo "PROGRAM"
+		# echo "========================================"
+		# echo "$prog"
+		# echo "========================================"
+		# echo "Build command: $build"
 		return 1
 	else
 		echo OK
@@ -130,9 +131,9 @@ check-python-version() {
 check-build-depends() {
 	echo "=================================================="
 	echo "Checking build dependencies"
-	check-clib xdrfile/xdrfile.h -lxdrfile          || return 1
-	check-clib gsl/gsl_matrix.h  -lgsl -lgslcblas   || return 1
-	check-python-version                            || return 1
+	check-clib xdrfile xdrfile/xdrfile.h -lxdrfile
+	check-clib gsl gsl/gsl_matrix.h  -lgsl -lgslcblas
+	check-python-version
 }
 
 
