@@ -11,6 +11,9 @@ OBJS = $(CODE:.c=.o)
 COMPILE = $(CC) $(CFLAGS) -c
 
 
+TESTFILES = $(addprefix testfiles/, Gens.dat traj.xtc AtomIndices.dat)
+
+
 
 assign : $(OBJS)
 	$(CC) $(OBJS) $(LDFLAGS) -o assign
@@ -39,3 +42,5 @@ gsl_util.o : gsl_util.c gsl_util.h
 clean :
 	rm -f *.o assign
 
+check : assign $(TESTFILES)
+	$< testfiles/Gens.dat testfiles/AtomIndices.dat testfiles/traj.xtc testfiles/AtomIndices.dat testfiles/cellasn.dat
