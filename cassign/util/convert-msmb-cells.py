@@ -1,13 +1,40 @@
 #!/usr/bin/env python
 
-import tables
-import numpy as np
 import os, sys
+
+try:
+    import tables
+except ImportError:
+    print "Failed to import the 'tables' python module"
+    print "This is required to load the hdf format files that MSMBuilder uses to store the cluster centers"
+    print "Please install PyTables before proceeding:"
+    print "http://www.pytables.org/moin"
+    sys.exit(1)
+
+import numpy as np
+
+def usage():
+    print 'USAGE'
+    print '    %s <hdf_path> <output_path>' % sys.argv[0]
+    print
+    print 'DESCRIPTION'
+    print "    Convert the cluster definitions from MSMBuilder's HDF storage format to one"
+    print "    compatiable with AWE. Please be aware that only MSMBuilder's 'hybrid' clustering"
+    print "    algorithm is supported."
+    sys.exit(1)
+
 
 PRECISION = 1000.
 
-hdfile = sys.argv[1]
-txtfile = sys.argv[2]
+parms = sys.argv[1:]
+if len(parms) == 0 or '-h' in parms or '--help' in parms or '-?' in parms:
+    usage()
+
+try:
+    hdfile  = parms[0]
+    txtfile = parms[1]
+except IndexError:
+    usage()
 
 
 F = tables.openFile(hdfile)

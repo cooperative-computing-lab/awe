@@ -40,7 +40,11 @@ gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
 clean :
+	rm -f testfiles/Gens.dat testfiles/cellasn.dat
 	rm -f src/*.o assign
+
+testfiles/Gens.dat : testfiles/Gens.lh5 util/convert-msmb-cells.py
+	./util/convert-msmb-cells.py $< $@
 
 check : assign $(TESTFILES)
 	$< testfiles/Gens.dat testfiles/AtomIndices.dat testfiles/traj.xtc testfiles/AtomIndices.dat testfiles/cellasn.dat
