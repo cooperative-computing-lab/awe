@@ -6,7 +6,7 @@ exit_t load_atomindices (const char *mndxpath, gsl_vector **target) {
       2) allocate the vector
       3) reread the file, inserting values into the vector
 
-      This access the file twice, buf unfortunately, I'm not (yet)
+      This access the file twice, but unfortunately I'm not (yet)
       aware of any standard list datastructure for C, and am willing
       to accept the redundancy at the moment
   */
@@ -57,11 +57,11 @@ exit_t load_atomindices (const char *mndxpath, gsl_vector **target) {
 int main (int argc, char *argv[]) {
 
   const char
-    *cells_file	   = argv[1], //"Gens.dat",
+    *cells_file    = argv[1], //"Gens.dat",
     *cell_ndx_file = argv[2], //"AtomIndices.dat",
-    *xtc_file	   = argv[3], //"traj.xtc",
+    *xtc_file      = argv[3], //"traj.xtc",
     *xtc_ndx_file  = argv[4], //"AtomIndices.dat",
-    *out_file	   = argv[5]; //"cell2.dat";
+    *out_file      = argv[5]; //"cell2.dat";
 
   printf ("~> Cells file: %s\n", cells_file);
   printf ("~> Xtc file: %s\n", xtc_file);

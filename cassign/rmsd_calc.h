@@ -26,15 +26,15 @@ double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2);
    using the Kabsch (1976) algorithm.
 
    Parameters
-       P	: a D*N matrix where P(a,i) is the a-th coordinate of the i-th point 
+       P    : a D*N matrix where P(a,i) is the a-th coordinate of the i-th point 
                   in the 1st representation
-       Q	: a D*N matrix where Q(a,i) is the a-th coordinate of the i-th point 
+       Q    : a D*N matrix where Q(a,i) is the a-th coordinate of the i-th point 
                   in the 2nd representation
 
    Output
-       U	: a proper orthogonal D*D matrix, representing the rotation
-       r	: a D-dimensional column vector, representing the translation
-       rmsd	: Root Mean Square distance
+       U    : a proper orthogonal D*D matrix, representing the rotation
+       r    : a D-dimensional column vector, representing the translation
+       rmsd : Root Mean Square distance
 
 
 

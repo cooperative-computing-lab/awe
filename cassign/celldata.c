@@ -84,51 +84,51 @@ exit_t celldata_load_file (const char* path, celldata** data) {
 
 
     int lineno  = 0;
-    int cell	= 0;
-    int coord	= 0;
-    int dim	= 0;
-    float val	= 0;
+    int cell    = 0;
+    int coord   = 0;
+    int dim = 0;
+    float val   = 0;
 
     /* read in the data */
     printf ("Reading data...\n");
     while ( ! feof (file) ) {
       if ( fgets (buffer, BUFFER_SIZE, file) != NULL ){
-	lineno += 1;
-	if ( sscanf (buffer, "%f", &val) != 1 ) {
-	  printf ("Failed to parse line %d of data section: '%s'\n", lineno, buffer);
-	  exit (EXIT_FAILURE);
-	}
-	celldata_set_value (*data, cell, coord, dim, (double) val);
+    lineno += 1;
+    if ( sscanf (buffer, "%f", &val) != 1 ) {
+      printf ("Failed to parse line %d of data section: '%s'\n", lineno, buffer);
+      exit (EXIT_FAILURE);
+    }
+    celldata_set_value (*data, cell, coord, dim, (double) val);
 
-	/* printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val); */
+    /* printf ("line %d data[%d][%d][%d] = %f\n", lineno, cell, coord, dim, val); */
 
-	/* printf ("incrementing dim %d\n", dim); */
-	dim += 1;
+    /* printf ("incrementing dim %d\n", dim); */
+    dim += 1;
 
-	if (dim >= ndims){
-	  /* printf ("reseting dim %d to 0\n", dim); */
-	  dim = 0;
-	}
+    if (dim >= ndims){
+      /* printf ("reseting dim %d to 0\n", dim); */
+      dim = 0;
+    }
 
-	if (dim == 0) {
-	  /* printf ("incrementing coord %d\n", coord); */
-	  coord += 1;
-	}
+    if (dim == 0) {
+      /* printf ("incrementing coord %d\n", coord); */
+      coord += 1;
+    }
 
-	if (coord >= ncoords) {
-	  /* printf ("reseting coord %d\n", coord); */
-	  coord = 0;
-	}
+    if (coord >= ncoords) {
+      /* printf ("reseting coord %d\n", coord); */
+      coord = 0;
+    }
 
-	if (coord == 0 && dim == 0) {
-	  /* printf ("incrementing cell %d\n", cell); */
-	  cell += 1;
-	}
+    if (coord == 0 && dim == 0) {
+      /* printf ("incrementing cell %d\n", cell); */
+      cell += 1;
+    }
 
-	if (cell >= ncells) {
-	  printf ("loaded %d cells\n", ncells);
-	  break;
-	}
+    if (cell >= ncells) {
+      printf ("loaded %d cells\n", ncells);
+      break;
+    }
 
       }
     }

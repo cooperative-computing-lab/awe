@@ -65,9 +65,9 @@ int xdrframe_last_in_xtc (const char* filename, xdrframe** frame) {
   int step;
   float time;
   xdr_matrix box;
-  float prec	= XTC_PRECISION;
-  int frameix	= 0;
-  xdr_vec* x	= (xdr_vec*) malloc (natoms*sizeof(xdr_vec));
+  float prec    = XTC_PRECISION;
+  int frameix   = 0;
+  xdr_vec* x    = (xdr_vec*) malloc (natoms*sizeof(xdr_vec));
 
   while ( (result = read_xtc (file, natoms, &step, &time, box, x, &prec)) == exdrOK )
     { frameix++; }
