@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS = --std=c99 -g
 LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm # -static
 
-CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c
+CODE = $(addprefix src/, assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c)
 HEADERS = $(CODE:.c:.h)
 OBJS = $(CODE:.c=.o)
 
@@ -40,7 +40,7 @@ gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
 clean :
-	rm -f *.o assign
+	rm -f src/*.o assign
 
 check : assign $(TESTFILES)
 	$< testfiles/Gens.dat testfiles/AtomIndices.dat testfiles/traj.xtc testfiles/AtomIndices.dat testfiles/cellasn.dat
