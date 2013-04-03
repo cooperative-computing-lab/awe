@@ -25,25 +25,25 @@ def getopts():
         p = optparse.OptionParser()
 
         # AWE params
-        p.add_option('-i', '--iterations', default=iterations, type=int,
+        p.add_option('-i', '--iterations', metavar="<int>", default=iterations, type=int, dest='iterations',
                      help='Number of AWE iterations (default=%s)' % iterations)
-        p.add_option('-r', '--restarts', default=restarts, type=int,
+        p.add_option('-r', '--restarts', metavar="<int>", default=restarts, type=int, dest='restarts',
                      help='Number of times to restart a failed task (default=%s)' % restarts)
-        p.add_option('-R', '--maxreps', default=maxreps, type=int,
+        p.add_option('-R', '--maxreps', metavar="<int>", default=maxreps, type=int, dest='maxreps',
                      help='Number of times to replicate a task (default=%s)' % maxreps)
 
         # WQ params
-        p.add_option('-p', '--port', default=wq_port, type=int,
+        p.add_option('-p', '--port', metavar="<int>", default=wq_port, type=int, dest='port',
                      help='Port for Work Queue to use (default=%s)' % wq_port)
-        p.add_option('-n', '--name',
+        p.add_option('-n', '--name', metavar="<string>", default=None, type="string", dest='name',
                      help='A project name to use with the catalog server (default=standalone mode)')
-        p.add_option('-f', '--fastabort', default=wq_fast_abort_multiplier, type=float,
+        p.add_option('-f', '--fastabort', metavar="<float>", default=wq_fast_abort_multiplier, type=float, dest='fastabort',
                      help='Set the Work Queue fast abort multipler')
-        p.add_option('-M', '--monitor', dest='enable_monitor', default=False, action='store_true',
+        p.add_option('-M', '--monitor', default=False, dest='enable_monitor', action='store_true',
                      help='Enable monitoring of resource usage of tasks (default=disabled)')
-        p.add_option('-S', '--summaryfile', metavar="<file>",
+        p.add_option('-S', '--summaryfile', metavar="<file>", default=None, type="string", dest='summaryfile',
                      help='Print resource usage summary of tasks to <file>. Must be used with -M option. (default=wq-<pid>-resource-usage)')
-        p.add_option('-d', '--debug', 
+        p.add_option('-d', '--debug', metavar="<string>", default=None, type="string", dest='debug', 
                      help='Print Work Queue debug messages')
 
         opts, args = p.parse_args()
