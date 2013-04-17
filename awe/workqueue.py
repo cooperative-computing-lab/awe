@@ -101,6 +101,7 @@ class Config(object):
         self.wqstats_logfile = 'debug/wq-stats.log'
         self.monitor         = False	
         self.summaryfile     = ''
+	self.capacity        = False
 
         self._executable = None
         self._cache = set()
@@ -130,6 +131,7 @@ class Config(object):
                 if self.wq_logfile:
                      awe.util.makedirs_parent(self.wq_logfile)
                      WQ.cctools_debug_config_file(self.wq_logfile)
+                     WQ.cctools_debug_config_file_size(0) 
             if self.name:
                 self.catalog = True
             wq = WQ.WorkQueue(name      = self.name,
@@ -140,6 +142,9 @@ class Config(object):
             wq.specify_algorithm(self.schedule)
             if self.monitor: 
                 wq.enable_monitoring(self.summaryfile)
+
+	    if self.capacity:
+		wq.estimate_capacity()
  
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
