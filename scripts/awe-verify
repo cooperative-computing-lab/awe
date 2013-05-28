@@ -51,7 +51,7 @@ check-pymodule() {
 
 printf "Checking for compatible python..."
 check-python-version
-test $EXITCODE -eq 0 || exit $EXITCODE
+test $EXITCODE -eq 0
 
 for n in ${EXECUTABLES[@]}; do
 	printf "Checking for executable $n..."
@@ -61,13 +61,14 @@ for n in ${EXECUTABLES[@]}; do
 		echo FAIL
 		EXITCODE=1
 	fi
-	test $EXITCODE -eq 0 || exit $EXITCODE
 done
 
 printf "Checking for compatible Gromacs..."
+msg="OK\n"
 check-gromacs-version
-test ! $? -eq 0 && printf "FAIL\nCannot find gromacs $ACCEPTABLE_GROMACS_VERSION\n" && exit 1
-echo OK
+test ! $? -eq 0 && msg="FAIL\nCannot find gromacs $ACCEPTABLE_GROMACS_VERSION\n" && EXITCODE=1
+printf $msg
+
 
 
 for n in ${PYMODS[@]}; do
@@ -78,7 +79,6 @@ for n in ${PYMODS[@]}; do
 		echo FAIL
 		EXITCODE=1
 	fi
-	test $EXITCODE -eq 0 || exit $EXITCODE
 done
 
 exit $EXITCODE

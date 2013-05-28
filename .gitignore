@@ -1,0 +1,11 @@
+*.pyc
+build
+*.dat
+*.log
+*.png
+*.tmp
+core.*
+*.bkp
+awe-assign
+awe-generic-data.tar.bz2
+awe-instance-data.tar.bz2

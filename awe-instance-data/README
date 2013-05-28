@@ -1,0 +1,138 @@
+SUMMARY
+=======
+
+This document describes the miscellaneous input files specific to
+running an AWE instance.
+
+The files described here are, in brief:
+
+| FILE                   | SUMMARY                                       |
+| cells.dat              | cell definitions                              |
+| CellIndices.dat        | atom indices of the cells                     |
+| StructureIndices.dat   | subset of walker atoms to assign              |
+| env.sh                 | shell definitions for the Task execution      |
+| execute-task.sh        | the WQ Task command                           |
+| sim.mdp                | gromacs simulation configuration              |
+| topol.pdb              | walker topology                               |
+| pdbs                   | initial walker definitions                    |
+
+
+
+
+cells.dat
+=========
+
+This file provides the coordinates of each cell.
+
+Given the following regular expressions
+  int : [0-9]+
+  float : [0-9]+.[0-9]+
+  coord : [:float:]\n
+
+The format is defined as follows:
+
+  ncells: [:int:]
+  ncoords: [:int:]
+  ndims: [:int:]
+
+  [:coord:]+
+
+where the coordinate of each atom is given on a separate line.
+
+For example, 2 cells of 3 atoms in 3 dimensions could be defined as:
+
+  ncells: 2
+  ncoords: 4
+  ndims: 3
+
+  1.11  \
+  1.12  |--> Cell 1, atom 1, x, y, z coords
+  1.13  /
+  1.21  \
+  1.22  |--> Cell 1, atom 2, x, y, z coords
+  1.23  /
+  1.31  \
+  1.32  |--> Cell 1, atom 3, x, y, z coords
+  1.33  /
+  1.11  \
+  2.12  |--> Cell 2, atom 1, x, y, z coords
+  2.13  /
+  2.21  \
+  2.22  |--> Cell 2, atom 2, x, y, z coords
+  2.23  /
+  2.31  \
+  2.32  |--> Cell 2, atom 3, x, y, z coords
+  2.33  /
+
+
+
+
+CellIndices.dat and StructureIndices.dat
+========================================
+
+These two files allow you to select a subset of the atoms in the cell
+and walker to use for assignment. The number of atoms in each file
+*must* be the same.
+
+The cells.dat file may define a cell based on all the atoms of a
+protein, but we may only care about the alpha carbons when
+assigning. By specifying the indices here we can ensure that only
+relevant atoms are considered.
+
+For instance:
+  CellIndices.dat                  StructureIndices.dat
+  1                  <------->     1
+  4                  <------->     4
+  5                  <------->     5
+  6                  <------->     6
+  8                  <------->     8
+
+
+The format is simple: a single index (as an integer) per line. It is
+easily obtained via numpy's savetxt function.
+
+
+
+
+env.sh and execute-task.sh
+==========================
+
+These two files define the commands that are executed on the WorkQueue
+Worker. When the Task is created, the command to execute is
+"./execute-task.sh", which then sources env.sh.
+
+The various components of a Task involve:
+
+  prelude        : any environment setup if needed
+  check-initial  : an initial check of the worker state
+  run-md         : prepare and run the MD trajectory for the walker definition
+  assign         : assign the final walker coords to a cell
+  check-result   : a sanity check
+  package        : collect the files to be returned to the AWE master
+  cleanup        : cleanup the worker workarea
+
+
+These functions are called in execute-task.sh and defined in env.sh
+
+
+
+
+sim.mdp
+=======
+
+Currently AWE uses gromacs to run the walkers. This file provides the
+simulation parameters to prepare the tpr with. The walker coordinates
+are transferred to the workers, and the gromacs cycle of pdb2gmx,
+grompp, and mdrun are called (in the run-md function).
+
+
+
+
+topol.pdb and pdbs
+==================
+
+The pdbs directory contains the initial walker coordinates as pdb
+files. These are loaded when AWE is started. Only the coordinates are
+used though. In order to materialize the coordinates on the workers,
+the topol.pdb file is used to define the topology. As such, topol.pdb
+and pdbs/<system>/State$i-$j.pdb must represent the same system.

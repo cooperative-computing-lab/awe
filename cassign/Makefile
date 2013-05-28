@@ -4,11 +4,14 @@ CC = gcc
 CFLAGS = --std=c99 -g
 LDFLAGS = -lxdrfile -lgsl -lgslcblas -lm # -static
 
-CODE = assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c theobald_rmsd.c
+CODE = $(addprefix src/, assign.c celldata.c xdr_util.c exit_codes.c rmsd_calc.c gsl_util.c)
 HEADERS = $(CODE:.c:.h)
 OBJS = $(CODE:.c=.o)
 
 COMPILE = $(CC) $(CFLAGS) -c
+
+
+TESTFILES = $(addprefix testfiles/, Gens.dat traj.xtc AtomIndices.dat)
 
 
 
@@ -37,5 +40,11 @@ gsl_util.o : gsl_util.c gsl_util.h
 	$(COMPILE) gsl_util.c
 
 clean :
-	rm -f *.o assign
+	rm -f testfiles/Gens.dat testfiles/cellasn.dat
+	rm -f src/*.o assign
 
+testfiles/Gens.dat : testfiles/Gens.lh5 util/convert-msmb-cells.py
+	./util/convert-msmb-cells.py $< $@
+
+check : assign $(TESTFILES)
+	$< testfiles/Gens.dat testfiles/AtomIndices.dat testfiles/traj.xtc testfiles/AtomIndices.dat testfiles/cellasn.dat

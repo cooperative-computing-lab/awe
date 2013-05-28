@@ -150,18 +150,10 @@ class Walker(object):
 class AWE(object):
 
     """
-    The main driver for the Adaptive Weighted Ensemble algorithm.
+    The main driver for the Accelerated Weighted Ensemble algorithm.
     This class manages the marshaling of workers to/from workers,
     updating the current WalkerGroup, and calling the resampleing
     algorithm.
-
-    When constructing an AWE instance, required parameters include:
-
-      *wqconfig*   : an instance of awe.workqueue.Config
-      *system*    : an instance of awe.aweclasses.System
-      *iterations* : number of iterations to run
-      *resample*   : the implementation of the resampling algorithm, a subclass of awe.resample.IResampler
-
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
@@ -191,7 +183,7 @@ class AWE(object):
         self._firstrun  = True
 
     def _print_start_screen(self):
-        start_str = "********************************* AWE - Adaptive Weighted Ensemble *********************************\n"
+        start_str = "********************************* AWE - Acclerated Weighted Ensemble *******************************\n"
         start_str += "AUTHORS:\n"
         start_str += "  Badi' Abdul-Wahid\n"
         start_str += "  Haoyun Feng\n"
