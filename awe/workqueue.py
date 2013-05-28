@@ -112,7 +112,7 @@ class Config(object):
     def execute(self, path):
         f = WQFile(path)
         self._executable = f
-        self.cache(f.masterpath)
+        self._cache.add(f)
 
     def cache(self, *files, **kws):
         base = kws.get('base', True)
