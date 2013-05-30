@@ -3,9 +3,13 @@
 Accelerated Weighted Ensemble or AWE package provides a Python library for
 adaptive sampling of molecular dynamics. The framework decomposes the
 resampling computations and the molecular dynamics simulations into tasks that
-are dispatched to Work Queue for execution on resources allocated from
+are dispatched for execution on resources allocated from
 clusters, clouds, grids, or any idle machines.
 
+AWE uses Work Queue, which is part of the Cooperating Computing Tools (CCTools)
+package, for dispatching jobs for execution on allocated resources.
+Documentation on downloading, installing, and using Work Queue can be found 
+<a href="http://www.nd.edu/~ccl/software/manuals/workqueue.html">here</a>.
 
 
 # REQUIREMENTS
@@ -32,6 +36,8 @@ clusters, clouds, grids, or any idle machines.
 
 # BUILDING AND INSTALLING 
 
+
+
 First, determine the location where AWE is to be installed. For example: 
 ```
 $ export AWE_INSTALL_PATH=$HOME/awe
@@ -57,18 +63,15 @@ Finally, set PYTHONPATH to include the installed AWE Python modules:
 $ export PYTHONPATH=${AWE_INSTALL_PATH}/lib/python2.6/site-packages:${PYTHONPATH}  
 ```
 
-> Make sure you use the correct version of python in the PYTHONPATH (eg python2.6 or python2.7).
-> One way to get it programmatically is by:
-> ```$ python -c 'import sys;print sys.version[:3]'```.
->
-> In my case:
-> ```
-> $ python -c 'import sys;print sys.version[:3]'
->   2.7
-> ```
+Note that the AWE Python modules will be built for the version of Python
+accessible in your installed environment.  The installation script creates a
+directory (under $AWE_INSTALL_PATH/lib) named with the version of Python for
+which the modules are built and copies the modules to this directory. So if your
+environment has a Python version different from 2.6, replace the version string
+accordingly when setting PYTHONPATH.
 
 
-You also check if AWE was correctly installed by running:
+You can check if AWE was correctly installed by running:
 
 ```
 $ awe-verify
@@ -121,8 +124,8 @@ You will see this output right away:
 
 ```
 $ python awe-ala.py
-$ Running on port 9123...
-$ Loading cells and walkers
+  Running on port 9123...
+  Loading cells and walkers
 ```
 
 The AWE master program successfully started and began loading the cells and

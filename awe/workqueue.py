@@ -101,7 +101,7 @@ class Config(object):
         self.wqstats_logfile = 'debug/wq-stats.log'
         self.monitor         = False	
         self.summaryfile     = ''
-        self.save_task_output = None
+	self.capacity        = False
 
         self._executable = None
         self._cache = set()
@@ -112,7 +112,7 @@ class Config(object):
     def execute(self, path):
         f = WQFile(path)
         self._executable = f
-        self.cache(f.masterpath)
+        self._cache.add(f)
 
     def cache(self, *files, **kws):
         base = kws.get('base', True)
@@ -131,6 +131,7 @@ class Config(object):
                 if self.wq_logfile:
                      awe.util.makedirs_parent(self.wq_logfile)
                      WQ.cctools_debug_config_file(self.wq_logfile)
+                     WQ.cctools_debug_config_file_size(0) 
             if self.name:
                 self.catalog = True
             wq = WQ.WorkQueue(name      = self.name,
@@ -141,6 +142,9 @@ class Config(object):
             wq.specify_algorithm(self.schedule)
             if self.monitor: 
                 wq.enable_monitoring(self.summaryfile)
+
+	    if self.capacity:
+		wq.estimate_capacity()
  
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
@@ -236,12 +240,7 @@ class WorkQueue(object):
         self.restarts = dict()
 
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
-
-        if type(self.cfg.save_task_output) is str and self.cfg.save_task_output:
-            tasklogfile = self.cfg.save_task_output
-        else:
-            tasklogfile = '/dev/null'
-        self.taskoutputlogger = awe.stats.StatsLogger(path=tasklogfile, buffersize=42)
+        self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
 
     @property
     def empty(self):
