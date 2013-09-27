@@ -38,12 +38,15 @@ except IndexError:
 
 
 F = tables.openFile(hdfile)
-data = F.getNode('/XYZList').read()
+coords = F.getNode('/XYZList').read()
 
 ### convert from the lossy integer scheme
-data = data.astype('float32') / PRECISION
+coords = coords.astype('float32') / PRECISION
 
-ncells, ncoords, dim = data.shape
+
+ncells, ncoords, dim = coords.shape
+
+
 
 with open(txtfile, 'w') as fd:
     fd.write('ncells: '  + str(ncells) + '\n')
@@ -51,6 +54,6 @@ with open(txtfile, 'w') as fd:
     fd.write('ndims: '   + str(dim)    + '\n')
     fd.write('\n')
 
-    np.savetxt(fd, data.flatten(), fmt='%f')
+    np.savetxt(fd, coords.flatten(), fmt='%f')
 
 F.close()
