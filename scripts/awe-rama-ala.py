@@ -64,6 +64,8 @@ def extractWeight(weightf,ncell):
     l = 1;
     for line in open(weightf,'r'):
         if l > 1:
+            if line.startswith('#'):
+                continue
 	    content = line.split(',')
             cellid = int(content[1])
 	    w = float(content[3])
