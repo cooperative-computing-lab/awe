@@ -24,6 +24,11 @@ from structures import PDB
 import voronoi
 
 import prody
-prody.setVerbosity('error')
+
+### compatibility with different versions of prody
+try:
+    prody.setVerbosity('error')
+except AttributeError:
+    prody.confProDy(verbosity='error')
 
 stats.time.start()
