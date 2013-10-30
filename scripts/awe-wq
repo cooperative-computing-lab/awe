@@ -32,8 +32,8 @@ def getopts(args=None):
 
     ### Performance parameters
     g = optparse.OptionGroup(p, 'Performance options')
-    g.add_option('--max-restarts', help='Maximum number of times to retry a failed task [%default]')
-    g.add_option('--max-replicas', help='Maximum number of times to replicate a task [%default]')
+    g.add_option('--max-restarts', type=int, help='Maximum number of times to retry a failed task [%default]')
+    g.add_option('--max-replicas', type=int, help='Maximum number of times to replicate a task [%default]')
 
     p.add_option_group(g)
 
