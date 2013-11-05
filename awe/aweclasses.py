@@ -19,6 +19,10 @@ import os, time, shutil
 from collections import defaultdict
 
 
+from guppy import hpy
+HP = hpy()
+
+
 _WALKER_ID = 0
 _DEFAULT_COLOR = -1
 DEFAULT_CORE = -1
@@ -302,8 +306,15 @@ class AWE(object):
         t = time.time()
         self.statslogger.update(t, 'AWE', 'start_unix_time', t)
 
+        HP.setrelheap()
+
         try:
             while True:
+
+                # DEBUG
+                h = HP.heap()
+                h.dump('heap.hpy')
+
 
                 if self.iteration % self.checkpointfreq == 0:
                     print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
@@ -326,6 +337,7 @@ class AWE(object):
                 self._resample()
 
                 self.stats.time_iter('stop')
+
 
         except KeyboardInterrupt:
             pass
