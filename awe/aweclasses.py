@@ -18,9 +18,14 @@ import cPickle as pickle
 import os, time, shutil
 from collections import defaultdict
 
+import memory_profiler
 
 from guppy import hpy
+import guppy.heapy.RM
 HP = hpy()
+
+import objgraph as og
+import pdb
 
 
 _WALKER_ID = 0
@@ -267,6 +272,7 @@ class AWE(object):
             task   = self._new_task(walker)
             self.wq.submit(task)
 
+    @memory_profiler.profile
     def _recv(self):
 
         print time.asctime(), 'Receiving tasks'
@@ -279,6 +285,11 @@ class AWE(object):
             self._try_duplicate_tasks()
         self.stats.time_barrier('stop')
         self.wq.clear_tags()
+
+        with open('/tmp/task_table.txt', 'a') as fd:
+            fd.write('%s,%s\n' % (self.iteration, len(self.wq.wq._task_table)))
+        # pdb.set_trace()
+        self.wq.wq._task_table.clear()
         print system
 
 
@@ -297,6 +308,7 @@ class AWE(object):
         self.recover()
 
         if self._firstrun:
+            og.show_growth()
             self.resample.save(self.system)
             self._firstrun = False
 
@@ -309,19 +321,32 @@ class AWE(object):
         HP.setrelheap()
 
         try:
-            while True:
+            while self.iteration < self.iterations:
 
-                # DEBUG
+                ################################################################################ DEBUG
+
                 h = HP.heap()
                 h.dump('heap.hpy')
 
+                # if 5 < self.iteration < 10:
+                #     self.iteration += 1
+                #     print h.bymodule
+                #     continue
+
+                # if self.iteration >= 10:
+                #     del self.wq.wq
+                #     self.wq.wq = 42
+                #     self.iteration += 1
+                #     h = HP.heap()
+                #     print h.bymodule
+                #     continue
+
+                
+                ################################################################################
 
                 if self.iteration % self.checkpointfreq == 0:
                     print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
                     self.checkpoint()
-
-
-                if self.iteration >= self.iterations: break
 
                 self.iteration += 1
 
@@ -331,6 +356,9 @@ class AWE(object):
                 self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
 
                 self.stats.time_iter('start')
+
+                if self.iteration > 45:
+                    pdb.set_trace()
 
                 self._submit()
                 self._recv()     ## barrier
