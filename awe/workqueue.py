@@ -338,6 +338,12 @@ class WorkQueue(object):
     def clear_tags(self):
         self._tagset.clear()
 
+    def clear(self):
+        self.clear_tags()
+
+        # force clearing to allow GC, otherwise linear memory growth
+        self.wq._task_table.clear()
+
     def tasks_in_queue(self):
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
 
