@@ -274,7 +274,7 @@ class AWE(object):
             self.logwalker(walker)
             self._try_duplicate_tasks()
         self.stats.time_barrier('stop')
-        self.wq.clear_tags()
+        self.wq.clear()
         print system
 
 
@@ -303,14 +303,11 @@ class AWE(object):
         self.statslogger.update(t, 'AWE', 'start_unix_time', t)
 
         try:
-            while True:
+            while self.iteration < self.iterations:
 
                 if self.iteration % self.checkpointfreq == 0:
                     print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
                     self.checkpoint()
-
-
-                if self.iteration >= self.iterations: break
 
                 self.iteration += 1
 
@@ -326,6 +323,7 @@ class AWE(object):
                 self._resample()
 
                 self.stats.time_iter('stop')
+
 
         except KeyboardInterrupt:
             pass

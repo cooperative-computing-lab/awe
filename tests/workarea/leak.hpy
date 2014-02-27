@@ -1,0 +1,1725 @@
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673080.915428
+.count: 1
+.size: 448
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 1
+.r: 1 448 types.FrameType
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673129.524772
+.count: 9978
+.size: 2544136
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 2015 161200 numpy.ndarray
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 2525 60600 int
+.r: 1095 26280 numpy.float64
+.r: 82 22960 dict of work_queue.Task
+.r: 82 22960 dict of work_queue.work_queue_task
+.r: 82 5248 work_queue.Task
+.r: 82 5248 work_queue.work_queue_task
+.r: 82 3936 __builtin__.SwigPyObject
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673154.118732
+.count: 12020
+.size: 2741880
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 2452 196160 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 301 84280 dict of work_queue.Task
+.r: 301 84280 dict of work_queue.work_queue_task
+.r: 3056 73344 int
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 301 19264 work_queue.Task
+.r: 301 19264 work_queue.work_queue_task
+.r: 301 14448 __builtin__.SwigPyObject
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673173.708485
+.count: 13118
+.size: 2908432
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 2408 192640 numpy.ndarray
+.r: 481 134680 dict of work_queue.Task
+.r: 481 134680 dict of work_queue.work_queue_task
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 3235 77640 int
+.r: 8 64448 dict (no owner)
+.r: 481 30784 work_queue.Task
+.r: 481 30784 work_queue.work_queue_task
+.r: 1097 26328 numpy.float64
+.r: 481 23088 __builtin__.SwigPyObject
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673192.671215
+.count: 13925
+.size: 2995696
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 2455 196400 numpy.ndarray
+.r: 604 169120 dict of work_queue.Task
+.r: 604 169120 dict of work_queue.work_queue_task
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 3401 81624 int
+.r: 8 64448 dict (no owner)
+.r: 604 38656 work_queue.Task
+.r: 604 38656 work_queue.work_queue_task
+.r: 604 28992 __builtin__.SwigPyObject
+.r: 1096 26304 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673210.596780
+.count: 14597
+.size: 3067712
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 731 204680 dict of work_queue.Task
+.r: 731 204680 dict of work_queue.work_queue_task
+.r: 2436 194880 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 3499 83976 int
+.r: 8 64448 dict (no owner)
+.r: 731 46784 work_queue.Task
+.r: 731 46784 work_queue.work_queue_task
+.r: 731 35088 __builtin__.SwigPyObject
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673227.259926
+.count: 15907
+.size: 3243664
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 949 265720 dict of work_queue.Task
+.r: 949 265720 dict of work_queue.work_queue_task
+.r: 2431 194480 numpy.ndarray
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 3703 88872 int
+.r: 8 64448 dict (no owner)
+.r: 949 60736 work_queue.Task
+.r: 949 60736 work_queue.work_queue_task
+.r: 949 45552 __builtin__.SwigPyObject
+.r: 1095 26280 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673243.678998
+.count: 16657
+.size: 3329000
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 1073 300440 dict of work_queue.Task
+.r: 1073 300440 dict of work_queue.work_queue_task
+.r: 2457 196560 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 3828 91872 int
+.r: 1073 68672 work_queue.Task
+.r: 1073 68672 work_queue.work_queue_task
+.r: 8 64448 dict (no owner)
+.r: 1073 51504 __builtin__.SwigPyObject
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673260.691683
+.count: 17225
+.size: 3397120
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 1181 330680 dict of work_queue.Task
+.r: 1181 330680 dict of work_queue.work_queue_task
+.r: 2432 194560 numpy.ndarray
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 3902 93648 int
+.r: 1181 75584 work_queue.Task
+.r: 1181 75584 work_queue.work_queue_task
+.r: 8 64448 dict (no owner)
+.r: 1181 56688 __builtin__.SwigPyObject
+.r: 1093 26232 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673277.718326
+.count: 17950
+.size: 3474752
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1910 2001680 dict of awe.aweclasses.Walker
+.r: 1314 367920 dict of work_queue.Task
+.r: 1314 367920 dict of work_queue.work_queue_task
+.r: 2427 194160 numpy.ndarray
+.r: 1910 122240 awe.aweclasses.Walker
+.r: 4009 96216 int
+.r: 1314 84096 work_queue.Task
+.r: 1314 84096 work_queue.work_queue_task
+.r: 8 64448 dict (no owner)
+.r: 1314 63072 __builtin__.SwigPyObject
+.r: 1091 26184 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673293.754662
+.count: 18858
+.size: 3643568
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1980 2075040 dict of awe.aweclasses.Walker
+.r: 1432 400960 dict of work_queue.Task
+.r: 1432 400960 dict of work_queue.work_queue_task
+.r: 2422 193760 numpy.ndarray
+.r: 1980 126720 awe.aweclasses.Walker
+.r: 4185 100440 int
+.r: 1432 91648 work_queue.Task
+.r: 1432 91648 work_queue.work_queue_task
+.r: 1432 68736 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1098 26352 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673312.000499
+.count: 19553
+.size: 3713952
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 1551 434280 dict of work_queue.Task
+.r: 1551 434280 dict of work_queue.work_queue_task
+.r: 2452 196160 numpy.ndarray
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 4297 103128 int
+.r: 1551 99264 work_queue.Task
+.r: 1551 99264 work_queue.work_queue_task
+.r: 1551 74448 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673328.737909
+.count: 20122
+.size: 3772944
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 1662 465360 dict of work_queue.Task
+.r: 1662 465360 dict of work_queue.work_queue_task
+.r: 2423 193840 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 1662 106368 work_queue.Task
+.r: 1662 106368 work_queue.work_queue_task
+.r: 4382 105168 int
+.r: 1662 79776 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673348.672509
+.count: 20969
+.size: 3892528
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 1786 500080 dict of work_queue.Task
+.r: 1786 500080 dict of work_queue.work_queue_task
+.r: 2449 195920 numpy.ndarray
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 1786 114304 work_queue.Task
+.r: 1786 114304 work_queue.work_queue_task
+.r: 4541 108984 int
+.r: 1786 85728 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673365.532615
+.count: 21902
+.size: 4013648
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 1948 545440 dict of work_queue.Task
+.r: 1948 545440 dict of work_queue.work_queue_task
+.r: 2430 194400 numpy.ndarray
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 1948 124672 work_queue.Task
+.r: 1948 124672 work_queue.work_queue_task
+.r: 4683 112392 int
+.r: 1948 93504 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673385.647484
+.count: 22676
+.size: 4109928
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 2074 580720 dict of work_queue.Task
+.r: 2074 580720 dict of work_queue.work_queue_task
+.r: 2434 194720 numpy.ndarray
+.r: 2074 132736 work_queue.Task
+.r: 2074 132736 work_queue.work_queue_task
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 4823 115752 int
+.r: 2074 99552 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673402.756483
+.count: 23496
+.size: 4203664
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 2210 618800 dict of work_queue.Task
+.r: 2210 618800 dict of work_queue.work_queue_task
+.r: 2448 195840 numpy.ndarray
+.r: 2210 141440 work_queue.Task
+.r: 2210 141440 work_queue.work_queue_task
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 4970 119280 int
+.r: 2210 106080 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673419.846449
+.count: 24262
+.size: 4301624
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 2340 655200 dict of work_queue.Task
+.r: 2340 655200 dict of work_queue.work_queue_task
+.r: 2439 195120 numpy.ndarray
+.r: 2340 149760 work_queue.Task
+.r: 2340 149760 work_queue.work_queue_task
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 5095 122280 int
+.r: 2340 112320 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673438.109477
+.count: 25422
+.size: 4441496
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 2540 711200 dict of work_queue.Task
+.r: 2540 711200 dict of work_queue.work_queue_task
+.r: 2432 194560 numpy.ndarray
+.r: 2540 162560 work_queue.Task
+.r: 2540 162560 work_queue.work_queue_task
+.r: 5283 126792 int
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 2540 121920 __builtin__.SwigPyObject
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673456.578142
+.count: 26490
+.size: 4565488
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1920 2012160 dict of awe.aweclasses.Walker
+.r: 2736 766080 dict of work_queue.Task
+.r: 2736 766080 dict of work_queue.work_queue_task
+.r: 2410 192800 numpy.ndarray
+.r: 2736 175104 work_queue.Task
+.r: 2736 175104 work_queue.work_queue_task
+.r: 2736 131328 __builtin__.SwigPyObject
+.r: 5435 130440 int
+.r: 1920 122880 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1092 26208 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673473.735871
+.count: 27848
+.size: 4755664
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 2937 822360 dict of work_queue.Task
+.r: 2937 822360 dict of work_queue.work_queue_task
+.r: 2443 195440 numpy.ndarray
+.r: 2937 187968 work_queue.Task
+.r: 2937 187968 work_queue.work_queue_task
+.r: 2937 140976 __builtin__.SwigPyObject
+.r: 5692 136608 int
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673492.501775
+.count: 28748
+.size: 4842144
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1910 2001680 dict of awe.aweclasses.Walker
+.r: 3112 871360 dict of work_queue.Task
+.r: 3112 871360 dict of work_queue.work_queue_task
+.r: 3112 199168 work_queue.Task
+.r: 3112 199168 work_queue.work_queue_task
+.r: 2439 195120 numpy.ndarray
+.r: 3112 149376 __builtin__.SwigPyObject
+.r: 5805 139320 int
+.r: 1910 122240 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1091 26184 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673515.493325
+.count: 29893
+.size: 5005784
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 3300 924000 dict of work_queue.Task
+.r: 3300 924000 dict of work_queue.work_queue_task
+.r: 3300 211200 work_queue.Task
+.r: 3300 211200 work_queue.work_queue_task
+.r: 2420 193600 numpy.ndarray
+.r: 3300 158400 __builtin__.SwigPyObject
+.r: 5987 143688 int
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1093 26232 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673533.115430
+.count: 30774
+.size: 5147272
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 3426 959280 dict of work_queue.Task
+.r: 3426 959280 dict of work_queue.work_queue_task
+.r: 3426 219264 work_queue.Task
+.r: 3426 219264 work_queue.work_queue_task
+.r: 2423 193840 numpy.ndarray
+.r: 3426 164448 __builtin__.SwigPyObject
+.r: 6151 147624 int
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673551.170766
+.count: 31776
+.size: 5248464
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 3600 1008000 dict of work_queue.Task
+.r: 3600 1008000 dict of work_queue.work_queue_task
+.r: 3600 230400 work_queue.Task
+.r: 3600 230400 work_queue.work_queue_task
+.r: 2459 196720 numpy.ndarray
+.r: 3600 172800 __builtin__.SwigPyObject
+.r: 6310 151440 int
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673571.611043
+.count: 32822
+.size: 5406312
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 3766 1054480 dict of work_queue.Task
+.r: 3766 1054480 dict of work_queue.work_queue_task
+.r: 3766 241024 work_queue.Task
+.r: 3766 241024 work_queue.work_queue_task
+.r: 2431 194480 numpy.ndarray
+.r: 3766 180768 __builtin__.SwigPyObject
+.r: 6491 155784 int
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673594.165955
+.count: 33733
+.size: 5509264
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 3934 1101520 dict of work_queue.Task
+.r: 3934 1101520 dict of work_queue.work_queue_task
+.r: 3934 251776 work_queue.Task
+.r: 3934 251776 work_queue.work_queue_task
+.r: 2411 192880 numpy.ndarray
+.r: 3934 188832 __builtin__.SwigPyObject
+.r: 6624 158976 int
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673612.555247
+.count: 34459
+.size: 5599016
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 4049 1133720 dict of work_queue.Task
+.r: 4049 1133720 dict of work_queue.work_queue_task
+.r: 4049 259136 work_queue.Task
+.r: 4049 259136 work_queue.work_queue_task
+.r: 2440 195200 numpy.ndarray
+.r: 4049 194352 __builtin__.SwigPyObject
+.r: 6746 161904 int
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673630.937215
+.count: 35129
+.size: 5668096
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 4169 1167320 dict of work_queue.Task
+.r: 4169 1167320 dict of work_queue.work_queue_task
+.r: 4169 266816 work_queue.Task
+.r: 4169 266816 work_queue.work_queue_task
+.r: 4169 200112 __builtin__.SwigPyObject
+.r: 2444 195520 numpy.ndarray
+.r: 6854 164496 int
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1093 26232 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673649.884807
+.count: 35999
+.size: 5787760
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 4313 1207640 dict of work_queue.Task
+.r: 4313 1207640 dict of work_queue.work_queue_task
+.r: 4313 276032 work_queue.Task
+.r: 4313 276032 work_queue.work_queue_task
+.r: 4313 207024 __builtin__.SwigPyObject
+.r: 2434 194720 numpy.ndarray
+.r: 6993 167832 int
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673669.058249
+.count: 36788
+.size: 5903440
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 4436 1242080 dict of work_queue.Task
+.r: 4436 1242080 dict of work_queue.work_queue_task
+.r: 4436 283904 work_queue.Task
+.r: 4436 283904 work_queue.work_queue_task
+.r: 4436 212928 __builtin__.SwigPyObject
+.r: 2431 194480 numpy.ndarray
+.r: 7128 171072 int
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673692.129541
+.count: 37709
+.size: 6000160
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 4609 1290520 dict of work_queue.Task
+.r: 4609 1290520 dict of work_queue.work_queue_task
+.r: 4609 294976 work_queue.Task
+.r: 4609 294976 work_queue.work_queue_task
+.r: 4609 221232 __builtin__.SwigPyObject
+.r: 2428 194240 numpy.ndarray
+.r: 7250 174000 int
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1093 26232 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673712.459863
+.count: 38908
+.size: 6167032
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 4798 1343440 dict of work_queue.Task
+.r: 4798 1343440 dict of work_queue.work_queue_task
+.r: 4798 307072 work_queue.Task
+.r: 4798 307072 work_queue.work_queue_task
+.r: 4798 230304 __builtin__.SwigPyObject
+.r: 2435 194800 numpy.ndarray
+.r: 7455 178920 int
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673733.171403
+.count: 39648
+.size: 6245864
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 4932 1380960 dict of work_queue.Task
+.r: 4932 1380960 dict of work_queue.work_queue_task
+.r: 4932 315648 work_queue.Task
+.r: 4932 315648 work_queue.work_queue_task
+.r: 4932 236736 __builtin__.SwigPyObject
+.r: 2434 194720 numpy.ndarray
+.r: 7568 181632 int
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1093 26232 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673757.131999
+.count: 40786
+.size: 6383520
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1920 2012160 dict of awe.aweclasses.Walker
+.r: 5128 1435840 dict of work_queue.Task
+.r: 5128 1435840 dict of work_queue.work_queue_task
+.r: 5128 328192 work_queue.Task
+.r: 5128 328192 work_queue.work_queue_task
+.r: 5128 246144 __builtin__.SwigPyObject
+.r: 2436 194880 numpy.ndarray
+.r: 7745 185880 int
+.r: 1920 122880 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1092 26208 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673777.758088
+.count: 42209
+.size: 6594184
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 5346 1496880 dict of work_queue.Task
+.r: 5346 1496880 dict of work_queue.work_queue_task
+.r: 5346 342144 work_queue.Task
+.r: 5346 342144 work_queue.work_queue_task
+.r: 5346 256608 __builtin__.SwigPyObject
+.r: 2430 194400 numpy.ndarray
+.r: 8000 192000 int
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673799.860174
+.count: 43030
+.size: 6659728
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1910 2001680 dict of awe.aweclasses.Walker
+.r: 5506 1541680 dict of work_queue.Task
+.r: 5506 1541680 dict of work_queue.work_queue_task
+.r: 5506 352384 work_queue.Task
+.r: 5506 352384 work_queue.work_queue_task
+.r: 5506 264288 __builtin__.SwigPyObject
+.r: 2441 195280 numpy.ndarray
+.r: 8115 194760 int
+.r: 1910 122240 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1091 26184 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673820.485593
+.count: 43970
+.size: 6794144
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1930 2022640 dict of awe.aweclasses.Walker
+.r: 5654 1583120 dict of work_queue.Task
+.r: 5654 1583120 dict of work_queue.work_queue_task
+.r: 5654 361856 work_queue.Task
+.r: 5654 361856 work_queue.work_queue_task
+.r: 5654 271392 __builtin__.SwigPyObject
+.r: 8286 198864 int
+.r: 2428 194240 numpy.ndarray
+.r: 1930 123520 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1093 26232 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673840.569562
+.count: 45822
+.size: 7033304
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 5952 1666560 dict of work_queue.Task
+.r: 5952 1666560 dict of work_queue.work_queue_task
+.r: 5952 380928 work_queue.Task
+.r: 5952 380928 work_queue.work_queue_task
+.r: 5952 285696 __builtin__.SwigPyObject
+.r: 8618 206832 int
+.r: 2437 194960 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673862.601159
+.count: 47097
+.size: 7191896
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 6159 1724520 dict of work_queue.Task
+.r: 6159 1724520 dict of work_queue.work_queue_task
+.r: 6159 394176 work_queue.Task
+.r: 6159 394176 work_queue.work_queue_task
+.r: 6159 295632 __builtin__.SwigPyObject
+.r: 8847 212328 int
+.r: 2448 195840 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673885.624552
+.count: 48346
+.size: 7360328
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 6368 1783040 dict of work_queue.Task
+.r: 6368 1783040 dict of work_queue.work_queue_task
+.r: 6368 407552 work_queue.Task
+.r: 6368 407552 work_queue.work_queue_task
+.r: 6368 305664 __builtin__.SwigPyObject
+.r: 9049 217176 int
+.r: 2429 194320 numpy.ndarray
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673907.908935
+.count: 49198
+.size: 7467632
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1950 2043600 dict of awe.aweclasses.Walker
+.r: 6509 1822520 dict of work_queue.Task
+.r: 6509 1822520 dict of work_queue.work_queue_task
+.r: 6509 416576 work_queue.Task
+.r: 6509 416576 work_queue.work_queue_task
+.r: 6509 312432 __builtin__.SwigPyObject
+.r: 9196 220704 int
+.r: 2429 194320 numpy.ndarray
+.r: 1950 124800 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1095 26280 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673931.695315
+.count: 51169
+.size: 7725304
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 6833 1913240 dict of work_queue.Task
+.r: 6833 1913240 dict of work_queue.work_queue_task
+.r: 6833 437312 work_queue.Task
+.r: 6833 437312 work_queue.work_queue_task
+.r: 6833 327984 __builtin__.SwigPyObject
+.r: 9521 228504 int
+.r: 2434 194720 numpy.ndarray
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673953.569675
+.count: 52295
+.size: 7878016
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 7021 1965880 dict of work_queue.Task
+.r: 7021 1965880 dict of work_queue.work_queue_task
+.r: 7021 449344 work_queue.Task
+.r: 7021 449344 work_queue.work_queue_task
+.r: 7021 337008 __builtin__.SwigPyObject
+.r: 9702 232848 int
+.r: 2418 193440 numpy.ndarray
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673975.811818
+.count: 53749
+.size: 8061984
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 7262 2033360 dict of work_queue.Task
+.r: 7262 2033360 dict of work_queue.work_queue_task
+.r: 7262 464768 work_queue.Task
+.r: 7262 464768 work_queue.work_queue_task
+.r: 7262 348576 __builtin__.SwigPyObject
+.r: 9940 238560 int
+.r: 2429 194320 numpy.ndarray
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383673997.363902
+.count: 54822
+.size: 8188176
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 7442 2083760 dict of work_queue.Task
+.r: 7442 2083760 dict of work_queue.work_queue_task
+.r: 1960 2054080 dict of awe.aweclasses.Walker
+.r: 7442 476288 work_queue.Task
+.r: 7442 476288 work_queue.work_queue_task
+.r: 7442 357216 __builtin__.SwigPyObject
+.r: 10128 243072 int
+.r: 2435 194800 numpy.ndarray
+.r: 1960 125440 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1096 26304 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383674020.300070
+.count: 56182
+.size: 8367896
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 7663 2145640 dict of work_queue.Task
+.r: 7663 2145640 dict of work_queue.work_queue_task
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 7663 490432 work_queue.Task
+.r: 7663 490432 work_queue.work_queue_task
+.r: 7663 367824 __builtin__.SwigPyObject
+.r: 10359 248616 int
+.r: 2438 195040 numpy.ndarray
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383674042.738467
+.count: 56970
+.size: 8446224
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 7812 2187360 dict of work_queue.Task
+.r: 7812 2187360 dict of work_queue.work_queue_task
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 7812 499968 work_queue.Task
+.r: 7812 499968 work_queue.work_queue_task
+.r: 7812 374976 __builtin__.SwigPyObject
+.r: 10473 251352 int
+.r: 2430 194400 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383674064.751368
+.count: 58517
+.size: 8661968
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 8049 2253720 dict of work_queue.Task
+.r: 8049 2253720 dict of work_queue.work_queue_task
+.r: 1970 2064560 dict of awe.aweclasses.Walker
+.r: 8049 515136 work_queue.Task
+.r: 8049 515136 work_queue.work_queue_task
+.r: 8049 386352 __builtin__.SwigPyObject
+.r: 10757 258168 int
+.r: 2445 195600 numpy.ndarray
+.r: 1970 126080 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1097 26328 numpy.float64
+.r: 1 448 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat
+.loader: _load_stat
+.format: SetFormat
+.timemade: 1383674088.777995
+.count: 59638
+.size: 8781632
+.kindname: 
+.kindheader: Kind (class / dict of class)
+.numrows: 26
+.r: 8252 2310560 dict of work_queue.Task
+.r: 8252 2310560 dict of work_queue.work_queue_task
+.r: 1940 2033120 dict of awe.aweclasses.Walker
+.r: 8252 528128 work_queue.Task
+.r: 8252 528128 work_queue.work_queue_task
+.r: 8252 396096 __builtin__.SwigPyObject
+.r: 10935 262440 int
+.r: 2436 194880 numpy.ndarray
+.r: 1940 124160 awe.aweclasses.Walker
+.r: 8 64448 dict (no owner)
+.r: 1094 26256 numpy.float64
+.r: 1 584 types.FrameType
+.r: 1 280 dict of awe.aweclasses.System
+.r: 1 280 dict of awe.structures.PDB
+.r: 1 280 dict of guppy.etc.Glue.Owner
+.r: 2 272 list
+.r: 1 184 prody.atomic.atomgroup.AtomGroup
+.r: 2 176 __builtin__.weakref
+.r: 3 160 str
+.r: 1 144 file
+.r: 5 120 float
+.r: 3 96 long
+.r: 1 80 types.MethodType
+.r: 1 72 guppy.etc.Glue.Owner
+.r: 1 64 awe.aweclasses.System
+.r: 1 64 awe.structures.PDB
+.end: .loader: _load_stat

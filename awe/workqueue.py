@@ -41,11 +41,12 @@ class WorkQueueWorkerException (Exception): pass
 
 class WQFile(object):
 
-    @awe.typecheck(str, base=bool, cached=bool)
-    def __init__(self, masterpath, base=True, cached=True):
+    @awe.typecheck(str, base=bool, cached=bool, remotepath=str)
+    def __init__(self, masterpath, base=True, cached=True, remotepath=None):
         self._masterpath = masterpath
         self._base       = base
         self._cached     = cached
+        self._remotepath = remotepath
 
     @property
     def masterpath(self):
@@ -53,7 +54,9 @@ class WQFile(object):
 
     @property
     def remotepath(self):
-        if self.isbase:
+        if self._remotepath:
+            return self._remotepath
+        elif self.isbase:
             return os.path.basename(self.masterpath)
         else:
             return self.masterpath
@@ -116,8 +119,9 @@ class Config(object):
 
     def cache(self, *files, **kws):
         base = kws.get('base', True)
+        remotepath = kws.get('remotepath', '')
         for path in files:
-            wqf = WQFile(path, base=base, cached=True)
+            wqf = WQFile(path, base=base, cached=True, remotepath=remotepath)
             self._cache.add(wqf)
 
     def _mk_wq(self):
@@ -333,6 +337,12 @@ class WorkQueue(object):
 
     def clear_tags(self):
         self._tagset.clear()
+
+    def clear(self):
+        self.clear_tags()
+
+        # force clearing to allow GC, otherwise linear memory growth
+        self.wq._task_table.clear()
 
     def tasks_in_queue(self):
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting

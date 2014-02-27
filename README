@@ -191,7 +191,7 @@ output of the AWE run. To generate a Ramachandran plot (free energy landscape
 on phi-psi space) using cell-weights.csv, run the following command. 
 
 ```
-$ python awe-rama-ala.py -w cell-weights.csv -p awe-instance-data/topol.pdb -c awe-instance-data/cells.dat -n 100
+$ python awe-rama-ala -w cell-weights.csv -p awe-instance-data/topol.pdb -c awe-instance-data/cells.dat -n 100
 ```
 
 where
@@ -205,10 +205,10 @@ This produces an output file named awe-rama-ala.png that contains the
 Ramachandran plot.
 
 To generate and visualize forward and backward fluxes from output
-color-transition-matrix.csv, use the script awe-flux.py.
+color-transition-matrix.csv, use the script awe-flux.
 
 ```
- python awe-flux.py -i color-transition-matrix.csv -l 0.01  
+ python awe-flux -i color-transition-matrix.csv -l 0.01  
 ```
 
 where
@@ -225,10 +225,10 @@ This will produce the following outputs:
 *   backward-flux.png: plot of backward flux
 
 Finally, to generate transition probability matrix from AWE output, run script
-awe-transMatrix.py
+awe-transMatrix
 
 ```
-$ python awe-transMatrix.py -p walker-history.dat -w walker-weights.dat -t 1 -n 100
+$ python awe-transMatrix -p walker-history.dat -w walker-weights.dat -t 1 -n 100
 ```
 
 where the options
