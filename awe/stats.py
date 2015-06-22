@@ -18,37 +18,132 @@ import os
 
 
 class Timer(object):
+    """
+    A stopwatch-esque functionality that uses system time.
+
+    Fields:
+        t0 - Start time
+        t1 - End time
+
+    Methods:
+        reset       - erase the contents of t0 and t1
+        start       - set t0 to the current time
+        stop        - set t1 to the current time
+        isrunning   - determine if the stopwatch is currently recording
+        elapsed     - output the time elapsed between t0 and t1 or the current time
+    """
     def __init__(self):
+        """
+        Timer.__init__
+
+        Alias for Timer.reset called upon instance creation.
+
+        Parameters:
+            self - the Timer instance accessed
+
+        Returns:
+            None
+        """
         self.reset()
 
     def reset(self):
+        """
+        Timer.reset
+
+        Clears any stored times and sets t0 and t1 to native states.
+
+        Parameters:
+            self - the Timer instance accessed
+
+        Returns:
+            None
+        """
         self.t0 = 0
         self.t1 = float('inf')
 
     def start(self):
+        """
+        Timer.start
+
+        Sets t0 to the current time, "starting" the stopwatch.
+
+        Parameters:
+            self - the Timer instance accessed
+
+        Returns:
+            None
+        """
         self.t0 = systime.time()
 
     def stop(self):
-        self.t1 = systime.time()
+        """
+        Timer.stop
+
+        Sets t1 to the current time, "stopping" the stopwatch.
+
+        Parameters:
+            self - the Timer instance accessed
+
+        Returns:
+            None
+        """
+        if self.t0 > 0:
+            self.t1 = systime.time()
 
     def isrunning(self):
-        return self.t0 > 0
+        """
+        Timer.isrunning
+
+        Determines whether the stopwatch is active or not, in the sense that
+        a start time has been recorded and a stop time has not.
+
+        Parameters:
+            self - the Timer instance accessed
+
+        Returns:
+            A Boolean value indicating whether or not the stopwatch is active
+        """
+        return self.t0 > 0 and self.t1 == float('inf')
 
     def elapsed(self, current=True, units='s'):
-        mults      = {'s' : 1,
-                      'm' : 60,
-                      'h' : 60*60,
-                      'd' : 60*60*24 }
-        multiplier = mults[units]
+        """
+        Timer.elapsed
 
-        ### get the current time or from when 'Timer.stop()' was called
-        if current or self.t1 == float('inf'):
-            t1 = systime.time()
-        else:
-            t1 = self.t1
+        Returns the elapsed time since t0 started if the timer is running.
 
-        diff       = t1 - self.t0
-        return multiplier * diff
+        Parameters:
+            self    - the Timer instance being accessed
+            current - whether or not to use the current time as a reference
+            units   - the time unit to which the elapsed time should be
+                      converted ['s' = seconds (default), 'm' = minutes,
+                      'h' = hours, 'd' = days]
+
+        Returns:
+            A number representing the elapsed time in the specified units. If
+            the Timer instance has never been started, returns 0.
+        """
+        if self.t0 > 0:
+            # System time is measured in seconds, so convert from seconds
+            mults      = {'s' : 1,
+                          'm' : 60,
+                          'h' : 60*60,
+                          'd' : 60*60*24 }
+            multiplier = mults[units]
+
+            ### get the current time or from when 'Timer.stop()' was called
+            if current or self.t1 == float('inf'):
+                t1 = systime.time()
+            else:
+                t1 = self.t1
+
+            # diff is the elapsed time in seconds
+            diff       = t1 - self.t0
+
+            # Convert to the specified units
+            return multiplier * diff
+        
+        # Only reached if the Timer instance was not started 
+        return 0
 
 
 ### use a single global timer for the system

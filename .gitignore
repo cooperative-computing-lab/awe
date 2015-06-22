@@ -6,6 +6,7 @@ build
 *.tmp
 core.*
 *.bkp
+*.xtc
 awe-assign
 awe-generic-data.tar.bz2
 awe-instance-data.tar.bz2
