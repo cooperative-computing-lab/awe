@@ -34,9 +34,10 @@ class Timer(object):
         isrunning   - determine if the stopwatch is currently recording
         elapsed     - output the time elapsed between t0 and t1 or the current time
     """
+    
     def __init__(self):
         """
-        Timer.__init__
+        awe.stats.Timer.__init__
 
         Alias for Timer.reset called upon instance creation.
 
@@ -46,11 +47,13 @@ class Timer(object):
         Returns:
             None
         """
+        
         self.reset()
+
 
     def reset(self):
         """
-        Timer.reset
+        awe.stats.Timer.reset
 
         Clears any stored times and sets t0 and t1 to native states.
 
@@ -60,12 +63,13 @@ class Timer(object):
         Returns:
             None
         """
+        
         self.t0 = 0
         self.t1 = float('inf')
 
     def start(self):
         """
-        Timer.start
+        awe.stats.Timer.start
 
         Sets t0 to the current time, "starting" the stopwatch.
 
@@ -75,11 +79,12 @@ class Timer(object):
         Returns:
             None
         """
+        
         self.t0 = systime.time()
 
     def stop(self):
         """
-        Timer.stop
+        awe.stats.Timer.stop
 
         Sets t1 to the current time, "stopping" the stopwatch.
 
@@ -89,12 +94,13 @@ class Timer(object):
         Returns:
             None
         """
+        
         if self.t0 > 0:
             self.t1 = systime.time()
 
     def isrunning(self):
         """
-        Timer.isrunning
+        awe.stats.Timer.isrunning
 
         Determines whether the stopwatch is active or not, in the sense that
         a start time has been recorded and a stop time has not.
@@ -105,11 +111,12 @@ class Timer(object):
         Returns:
             A Boolean value indicating whether or not the stopwatch is active
         """
+        
         return self.t0 > 0 and self.t1 == float('inf')
 
     def elapsed(self, current=True, units='s'):
         """
-        Timer.elapsed
+        awe.stats.Timer.elapsed
 
         Returns the elapsed time since t0 started if the timer is running.
 
@@ -124,6 +131,7 @@ class Timer(object):
             A number representing the elapsed time in the specified units. If
             the Timer instance has never been started, returns 0.
         """
+        
         if self.t0 > 0:
             # System time is measured in seconds, so convert from seconds
             mults      = {'s' : 1,
@@ -167,10 +175,11 @@ class time:
         time    - (static) return the elapsed time from the Timer singleton
         timer   - (static) return a reference to the Timer singleton
     """
+    
     @staticmethod
     def start():
         """
-        time.start
+        awe.stats.time.start
 
         Starts the Timer singleton.
 
@@ -180,13 +189,14 @@ class time:
         Returns:
             None
         """
+        
         global _TIMER
         _TIMER.start()
 
     @staticmethod
     def time():
         """
-        time.time
+        awe.stats.time.time
 
         Determines the elapsed time of the Timer singleton.
 
@@ -197,6 +207,7 @@ class time:
             A number representing the elapsed time in seconds since the Timer
             singleton was started
         """
+        
         global _TIMER
         t = _TIMER.elapsed(units='s')
         return t
@@ -205,7 +216,7 @@ class time:
     @staticmethod
     def timer():
         """
-        time.timer
+        awe.stats.time.timer
 
         Allows direct access to the Timer singleton.
 
@@ -215,37 +226,111 @@ class time:
         Returns:
             A reference to the Timer singleton object.
         """
+        
         global _TIMER
         return _TIMER
 
 
 class ExtendableArray(object):
     """
-    A numpy.array that can be efficiently appended to
+    awe.stats.ExtendableArray
+
+    Contains and manages an oversized numpy.array object for efficient append
+    operations.
+
+    Fields:
+        _type   - a numpy array type (e.g. numpy.zeros, numpy.ones, etc.) by
+                  which to create the numpy.array
+        _size0  - the total capacity of the numpy.array
+        _count  - a counter keeping track of the number of entries in the array
+        _factor - the multiplicative factor by which to increase the array
+                  capacity
+        _vals   - the numpy.array object
+
+    Methods:
+        _initialize     - create a new numpy.array
+        get             - return the contents of the array up to the current
+                          count
+        _realloc        - allocate a new numpy.array with increased capacity
+        append          - add elements to the end of the numpy.array
+        __getitem__     - retrieve an element from the numpy.array
+        __setitem__     - change the value of an existing element
+        __len__         - return the length (count, not capacity) of the array
+        __contains__    - determine if the array contains a specified element
+        __iter__        - return an iterator over the set values of the array
+        __str__         - return a string representation of the array
+        __repr__        - return a string representation of the array
     """
 
     def __init__(self, typ=np.zeros, size=500, factor=2):
+        """
+        ExtendableArray.__init__
 
+        Set instance fields at initialization.
+
+        Parameters:
+            typ     - a numpy array type (e.g. numpy.zeros, numpy.ones, etc.) by
+                      which to create the numpy.array
+            size    - the initial capacity of the numpy.array
+            factor  - the multiplicative factor by which to increase the array
+                      capacity
+        """
         self._type    = typ
         self._size0   = size
-        self._count   = 0
+        self._count   = 0       # Says no elements have been appended
         self._factor  = factor
         self._vals    = self._initialize()
 
     def _initialize(self):
+        """
+        awe.stats.ExtendableArray._initialize
+
+        Create a new array of the ExtendableArray instance numpy.array type
+        with capacity specified by the ExtendableArray instance.
+
+        Parameters:
+            self - the ExtendableArray instance accessed
+
+        Returns:
+            A new numpy.array of type self._type and length self._size0
+        """
+        
         return self._type(self._size0)
 
     def get(self):
+        """
+        awe.stats.ExtendableArray.get
+
+        Return only the modified entries of the numpy.array managed by the 
+        ExtendableArray instance.
+
+        Parameters:
+            self - the ExtendableArray instance accessed
+
+        Returns:
+            A slice of the numpy.array size self._count consisting only of
+            elements appended to this instance of ExtendableArray.
+        """
+        
         return self._vals[:self._count]
 
     def _realloc(self):
         """
-        Reallocates space if the current size and the underlying size are equal
-        """
+        awe.stats.ExtendableArray._realloc
 
+        Resize the numpy.array managed by the instance of ExtendableArray if
+        the capacity has been reached.
+        
+        Parameters:
+            self - the ExtendableArray instance accessed
+
+        Returns:
+            None
+        """
+        
         if self._count == len(self._vals):
 
-            x     = len(self._vals)
+            x     = self._count
             alloc = x * self._factor
             self._size0 = alloc
             vals2 = self._initialize()
@@ -254,40 +339,145 @@ class ExtendableArray(object):
 
 
     def append(self, *values):
+        """
+        awe.stats.ExtendableArray.append
 
-        self._realloc()
+        Add a new value to the numpy.array managed by the ExtendableArray
+        instance at the index of the current counter. Resize the array if
+        capacity has been reached.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+            *values - the elements to append
+
+        Returns:
+            None
+        """
+
+        self._realloc() # Dangerous: What if len(values) >= _factor * _size0 ?
         i = self._count
         j = i + len(values)
-        self._vals[i:j] = np.array(values)
+        self._vals[i:j] = np.array(values) # Appends len(values) values
         self._count += len(values)
 
     def __getitem__(self, i):
-        if i < 0: k = self._count + i
+        """
+        awe.stats.ExtendableArray.__getitem__
+
+        Retrieve the element at the specified index or exit if k is too large.
+        The system exit seems like overkill. Maybe an Exception instead?
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+            i       - the index from which to retrieve the element
+
+        Returns:
+            The element at index i if i is in range
+        """
+
+        if i < 0: k = self._count + i # Can look up in reverse. Nice!
         else:     k = i
 
-        assert k <= self._count
+        assert k <= self._count # Seems like overkill
         return self._vals[k]
 
     def __setitem__(self, i, v):
-        if i < 0: k = self._count + i
+        """
+        awe.stats.ExtendableArray.__setitem__
+
+        Update the entry at the specified index with the supplied value. Once
+        again, there's a strange assert here that seems like overkill.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+            i       - the index to access
+            v       - the the new value
+
+        Returns:
+            None
+        """
+
+        if i < 0: k = self._count + i # Once again, reverse lookup
         else:     k = i
 
-        assert k <= self._count
+        assert k <= self._count # Seems like overkill
         self._vals[k] = v
 
     def __len__(self):
+        """
+        awe.stats.ExtendableArray.__len__
+
+        Return the size of the active array.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+
+        Returns:
+            The value of self._count, reflecting the size of the active array
+        """
+
         return self._count
 
     def __contains__(self, v):
+        """
+        awe.stats.ExtendableArray.__contains__
+
+        Determine whether or not a specified value is an entry in the array.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+            v       - the element to search for
+
+        Returns:
+            A Boolean value reflecting whether or not the supplied value is
+            in the active array.
+        """
+
         return v in self._vals[:self._count]
 
     def __iter__(self):
+        """
+        awe.stats.ExtendableArray.__iter__
+
+        Return an iterator over the active array.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+
+        Returns:
+            An iterator spanning the active array.
+        """
+
         return iter(self._vals[:self._count])
 
     def __str__(self):
+        """
+        awe.stats.ExtendableArray.__str__
+
+        Return a string visualization of the array contents.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+
+        Returns:
+            A string representing the array contents
+        """
+
         return str(self._vals[:self._count])
 
     def __repr__(self):
+        """
+        awe.stats.ExtendableArray.append
+
+        Return a string representing the objects in the array.
+        
+        Parameters:
+            self    - the ExtendableArray instance accessed
+
+        Returns:
+            A string representing the objects in the array
+        """
+
         return repr(self._vals[:self._count])
             
 
