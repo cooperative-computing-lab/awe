@@ -19,6 +19,8 @@ import os
 
 class Timer(object):
     """
+    awe.stats.Timer
+
     A stopwatch-esque functionality that uses system time.
 
     Fields:
@@ -151,14 +153,50 @@ _TIMER = Timer()
 
 ### simulate built-in *time* module
 class time:
+    """
+    awe.stats.time
 
+    Simulates the system time module using a singleton of awe.stats.Timer as a
+    starting point instead of the UNIX epoch.
+
+    Fields:
+        None
+
+    Methods:
+        start   - (static) start the Timer singleton
+        time    - (static) return the elapsed time from the Timer singleton
+        timer   - (static) return a reference to the Timer singleton
+    """
     @staticmethod
     def start():
+        """
+        time.start
+
+        Starts the Timer singleton.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         global _TIMER
         _TIMER.start()
 
     @staticmethod
     def time():
+        """
+        time.time
+
+        Determines the elapsed time of the Timer singleton.
+
+        Parameters:
+            None
+
+        Returns:
+            A number representing the elapsed time in seconds since the Timer
+            singleton was started
+        """
         global _TIMER
         t = _TIMER.elapsed(units='s')
         return t
@@ -166,6 +204,17 @@ class time:
 
     @staticmethod
     def timer():
+        """
+        time.timer
+
+        Allows direct access to the Timer singleton.
+
+        Parameters:
+            None
+
+        Returns:
+            A reference to the Timer singleton object.
+        """
         global _TIMER
         return _TIMER
 
