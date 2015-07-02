@@ -746,22 +746,85 @@ class Timings(object):
     """
     awe.stats.Timings
 
-    
+    A stopwatch that records elapsed times and manages statistics about them.
+
+    Fields:
+        timer - the stopwatch
+        times - holds the ending time of each stopwatch run
+        stats - contains elapsed times and performs statistical operations
+
+    Methods:
+        data  - returns the recorded system times and elapsed times
+        start - starts the stopwatch
+        stop  - stops the stopwatch and records its information
     """
 
     def __init__(self):
+        
+        """
+        awe.stats.Timings.__init__
+
+        Initializes a new instance of the Timings class.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self.timer = Timer()
         self.times = ExtendableArray()
         self.stats = Statistics()
 
     @property
     def data(self):
+        
+        """
+        awe.stats.Timings.data
+
+        Returns the system and elapsed times from the times and stats fields.
+
+        Parameters:
+            None
+
+        Returns:
+            A numpy.array containing the system times and a numpy.array
+            containing the elapsed times recorded at each system time
+        """
+
         return self.times.get(), self.stats.values
 
     def start(self):
+
+        """
+        awe.stats.Timings.start
+
+        Starts the stopwatch.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self.timer.start()
 
     def stop(self):
+
+        """
+        awe.stats.Timings.stop
+
+        Stops the stopwatch and records the system time and elapsed time.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self.timer.stop()
         self.times.append(systime.time())
         self.stats.update(self.timer.elapsed())
