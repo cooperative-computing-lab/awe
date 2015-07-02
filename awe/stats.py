@@ -18,6 +18,7 @@ import os
 
 
 class Timer(object):
+    
     """
     awe.stats.Timer
 
@@ -161,6 +162,7 @@ _TIMER = Timer()
 
 ### simulate built-in *time* module
 class time:
+    
     """
     awe.stats.time
 
@@ -232,6 +234,7 @@ class time:
 
 
 class ExtendableArray(object):
+    
     """
     awe.stats.ExtendableArray
 
@@ -484,7 +487,26 @@ class ExtendableArray(object):
 class Statistics(object):
 
     """
-    Keep track of running statistics as the program runs
+    awe.stats.Statistics
+
+    Keeps track of running statistics as workers work using an ExtendableArray.
+
+    Fields:
+        _num    - The number of of values in the ExtendableArray
+        _mean   - The mean of values in the ExtendableArray
+        _m2     - The second statistical moment
+        _values - The ExtendableArray containing values on which to run stats
+
+    Properties:
+        num     - The number of elements in the ExtendableArray
+        mean    - The mean of values in the ExtendableArray
+        var     - The variance of values in the ExtendableArray
+        std     - The standard deviation of values in the ExtendableArray
+
+    Methods:
+        values  - Getter for the ExtendableArray
+        update  - Append values to the ExtendableArray and update the stats 
+
     """
 
     def __init__(self):
@@ -495,6 +517,7 @@ class Statistics(object):
 
         self._values = ExtendableArray() # keep track of the actual values for plots
 
+    # Properties for useful statistics. The first two were probably unneccessary.
     num  = property(lambda self: self._num)
     mean = property(lambda self: self._mean)
     var  = property(lambda self: self._m2 / float(self._num))
@@ -502,9 +525,32 @@ class Statistics(object):
 
     @property
     def values(self):
+        """
+        awe.stats.Statistics.values
+
+        Access the values added to the ExtendableArray.
+
+        Parameters:
+            None
+
+        Returns:
+            numpy.array slice containing all values added to the statistics class
+        """
+
         return self._values.get()
 
     def update(self, *values):
+        """
+        awe.stats.Statistics.update
+
+        Add a value to the ExtendableArray and update all statistics.
+        
+        Parameters:
+            values - a list of values to add
+
+        Returns:
+            None
+        """
 
         self._values.append(*values)
 
@@ -523,10 +569,38 @@ class Statistics(object):
 class WQStats(object):
 
     """
-    Keep track of the WQ statistics
+    awe.stats.WQStats
+
+    Keeps track of statistics about running time and the amount of data
+    transferred.
+
+    Fields:
+        logger                  - the logging utility to use
+        _task_times             - the list of running times for returned tasks
+        _wq_times               - the list of running times for parts of WQ
+        computation_time        - keeps track of statistics surrounding the
+                                  computational time for a task
+        total_bytes_transferred - keeps track of statistics surrounding the
+                                  amount of data transferred
+        total_transfer_time     - keeps track of statistics surrounding the
+                                  amount of time spent transferring data
+        task_life_time          - keeps track of statistics surrounding the
+                                  amount of time tasks take to execute
     """
 
     def __init__(self, logger=None):
+
+        """
+        awe.stats.WQStats.__init__
+
+        Create an instance of WQStats with a specified logging class.
+
+        Parameters:
+            logger - the logging class to use
+
+        Returns:
+            None
+        """
 
         self.logger = logger or StatsLogger()
 
@@ -544,18 +618,26 @@ class WQStats(object):
     @typecheck(workqueue.WQ.Task)
     def task(self, task):
         """
-        Update the running statistics with a task result
+        awe.stats.WQStats.task
+
+        Add information about a returned task to the logger.
+
+        Parameters:
+            task - a completed Work Queue task
+
+        Returns:
+            None
         """
 
         t = systime.time()
 
         component = 'TASK'
 
-        self.logger.update (t, component, 'host'                  , task.host)
-        self.logger.update (t, component, 'tag'                   , task.tag)
-        self.logger.update (t, component, 'result'                , task.result)
-        self.logger.update (t, component, 'return_status'         , task.return_status)
-        self.logger.update (t, component, 'total_bytes_transfered', task.total_bytes_transferred)
+        self.logger.update(t, component, 'host'                  , task.host)
+        self.logger.update(t, component, 'tag'                   , task.tag)
+        self.logger.update(t, component, 'result'                , task.result)
+        self.logger.update(t, component, 'return_status'         , task.return_status)
+        self.logger.update(t, component, 'total_bytes_transfered', task.total_bytes_transferred)
 
         # try/except: support different versions of cctools
         try:
