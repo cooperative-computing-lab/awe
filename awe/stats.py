@@ -969,7 +969,36 @@ class AWEStats(object):
 
 class StatsLogger (object):
 
+    """
+    awe.stats.StatsLogger
+
+    Logging utility to manage log file File objects and write to log files.
+
+    Fields:
+        _fd         - the File object pointing to the log file
+        _path       - the filepath of the logfile
+        _buffersize - the size of the write buffer
+
+    Methods:
+        path   - get the path to the log file
+        update - write an object representation to the logfile
+        output - write an arbitrary string to the logfile
+        close  - close the File object
+        open   - open the File object
+    """
+
     def __init__(self, path='debug/stats.log.gz', buffersize=9):
+
+        """
+        awe.stats.StatsLogger.__init__
+
+        Initialize a new StatsLogger that points to the logfile.
+
+        Parameters:
+            path       - the filepath to the logfile, may be absolute or
+                         relative
+            buffersize - the size of the write buffer
+        """
 
         prefix = os.path.dirname(os.path.abspath(os.path.expanduser(path)))
         if not os.path.exists(prefix):
@@ -986,17 +1015,74 @@ class StatsLogger (object):
 
     @typecheck(float, str, str)
     def update(self, t, component, name, val):
+
+        """
+        awe.stats.StatsLogger.update
+
+        Write a representation of an object (type, name of the AWE run, and
+        object attributes) to the log file along with a timestamp.
+        
+        Parameters:
+            t         - the timestamp
+            component - the type of the object to be written
+            name      - the name of the object
+            val       - the object values to be written
+
+        Returns:
+            None
+        """
+
         s = '%f %s %s %s\n' % (t, component, name, val)
         self._fd.write(s)
 
     def output(self, val):
+        
+        """
+        awe.stats.StatsLogger.output
+
+        Write an arbitrary value to the log file.
+
+        Parameters:
+            val - the value to be written to the log file, must have a string
+                  representation
+
+        Returns:
+            None
+        """
+
         self._fd.write(str(val))
 
     def close(self):
+       
+        """
+        awe.stats.StatsLogger.close
+
+        Close the File object associated with the log file.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         if self._fd is not None:
             self._fd.close()
             self._fd = None
 
     def open(self):
+
+        """
+        awe.stats.StatsLogger.open
+
+        Open the File object associated with the log file.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         if self._fd is None:
             self._fd = gzip.GzipFile(self._path, 'ab')
