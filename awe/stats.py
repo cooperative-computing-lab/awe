@@ -681,6 +681,20 @@ class WQStats(object):
 
 
     def _save_attrs(self, fd, name, times, attrs):
+        """
+        awe.stats.WQStats._save_attrs
+
+        Save attributes to a specified log file. Used to save task and WQ
+        attributes for debug, logging, and tuning purposes.
+
+        Parameters:
+            fd    - a File object representing a log file open in write mode
+            name  - the name of the object whose attributes will be saved
+            times - times associated with the object to be saved (e.g., running
+                    time, computational time, lifetime)
+            attrs - an iterable containing object attributes to record
+        """
+        
         print 'Saving', name, 'data to', fd.name
         data = dict()
         data['time'] = times
@@ -691,21 +705,49 @@ class WQStats(object):
         np.savez(fd, **data)
 
     def _save_task_stats(self, fd):
-        attrs = 'computation_time total_bytes_transferred total_transfer_time task_life_time'.split()
+        """
+        awe.stats.WQStats._save_task_stats
 
+        Call to _save_attrs for saving statistics associated with a WQ task.
+
+        Parameters:
+            fd - a File object representing a log file open in write mode
+
+        Returns:
+            None
+        """
+        
+        attrs = 'computation_time total_bytes_transferred total_transfer_time task_life_time'.split()
         self._save_attrs(fd, 'task', self._task_times.get(), attrs)
 
     def _save_wq_stats(self, fd):
+        """
+        awe.stats.WQStats._save_wq_stats
+
+        Call to _save_attrs for saving statistics associated with the WQ object.
+
+        Parameters:
+            fd - a File object representing a log file open in write mode
+
+        Returns:
+            None
+        """
+        
         attrs =  'workers_ready workers_busy tasks_running tasks_waiting tasks_complete'.split()
         attrs += 'total_tasks_dispatched total_tasks_complete total_workers_joined'.split()
         attrs += 'total_workers_removed total_bytes_sent total_bytes_received'.split()
         attrs += 'total_send_time total_receive_time'.split()
-
         self._save_attrs(fd, 'wq', self._wq_times.get(), attrs)
 
 
 
 class Timings(object):
+
+    """
+    awe.stats.Timings
+
+    
+    """
 
     def __init__(self):
         self.timer = Timer()
