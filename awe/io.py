@@ -18,10 +18,11 @@ class trace(object):
     development and debugging purposes.
 
     Fields:
-        print_values - 
+        print_values - flag for printing argument values or types
 
     Methods:
-        prettyargs - 
+        prettyargs - transform function arguments into string representations
+                     of their values or types
     """
 
     def __init__(self, values=False):
