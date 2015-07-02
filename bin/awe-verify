@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+EXITCODE=0
+
+
+ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
+ACCEPTABLE_GROMACS_VERSION=4.5
+
+EXECUTABLES=(
+	work_queue_status      # check cctools installation
+	pdb2gmx grompp mdrun   # check gromacs installation
+	awe-assign
+)
+
+PYMODS=(work_queue numpy prody pylab trax awe)
+
+
+
+get-python-version() {
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+}
+
+check-gromacs-version() {
+	local gmx_ver=$(pdb2gmx -h 2>&1 | grep $ACCEPTABLE_GROMACS_VERSION)
+	ecode=1
+	test ! -z "$gmx_ver" && ecode=0
+	return $ecode
+}
+
+check-python-version() {
+	pv=$(get-python-version)
+	for v in ${ACCEPTABLE_PYTHON_VERSION[@]}; do
+		test  $pv == $v && echo OK && return 0
+	done
+	echo FAIL
+	EXITCODE=1
+	return 1
+}
+
+check-exe() {
+	local name=$1
+	which $name >/dev/null 2>&1
+}
+
+check-pymodule() {
+	local name=$1
+	python -c "import $name" >/dev/null 2>&1
+}
+
+
+
+printf "Checking for compatible python..."
+check-python-version
+test $EXITCODE -eq 0
+
+for n in ${EXECUTABLES[@]}; do
+	printf "Checking for executable $n..."
+	if check-exe $n; then
+		echo OK
+	else
+		echo FAIL
+		EXITCODE=1
+	fi
+done
+
+printf "Checking for compatible Gromacs..."
+msg="OK\n"
+check-gromacs-version
+test ! $? -eq 0 && msg="FAIL\nCannot find gromacs $ACCEPTABLE_GROMACS_VERSION\n" && EXITCODE=1
+printf $msg
+
+
+
+for n in ${PYMODS[@]}; do
+	printf "Checking for python module $n..."
+	if check-pymodule $n; then
+		echo OK
+	else
+		echo FAIL
+		EXITCODE=1
+	fi
+done
+
+exit $EXITCODE

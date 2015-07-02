@@ -1,0 +1,192 @@
+#!/usr/local/opt/python/bin/python2.7
+# -*- mode: Python; indent-tabs-mode: nil -*-  #
+
+
+import awe
+
+import numpy as np
+import sys
+import os
+import optparse
+
+def getopts(args=None):
+    
+    p = optparse.OptionParser()
+
+    ### Required params
+    g = optparse.OptionGroup(p, 'Required options')
+    g.add_option('-N', '--num-walkers', type=int, metavar='<int>', help='Number of walkers in each cell')
+    g.add_option('-C', '--num-cells',   type=int, metavar='<int>', help='Number of cells')
+    p.add_option_group(g)
+
+    ### AWE params
+    g = optparse.OptionGroup(p, 'AWE configuration options')
+    g.add_option('-i', '--iterations', type=int, help='Number of iterations [%default]')
+    g.add_option('-c', '--cells', help='Location of cell definitions [%default]')
+    g.add_option('-w', '--weights', help='Location of the weights definitions [%default]')
+    g.add_option('-W', '--walkers', help='Directory under which the walker PDF files exists in form "StateX-Y.pdb" where X and Y are the cell and walker ids [%default]')
+    g.add_option('-r', '--regions', nargs=2, help='List of files defining the cells of the two regions to compute fluxes between. E.g: -r unfolded.dat folded.dat. [%default]')
+
+    p.add_option_group(g)
+
+
+    ### Performance parameters
+    g = optparse.OptionGroup(p, 'Performance options')
+    g.add_option('--max-restarts', type=int, help='Maximum number of times to retry a failed task [%default]')
+    g.add_option('--max-replicas', type=int, help='Maximum number of times to replicate a task [%default]')
+
+    p.add_option_group(g)
+
+
+    ### WQ params
+    g = optparse.OptionGroup(p, 'WQ configuration options')
+    g.add_option('-n', '--name', help='Project name to publish to the catalog server [%default]')
+    g.add_option('-p', '--port', help='Port to run the master on (random|<int>) [%default]')
+    g.add_option('--fast-abort', type=float, help='Use this fastabort multiplier [%default]')
+    g.add_option('--debug',      action='store_true', help='Write WorkQueue debug information [%default]')
+
+    p.add_option_group(g)
+
+    p.set_defaults(
+            ### AWE params
+            iterations   = float('inf'),
+            cells        = os.path.join('awe-instance-data', 'cells.dat'),
+            weights      = os.path.join('awe-instance-data', 'weights.dat'),
+            walkers      = os.path.join('awe-instance-data', 'pdbs'),
+            regions      = map(lambda p: os.path.join('awe-instance-data',p),
+                               ['unfolded.dat','folded.dat']),
+
+            ### Performance params
+            max_restarts = 9,
+            max_replicas = 19,
+
+            ### WQ params
+            name         = None,
+            port         = 'random',
+            fast_abort   = False,
+            debug        = False,
+            )
+
+
+
+
+
+    ### parse the parameters    
+    opts, args = p.parse_args(args=args)
+
+    if opts.port == 'random':
+            opts.port = -1
+    else:
+        try:
+            port = float(opts.port)
+        except ValueError, e:
+            p.error('Invalid port specified, cannot be converted to integer: %s' % opts.port)
+        opts.port = port
+
+    if opts.debug:
+        opts.debug = 'all'
+
+    # if opts.regions:
+    #     opts.regions = opts.regions.split(',')
+
+
+    return opts
+
+
+def config(opts):
+
+    INSTANCE_ROOT = 'awe-instance-data'
+    GENERIC_ROOT  = 'awe-generic-data'
+
+
+    cfg = awe.workqueue.Config()
+    cfg.fastabort = opts.fast_abort
+    cfg.restarts = opts.max_restarts
+    cfg.maxreps = opts.max_replicas
+
+    if opts.name:
+        cfg.name = opts.name
+
+    cfg.port = opts.port
+
+    if opts.debug:
+        cfg.debug = opts.debug
+
+
+    # the "main" function of the worker
+    cfg.execute(os.path.join(INSTANCE_ROOT, 'execute-task.sh'))
+
+    # binaries required for the worker to run
+    for name in 'pdb2gmx grompp mdrun awe-assign'.split():
+        cfg.cache(os.path.join(GENERIC_ROOT, 'binaries', '$OS-$ARCH', name))
+
+    cfg.cache(os.path.join(GENERIC_ROOT, 'gmxtopologies'))
+
+    # files needed to run MD and assignment
+    for name in 'sim.mdp env.sh CellIndices.dat StructureIndices.dat'.split():
+        cfg.cache(os.path.join(INSTANCE_ROOT, name))
+
+    cfg.cache(opts.cells, remotepath='cells.dat')
+
+    return cfg
+
+
+def main(opts):
+    cfg = config(opts)
+
+    # load the weights
+    weights = np.loadtxt(opts.weights)
+    assert abs(1 - weights.sum()) <= 0.0003, weights.sum
+
+    # load the topology
+    topol = os.path.join(opts.walkers, 'State0-0.pdb')
+    system = awe.System(topology = awe.PDB(topol))
+
+    # load the regions
+    red,blue = opts.regions[0:2]
+    red      = np.loadtxt(red)
+    blue     = np.loadtxt(blue)
+
+    # load the walkers
+    print 'Loading cells and walkers'
+    partition = awe.SinkStates()
+    partition.add(0, *list(red))
+    partition.add(1, *list(blue))
+    for c in xrange(opts.num_cells):
+        if   c in red : cell = awe.Cell(c, core=0)
+        elif c in blue: cell = awe.Cell(c, core=1)
+        else:           cell = awe.Cell(c)
+
+        color  = partition.color(cell)
+        if color < 0: color = np.random.choice([0,1])
+        weight = weights[c] / opts.num_walkers
+        system.add_cell(cell)
+
+        for w in xrange(opts.num_walkers):
+            path = os.path.join(opts.walkers, 'State%d-%d.pdb' % (c, w))
+            if  not os.path.exists(path):
+                print 'WARNING Walker does not exist, skipping:', path
+                continue
+            pdb  = awe.PDB(path)
+            walker = awe.Walker(start=pdb.coords, assignment=c, color=color, weight=weight, cellid=cell.id)
+            system.add_walker(walker)
+
+    # setup the AWE algorithm
+    resampler = awe.resample.MultiColor(opts.num_walkers, partition)
+    resampler = awe.resample.SaveWeights(resampler)
+    resampler = awe.AWE(wqconfig       = cfg,
+                        system         = system,
+                        iterations     = opts.iterations,
+                        resample       = resampler,
+                        checkpointfreq = 1,
+                        )
+
+    resampler.run()
+
+
+    
+
+if __name__ == '__main__':
+    opts = getopts()
+    print opts
+    main(opts)
