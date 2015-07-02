@@ -833,7 +833,36 @@ class Timings(object):
 
 class AWEStats(object):
 
+    """
+    awe.stats.AWEStats
+
+    Manages statistics about the AWE program.
+
+    Fields:
+        iteration - the elapsed time of an iteration of AWE 
+        resample  - the elapsed time of the resampling process between iters
+        barrier   - ???
+        logger    - the logger used to output AWE statistics
+
+    Methods:
+        _timeit       - start or stop a stopwatch
+        time_iter     - start or stop the iteration timer
+        time_resample - start or stop the resampling timer
+        time_barrier  - start or stop the barrier timer
+        close         - close the logging utility's logfile
+        open          - open the logging utility's logfile
+    """
+
     def __init__(self, logger=None):
+
+        """
+        awe.stats.AWEStats.__init__
+
+        Initialize a new instance of AWEStats.
+
+        Parameters:
+            logger - the class to use as a logging utility
+        """
 
         self.iteration = Timer()
         self.resample  = Timer()
@@ -858,18 +887,83 @@ class AWEStats(object):
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
+        
+        """
+        awe.stats.AWEStats.time_iter
+
+        Start or stop the iteration stopwatch.
+
+        Parameters:
+            state - 'start' or 'stop'
+
+        Returns:
+            None
+        """
+
         self._timeit(state, self.iteration, 'iteration time')
 
     def time_resample(self, state):
+        
+        """
+        awe.stats.AWEStats.time_resample
+
+        Start or stop the resampling stopwatch.
+
+        Parameters:
+            state - 'start' or 'stop'
+
+        Returns:
+            None
+        """
+        
         self._timeit(state, self.resample, 'resample time')
 
     def time_barrier(self, state):
+        
+        """
+        awe.stats.AWEStats.time_barrier
+
+        Start or stop the barrier stopwatch.
+
+        Parameters:
+            state - 'start' or 'stop'
+
+        Returns:
+            None
+        """
+        
         self._timeit(state, self.barrier, 'barrier time')
 
     def close(self):
+
+        """
+        awe.stats.AWEStats.close
+
+        Close the logging utility's File object.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self.logger.close()
 
     def open(self):
+
+        """
+        awe.stats.AWEStats.open
+
+        Openthe logging utility's File object.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self.logger.open()
 
 
