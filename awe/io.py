@@ -93,10 +93,26 @@ class trace(object):
 class StringStream(object):
 
     """
-    write strings to a representation in memory
+    awe.io.StringStream
+
+    Store values in a buffer for changing to and from string values. This
+    allows an internal representation of arbitrary data as strings in memory.
+
+    Fields:
+        _buffer - a list of strings
+        _read   - whether the StringStream is in read or write mode
+        _str    - a string representation of the buffer
+
+    Methods:
+        write     - add an item to the buffer
+        reset     - clear the buffer and string representation, and enter
+                    write mode
+        read      - transform the buffer into a string representation
+        readlines - return the buffer
     """
 
     def __init__(self, s=None):
+        
         """
         Create the stream.
         Parameters:
@@ -111,15 +127,55 @@ class StringStream(object):
             self._buffer = s
 
     def write(self, s):
+
+        """
+        awe.io.StringStream.write
+
+        Write to the buffer (add a string to it).
+
+        Parameters:
+            s - a string to add to the buffer
+
+        Returns:
+            None
+        """
+
         self._read = False
         self._buffer.append(s)
 
     def reset(self):
+
+        """
+        awe.io.StringStream.clear
+
+        Clear the buffer and string representation, and set to write mode.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self._buffer = list()
         self._str    = str()
         self._read   = False
 
     def read(self):
+        
+        """
+        awe.io.StringStream.read
+
+        Read from the buffer (turn it into a string representation of its
+        contents with no separators).
+        
+        Parameters:
+            None
+
+        Returns:
+            A string representation of the contents of the buffer.
+        """
+
         if not self._read:
             self._str  = ''.join(self._buffer)
             self._read = True
@@ -127,6 +183,19 @@ class StringStream(object):
         return self._str
 
     def readlines(self):
+
+        """
+        awe.io.StringStream.readlines
+
+        Return a list of lines in the string (i.e., the buffer).
+
+        Parameters:
+            None
+
+        Returns:
+            The buffer (a list)
+        """
+
         return self._buffer
 
 
