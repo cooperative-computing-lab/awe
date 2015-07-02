@@ -10,21 +10,77 @@ See the file COPYING for details.
 TRACE = False
 
 class trace(object):
+
+    """
+    awe.io.trace
+
+    A utility for printing function arguments and keyword arguments for
+    development and debugging purposes.
+
+    Fields:
+        print_values - 
+
+    Methods:
+        prettyargs - 
+    """
+
     def __init__(self, values=False):
+        
+        """
+        awe.io.trace.__init__
+
+        Initialize a new instance of the trace class.
+
+        Parameters:
+            values - 
+
+        """
         self.print_values = values
 
     def prettyargs(self, *args, **kws):
+        
+        """
+        awe.io.trace.prettyargs
+
+        Transform a list of arguments and keyword arguments into a string
+        representations (either of their types or values).
+
+        Parameters:
+            args - a list of function arguments
+            kws  - a dictionary of function keyword arguments
+
+        Returns:
+            A comma-separated string listing the args and kws
+        """
+
         if self.print_values:
+            # Outputs the argument value
             pretty = lambda a: repr(a)
         else:
+            # Outputs the argument type
             pretty = lambda a: str(type(a))
 
+        # Generate the string representations
         pargs = map(pretty, args)
         pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in kws.items() ]
 
+        # Make the arguments a comma-delimited string
         return ', '.join(pargs + pkws)
 
     def __call__(self, fn):
+        
+        """
+        awe.io.trace.__call__
+
+        Wrap a function to provide trace functionality to its arguments.
+
+        Parameters:
+            fn - a function/method to wrap
+
+        Returns:
+            The supplied function/method wrapped with trace functionality
+        """
+
         def wrapped(*args, **kws):
             global TRACE
             if TRACE:
@@ -75,4 +131,17 @@ class StringStream(object):
 
 
 def log(string):
+    """
+    awe.io.log
+
+    Alias for a print statement. Likely to be used in the event that logging
+    requires some other action in the future.
+
+    Parameters:
+        string - a value to be printed (any primitive or object with __str__)
+
+    Returns:
+        None
+    """
+
     print string
