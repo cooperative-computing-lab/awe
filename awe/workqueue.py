@@ -20,20 +20,24 @@ _AWE_WORK_QUEUE = None
 
 
 ### workaround for now.
-##+ These are the names of the input/output filess to be materialized on the worker
+##+ These are the names of the input/output filess to be
+##+ materialized on the worker
 
-WORKER_POSITIONS_NAME     = 'structure.pdb'
-WORKER_WALKER_NAME  = 'walker.pkl'
-WORKER_WEIGHTS_NAME = 'weight.dat'
-WORKER_COLOR_NAME   = 'color.dat'
-WORKER_CELL_NAME    = 'cell.dat'
-WORKER_RESULTS_NAME = 'results.tar'
+# These seem to have been deprecated in production.
+# The workers use a different set of files.
 
-RESULT_POSITIONS    = 'structure2.pdb'
-RESULT_WEIGHTS      = 'weight.dat'
-RESULT_COLOR        = 'color.dat'
-RESULT_CELL         = 'cell2.dat'
-RESULT_NAME         = 'results.tar'
+WORKER_POSITIONS_NAME = 'structure.pdb' # The PDB used to generate a trajectory
+WORKER_WALKER_NAME    = 'walker.pkl'    # The walker object for the task
+WORKER_WEIGHTS_NAME   = 'weight.dat'    # The weight for each walker
+WORKER_COLOR_NAME     = 'color.dat'     # The color (state?) of the walker
+WORKER_CELL_NAME      = 'cell.dat'      # The list of exemplar configurations
+WORKER_RESULTS_NAME   = 'results.tar'   # The file to return to the master
+
+RESULT_POSITIONS = 'structure2.pdb' # The PDB of the final trajectory frame
+RESULT_WEIGHTS   = 'weight.dat'     # The weight of the resulting configuration
+RESULT_COLOR     = 'color.dat'      # The color (state) of the walker
+RESULT_CELL      = 'cell2.dat'      # The updated cells information
+RESULT_NAME      = 'results.tar'    # The file to return to the master
 
 
 class WorkQueueException       (Exception): pass
@@ -230,8 +234,51 @@ class TagSet(object):
 
 class WorkQueue(object):
 
+    """
+    awe.workqueue.WorkQueue
+
+    An interface to the cctools work_queue module.
+
+    Fields:
+        cfg              - configuration settings container
+        wq               - cctools work_queue.WorkQueue object
+        _tagset          - 
+        stats            - statistical unit from stats module
+        tmpdir           - temp directory where task information is stored
+        restarts         - 
+        statslogger      - logging unit for global AWE-WQ statistics
+        taskoutputlogger - logging unit for individual task output and stats
+
+    Methods:
+        update_task_stats   -
+        new_task            - 
+        submit              - 
+        restart             - 
+        wait                -
+        taskoutput          -
+        add_tag             -
+        discard_tag         -
+        cancel_tag          -
+        select_tag          -
+        clear_tags          -
+        clear               -
+        tasks_in_queue      -
+        active_workers      -
+        can_duplicate_tasks - 
+        recv                -
+    """
+
     # @awe.typecheck(Config)
     def __init__(self, cfg, statslogger=None, taskoutputlogger=None):
+
+        """
+        awe.workqueue.WorkQueue.__init__
+
+        Create a new instance of WorkQueue if one does not exist. The singleton
+        is managed through cfg.
+
+
+        """
 
         self.cfg    = cfg
         self.wq     = self.cfg._mk_wq()
@@ -252,7 +299,8 @@ class WorkQueue(object):
 
     def __getstate__(self):
         """
-        SwigPyObjects cannot be pickles, so remove the underlying WorkQueue object
+        SwigPyObjects cannot be pickled, so remove the underlying WorkQueue object
+        See pickle documentation for more information on __getstate__
         """
         self.statslogger.close()
         self.taskoutputlogger.close()
@@ -263,6 +311,7 @@ class WorkQueue(object):
     def __setstate__(self, odict):
         """
         Since SwigPyObjects are not pickleable, we just recreate the WorkQueue object from the configuration
+        See pickle documentation for more information on __setstate__
         """
         self.__dict__.update(odict)
         self.statslogger.open()
@@ -270,15 +319,60 @@ class WorkQueue(object):
 
 
     def __del__(self):
+        
+        """
+        awe.workqueue.WorkQueue.__del__
+
+        Standard Python delete function. It does occasionally cause problems
+        if the garbage collector does not want to cooperate. If so, add tmpdir
+        to the WorkQueue instance in the AWE object in aweclasses after
+        initializing the WorkQueue instance. This seems to overcome the issue.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+        
         import shutil
         shutil.rmtree(self.tmpdir)
 
 
     @awe.typecheck(WQ.Task)
     def update_task_stats(self, task):
+        
+        """
+        awe.workqueue.WorkQueue.update_task_stats
+
+        Add information about a task to the WorkQueue object logging utility.
+        See stats.WQStats for more information on the default logger.
+
+        Parameters:
+            task - a WorkQueue task
+
+        Returns:
+            None
+        """
+
         self.stats.task(task)
 
     def new_task(self):
+
+        """
+        awe.workqueue.WorkQueue.new_task
+
+        Generate a new task object and assign it a program to run. Ensures each
+        task has the correct set of supporting files. See WorkQueue.Config for
+        information on task files.
+
+        Parameters:
+            None
+
+        Returns:
+            A new cctools WorkQueue.Task instance
+        """
+
         cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
 
@@ -293,6 +387,11 @@ class WorkQueue(object):
 
     @awe.typecheck(WQ.Task)
     def submit(self, task):
+
+        """
+
+        """
+        
         self._tagset.add(task.tag)
         return self.wq.submit(task)
 
