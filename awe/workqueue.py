@@ -142,7 +142,7 @@ class Config(object):
     Fields:
         name            - the name of this run of AWE-WQ
         port            - the port on which the WorkQueue master listens
-        schedule        - 
+        schedule        - the task scheduling algorithm to use
         exclusive       - whether or not the WorkQueue instance is singleton
         catalog         - 
         debug           - which information to include in logs
@@ -158,9 +158,28 @@ class Config(object):
         capacity        - 
         _executable     - the script or executable that the task should run
         _cache          - 
+
+    Methods:
+        execute - add the main program to run to the task cached file list
+        cache   - add files to the task cached file list
+        _mk_wq  - create a WorkQueue instance or get a reference to the
+                  singleton
     """
 
     def __init__(self):
+
+        """
+        awe.workqueue.Config.__init__
+
+        Initialize a new instance of Config. Uses default options that are then
+        reset by the aweclasses.AWE class if necessary.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
 
         self.name            = ''
         self.port            = WQ.WORK_QUEUE_DEFAULT_PORT
@@ -188,7 +207,16 @@ class Config(object):
     def execute(self, path):
 
         """
+        awe.workqueue.Config.execute
 
+        Tag a file as the intended program for the task to execute and add it
+        to the cache.
+
+        Parameters:
+            path - filepath of the program to execute
+
+        Returns:
+            None
         """
 
         f = WQFile(path)
@@ -196,6 +224,26 @@ class Config(object):
         self._cache.add(f)
 
     def cache(self, *files, **kws):
+
+        """
+        awe.workqueue.Config.cache
+
+        Add a list of files to the WorkQueue task cache. Cached files are saved
+        between tasks run by a single worker.
+
+        Parameters:
+            files - a tuple of filepaths
+            kws   - a dictionary of keyword-mapped arguments
+
+        Keyword Arguments:
+            base       - a boolean value representing whether to use the 
+                         current directory
+            remotepath - the remote filepath to look in for files
+
+        Returns:
+            None
+        """
+
         base = kws.get('base', True)
         remotepath = kws.get('remotepath', '')
         for path in files:
@@ -203,101 +251,303 @@ class Config(object):
             self._cache.add(wqf)
 
     def _mk_wq(self):
+
+        """
+        awe.workqueue.Config._mk_wq
+
+        Only one instance of WorkQueue should be run per process. This grants
+        access to the WorkQueue singleton or else creates a new WorkQueue
+        instance. This also ensures that the cctools WorkQueue object can
+        handle more workers.
+
+        Parameters:
+            None
+
+        Returns:
+            The cctools WorkQueue singleton object
+        """
+
         global _AWE_WORK_QUEUE
         if _AWE_WORK_QUEUE is not None:
             ### warn
             awe.log('WARNING: using previously created WorkQueue instance')
         else:
             if self.debug:
+                # Set up debugging parameters for the cctools WorkQueue object.
+                # It has inbuilt debugging capabilities.
                 WQ.set_debug_flag(self.debug)
+                
                 if self.wq_logfile:
                      awe.util.makedirs_parent(self.wq_logfile)
                      WQ.cctools_debug_config_file(self.wq_logfile)
                      WQ.cctools_debug_config_file_size(0) 
+            
             if self.name:
                 self.catalog = True
+            
+            # Create the cctools WorkQueue object
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
                               shutdown  = self.shutdown,
                               catalog   = self.catalog,
                               exclusive = self.exclusive)
+            
+            # Specify the task scheduling algorithm
             wq.specify_algorithm(self.schedule)
+            
+            # Turn cctools WorkQueue object status monitoring on or off
             if self.monitor: 
                 wq.enable_monitoring(self.summaryfile)
 
-	    if self.capacity:
-		wq.estimate_capacity()
+    	    if self.capacity:
+                # Determine the number of workers the WorkQueue object can handle
+    		    wq.estimate_capacity()
  
+            # Display information about this run of AWE-WQ
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
                 awe.log('Using project name %s' % wq.name)
             if self.debug and self.wq_logfile:
                 awe.log('Logging WorkQueue to %s' % self.wq_logfile)
 
+            # Set up fast abort procedures
             typ = type(self.fastabort)
             if typ is float or typ is int:
                 wq.activate_fast_abort(self.fastabort)
 
+            # Ensure that the singleton is set to the new instance
             _AWE_WORK_QUEUE = wq
 
+        # Ensure that the singleton is logging to the correct files
         awe.util.makedirs_parent(self.wqstats_logfile)
         _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
+        
+        # Return a reference to teh singleton
         return _AWE_WORK_QUEUE
 
 
 class TagSet(object):
+
+    """
+    awe.workqueue.TagSet
+
+    Manages tags for identifying submitted tasks. Tags are stored in sets
+    indexed in a dictionary by the total number of duplicates existing for
+    that particular tag (e.g. if tag in self._tags[3], there exist three
+    duplicates of that tag).
+
+    Fields:
+        _tags    - the dictionary of sets of tags
+        _maxreps - the maximum number of times a tag may be duplicated
+
+    Methods:
+        can_duplicate   - determines whether any task can be duplicated
+        clear           - clear the tag set dictionary
+        clean           - remove a tag set from the dictionary if it contains
+                          no tags
+        _find_tag_group - find the set containing a specific tag in the
+                          dictionary
+        add             - add a tag (or duplicate) to the dictionary
+        select          - get a random tag from the tag set with the least
+                          duplicates
+        discard         - remove a tag from the dictionary
+    """
+
     def __init__(self, maxreps=5):
+
+        """
+        awe.workqueue.TagSet.__init__
+
+        Initialize a new instance of TagSet.
+
+        Parameters:
+            maxreps - the maximum number of times a tag may be duplicated
+
+        Returns:
+            None
+        """
+
+        # Return an empty set if a key does not exist (see Python docs)
         self._tags = defaultdict(set)
         self._maxreps = maxreps
 
     def can_duplicate(self):
+
+        """
+        awe.workqueue.TagSet.can_duplicate
+
+        Determine whether any tags can can be duplicated.
+
+        Parameters:
+            None
+
+        Return:
+            A Boolean value representing whether any tag can be duplicated
+        """
+
         valid = filter(lambda k: k < self._maxreps, self._tags.iterkeys())
         return len(valid) > 0
 
     def clear(self):
+
+        """
+        awe.workqueue.TagSet.clear
+
+        Remove all tag sets from the dictionary.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self._tags.clear()
 
     def clean(self):
+
+        """
+        awe.workqueue.TagSet.clean
+
+        Remove any empty tag sets from the dictionary.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         for k in self._tags.keys():
             if len(self._tags[k]) < 1:
                 del self._tags[k]
 
     def _find_tag_group(self, tag):
+
+        """
+        awe.workqueue.TagSet._find_tag_group
+
+        Find the set that the supplied tag resides in.
+
+        Parameters:
+            tag - the tag to search the dictionary for
+
+        Returns:
+            The set containing the tag or None if the tag is not in the
+            dictionary
+        """
+
         for group, tags in self._tags.iteritems():
             if tag in tags:
                 return group
         return None
 
     def add(self, tag, startcount=0):
+
+        """
+        awe.workqueue.TagSet.add
+
+        Adds a tag to the dictionary in the set representing the number of
+        duplicates of that tag.
+
+        Parameters:
+            tag        - the tag to add to the dictionary
+            startcount - the set index to begin at
+
+        Returns:
+            None
+        """
+
         key = self._find_tag_group(tag)
 
         ### add the tag to the appropriate group, removing it from previous one
         if key is None:
+            # Note: this would only be dangerous if using a list
+            # Dictionary keys need not be positive (or numeric), however given
+            # the definition of the contents of the TagSet, this method leaves
+            # the option available to have negative duplicates of a tag, etc.,
+            # even though that does not make sense and would not inherently
+            # cause problems.
             self._tags[startcount].add(tag)
         else:
+            # Add a duplicate of the tag and remove it from its original set
             self._tags[key+1].add(tag)
             self._tags[key  ].discard(tag)
 
         ### delete the group if it became empty
         if key is not None and len(self._tags[key]) == 0:
+            # Clean up any sets left empty
             del self._tags[key]
 
 
     def select(self):
+        
+        """
+        awe.workqueue.TagSet.select
+
+        Gets a random tag from the set of tags representing the lowest number
+        of duplicates.
+
+        Parameters:
+            None
+
+        Returns:
+            A random tag from the lowest-indexed tag set or None of the
+            dictionary is empty.
+        """
+
         if len(self) > 0:
             count  = 1
+            
+            # Keys are ordinal (likely integers), so min(keys) is the tag set
+            # representing tags with the least number of duplicates.
             minkey = min(self._tags.keys())
+            
             assert len(self._tags[minkey]) > 0, str(minkey) + ', ' + str(self._tags[minkey])
+            
             return random.sample(self._tags[minkey], count)[0]
+        
         else:
             return None
 
     def discard(self, tag, key=None):
+
+        """
+        awe.workqueue.TagSet.discard
+
+        Remove a tag from the dictionary completely (as opposed to reducing the
+        number of duplicates).
+
+        Parameters:
+            tag - the tag to remove
+            key - the dictionary key to check, None if TagSet should determine
+                  which set contains the tag
+
+        Returns:
+            None
+        """
+
         key = key or self._find_tag_group(tag)
         if key is not None:
+            # This is safe in the event that the tag is not at the
+            # user-supplied key. Discard will do nothing if the element to get
+            # rid of is not in the set.
             self._tags[key].discard(tag)
 
     def __len__(self):
+        
+        """
+        awe.workqueue.TagSet.__len__
+
+        Override of the object __len__ function.
+
+        Parameter:
+            None
+
+        Returns:
+            The total number of tags in the dictionary
+        """
+
         return reduce(lambda s, k: s + len(self._tags[k]), self._tags.iterkeys(), 0 )
 
     def __str__(self):
@@ -316,10 +566,10 @@ class WorkQueue(object):
     Fields:
         cfg              - configuration settings container
         wq               - cctools work_queue.WorkQueue object
-        _tagset          - 
+        _tagset          - the TagSet object containing task tags
         stats            - statistical unit from stats module
         tmpdir           - temp directory where task information is stored
-        restarts         - 
+        restarts         - a dictionary of tasks that have been restarted
         statslogger      - logging unit for global AWE-WQ statistics
         taskoutputlogger - logging unit for individual task output and stats
 
@@ -348,22 +598,39 @@ class WorkQueue(object):
         """
         awe.workqueue.WorkQueue.__init__
 
-        Create a new instance of WorkQueue if one does not exist. The singleton
-        is managed through cfg.
+        Initialize a new instance of WorkQueue for managing the cctools
+        work_queue.WorkQueue object with the necessary parameters for running
+        AWE-WQ.
 
+        Parameters:
+            cfg              - an initialized workqueue.Config object to use
+            statslogger      - a logger object for logging statistics about
+                               WorkQueue
+            taskoutputlogger - a logger to use for logging the output of
+                               individual tasks
 
+        Returns:
+            None
         """
 
+        # Configure and gain access to the cctools WorkQueue singleton
         self.cfg    = cfg
         self.wq     = self.cfg._mk_wq()
+
+        # Create the task tag set for managing duplicate tasks
         self._tagset = TagSet(maxreps=self.cfg.maxreps)
 
+        # Start collecting statistics on the WorkQueue object
         self.stats  = awe.stats.WQStats(logger=statslogger)
 
+        # Create the temporary file where the task cache is stored
         self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
 
+        # Create a dictionary to keep track of the number of times a
+        # particular task has been restarted
         self.restarts = dict()
 
+        # Start logging statistics about and output from the tasks
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
         self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
 
@@ -463,7 +730,16 @@ class WorkQueue(object):
     def submit(self, task):
 
         """
+        awe.workqueue.WorkQueue.submit
 
+        Submit a task to a worker. This adds it to the TagSet to keep track of
+        duplicate tasks.
+
+        Parameters:
+            task - a configured cctools work_queue.Task object
+
+        Returns:
+            ???
         """
 
         self._tagset.add(task.tag)
@@ -471,9 +747,26 @@ class WorkQueue(object):
 
     @awe.typecheck(WQ.Task)
     def restart(self, task):
+
+        """
+        awe.workqueue.WorkQueue.restart
+
+        Restart a task if something has gone wrong and record the number of
+        times that task has been restarted.
+
+        Parameters:
+            task - a configured cctools work_queue.Task object
+
+        Return:
+            A Boolean value representing whether or not the task was restarted
+        """
+
+        # Add to the dictionary of restarted tasks if first restart
         if task.tag not in self.restarts:
             self.restarts[task.tag] = 0
 
+        # Record the restart and notify the user, then restart if the task has
+        # not exceeded the maximum number of restarts
         if self.restarts[task.tag] < self.cfg.restarts:
             print time.asctime(), 'task failed with', task.return_status, \
                 'result is', task.result, \
@@ -482,60 +775,220 @@ class WorkQueue(object):
             self.submit(task)
             self.restarts[task.tag] += 1
             return True
+        
+        # Otherwise, do not restart the task
         else:
             return False
 
     def wait(self, *args, **kws):
+        
+        """
+        awe.workqueue.WorkQueue.wait
+
+        Set the cctools work_queue.WorkQueue instance to idle state (usually
+        if no workers are available).
+        
+        Parameters: (see the cctools module work_queue.py for more information)
+            args - arguments for wq.wait
+            kws  - keyword arguments for wq.wait
+
+        Returns:
+            ???
+        """
+
         return self.wq.wait(*args, **kws)
 
     def taskoutput(self, task):
+
+        """
+        awe.workqueue.WorkQueue.taskoutput
+
+        Concatenate all output from a task into a single string.
+
+        Parameters:
+            task - a configured cctools work_queue.Task object
+
+        Returns:
+            A string containing all output from the task
+        """
+
         output = task.output or ''
         output = ('\n' + output).split('\n')
         output = '\n\t'.join(output)
         return output
 
     def add_tag(self, tagtext):
+
+        """
+        awe.workqueue.WorkQueue.add_tag
+
+        Add a task tag to the internal tag set dictionary.
+
+        Parameters:
+            tagtext - a string identifying the tag
+
+        Returns:
+            None
+        """
+
         self._tagset.add(tagtext)
 
     def discard_tag(self, tagtext):
+
+        """
+        awe.workqueue.WorkQueue.discard_tag
+
+        Discard a tag from the internal tag set dictionary.
+
+        Parameters:
+            tagtext - string identifying the tag to be removed
+
+        Returns:
+            None
+        """
+
         self._tagset.discard(tagtext)
 
     def cancel_tag(self, tagtext):
+
+        """
+        awe.workqueue.WorkQueue.cancel_tag
+
+        Cancel all tasks associated with the supplied tag.
+
+        Parameters:
+            tagtext - a string identifying the tasks to cancel
+
+        Returns:
+            None
+        """
+
         while self.wq.cancel_by_tasktag(tagtext):
             pass
 
     def select_tag(self):
+
+        """
+        awe.workqueue.WorkQueue.select_tag
+
+        Get a tag from the internal tag set dictionary. See TagSet.select for
+        details on the selectoin process.
+
+        Parameters:
+            None
+
+        Returns:
+            A tag from the internal tag set dictionary
+        """
+
         self._tagset.clean()
         return self._tagset.select()
 
     def clear_tags(self):
+
+        """
+        awe.workqueue.WorkQueue.clear_tags
+
+        Clear the internal tag set dictionary (i.e. remove all tags).
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         self._tagset.clear()
 
     def clear(self):
+
+        """
+        awe.workqueue.WorkQueue.clear
+
+        Remove all tags from the internal tag set dictionary and all tasks from
+        the cctools work_queue.WorkQueue object instance. 
+        """
+
         self.clear_tags()
 
         # force clearing to allow GC, otherwise linear memory growth
         self.wq._task_table.clear()
 
     def tasks_in_queue(self):
+
+        """
+        awe.workqueue.WorkQueue.tasks_in_queue
+
+        The number of tasks currently running and waiting in the queue.
+
+        Parameters: 
+            None
+
+        Returns:
+            An integer representing the total number of enqueued tasks
+        """
+
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
 
     def active_workers(self):
+
+        """
+        awe.workqueue.WorkQueue.active_workers
+
+        The number of workers currently working or ready to work.
+
+        Parameters:
+            None
+
+        Returns:
+            An integer representing the number of workers not idle
+        """
+
         return self.wq.stats.workers_busy + self.wq.stats.workers_ready 
 
     def can_duplicate_tasks(self):
+
+        """
+        awe.workqueue.WorkQueue.can_duplicate_tasks
+
+        Determine whether any task can be duplicated and sent to an idle
+        worker.
+
+        Parameters:
+            None
+
+        Returns:
+            A Boolean value representing whether any task can be duplicated and
+            sent to an idle worker.
+        """
+
         return  self.tasks_in_queue() < self.active_workers() \
             and self._tagset.can_duplicate()
 
 
     def recv(self, marshall):
 
+        """
+        awe.workqueue.WorkQueue.recv
+
+        Deal with tasks as they return. Handle successes, errors, and restarts.
+        Runs forever.
+
+        Parameters:
+            marshall - function describing how to send tasks to workers
+
+        Returns:
+            None
+        """
+
         # print time.asctime(), 'waiting for task'
         while True:
 
+            # Set the cctools WorkQueue object to idle until a task arrives
             task = self.wait(self.cfg.waittime)
 
             if task:
+                # Record the task output whether it succeeded or failed
                 self.update_task_stats(task)
                 # print time.asctime(), 'Received result. %d tasks remaining in iteration.' % self.tasks_in_queue()
 
@@ -544,7 +997,7 @@ class WorkQueue(object):
                 self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
 
             if task and task.result == 0:
-
+                # Deal with tasks in which an error occurred
                 if not task.return_status == 0 and not self.restart(task):
                     raise WorkQueueWorkerException, \
                         self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
@@ -563,11 +1016,13 @@ class WorkQueue(object):
                     else:
                         continue
 
+                # Kill the task if it cannot be restarted
                 self.cancel_tag(task.tag)
                 self.discard_tag(task.tag)
                 return result
 
             elif task and not task.result == 0:
+                # Kill the task if it cannot be restarted.
                 if not self.restart(task):
                     raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \
                         (task.tag, self.taskoutput(task))
