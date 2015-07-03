@@ -45,8 +45,40 @@ class WorkQueueWorkerException (Exception): pass
 
 class WQFile(object):
 
+    """
+    awe.workqueue.WQFile
+
+    Manages filepath information and options for temp directories containing
+    files used by cctools WorkQueue.Task objects.
+
+    Fields:
+        _masterpath - the path to the master set of files
+        _base       - flag for looking in the current directory
+        _cached     - flag for determining if the path points to cached
+                      task files
+        _remotepath - the path to the master set of files if not local
+
+    Methods:
+        add_to_task - tell a task where to find the files it needs
+    """
+
     @awe.typecheck(str, base=bool, cached=bool, remotepath=str)
     def __init__(self, masterpath, base=True, cached=True, remotepath=None):
+
+        """
+        awe.workqueue.WQFile.__init__
+
+        Initialize a new instance of WQFile.
+
+        Properties:
+            masterpath - the path to the master set of task files
+            base       - whether or not the current directory is the directory
+                         to look in
+            cached     - whether or not the path points to files cached for a
+                         WorkQueue Task
+            remotepath - the remote directory to look in for task files
+        """
+
         self._masterpath = masterpath
         self._base       = base
         self._cached     = cached
@@ -61,6 +93,7 @@ class WQFile(object):
         if self._remotepath:
             return self._remotepath
         elif self.isbase:
+            # This returns only a filename, look in the current directory
             return os.path.basename(self.masterpath)
         else:
             return self.masterpath
@@ -74,6 +107,19 @@ class WQFile(object):
         return self._cached
 
     def add_to_task(self, task):
+        
+        """
+        awe.workqueue.WQFile.add_to_task
+
+        Tell a task where to find the files it needs to do its work.
+
+        Parameters:
+            task - a cctools WorkQueue.Task object
+
+        Returns:
+            None
+        """
+
         if '$' not in self.masterpath and not os.path.exists(self.masterpath):
             raise IOError, 'Cannot find file to send to worker: %s' % self.masterpath
         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
@@ -87,8 +133,31 @@ class WQFile(object):
 
 
 class Config(object):
+    
     """
-    Class for configuring a WorkQueue instance
+    awe.workqueue.Config
+
+    Configuration options for a WorkQueue instance.
+    
+    Fields:
+        name            - the name of this run of AWE-WQ
+        port            - the port on which the WorkQueue master listens
+        schedule        - 
+        exclusive       - whether or not the WorkQueue instance is singleton
+        catalog         - 
+        debug           - which information to include in logs
+        shutdown        - 
+        fastabort       - 
+        restarts        - the number of times to restart a failed task
+        maxreps         - 
+        waittime        - 
+        wq_logfile      - the log file for WorkQueue debug information
+        wqstats_logfile - the log file for WorkQueue statistical information
+        monitor         - 
+        summaryfile     - the log file for WorkQueue run basic information
+        capacity        - 
+        _executable     - the script or executable that the task should run
+        _cache          - 
     """
 
     def __init__(self):
@@ -108,7 +177,7 @@ class Config(object):
         self.wqstats_logfile = 'debug/wq-stats.log'
         self.monitor         = False	
         self.summaryfile     = ''
-	self.capacity        = False
+	    self.capacity        = False
 
         self._executable = None
         self._cache = set()
@@ -117,6 +186,11 @@ class Config(object):
     getcache   = property(lambda self: self._cache)
 
     def execute(self, path):
+
+        """
+
+        """
+
         f = WQFile(path)
         self._executable = f
         self._cache.add(f)
@@ -391,7 +465,7 @@ class WorkQueue(object):
         """
 
         """
-        
+
         self._tagset.add(task.tag)
         return self.wq.submit(task)
 
