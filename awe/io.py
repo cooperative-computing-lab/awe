@@ -10,10 +10,7 @@ See the file COPYING for details.
 TRACE = False
 
 class trace(object):
-
     """
-    awe.io.trace
-
     A utility for printing function arguments and keyword arguments for
     development and debugging purposes.
 
@@ -26,10 +23,7 @@ class trace(object):
     """
 
     def __init__(self, values=False):
-        
         """
-        awe.io.trace.__init__
-
         Initialize a new instance of the trace class.
 
         Parameters:
@@ -39,10 +33,7 @@ class trace(object):
         self.print_values = values
 
     def prettyargs(self, *args, **kws):
-        
         """
-        awe.io.trace.prettyargs
-
         Transform a list of arguments and keyword arguments into a string
         representations (either of their types or values).
 
@@ -69,10 +60,7 @@ class trace(object):
         return ', '.join(pargs + pkws)
 
     def __call__(self, fn):
-        
         """
-        awe.io.trace.__call__
-
         Wrap a function to provide trace functionality to its arguments.
 
         Parameters:
@@ -92,10 +80,7 @@ class trace(object):
 
 
 class StringStream(object):
-
     """
-    awe.io.StringStream
-
     Store values in a buffer for changing to and from string values. This
     allows an internal representation of arbitrary data as strings in memory.
 
@@ -113,7 +98,6 @@ class StringStream(object):
     """
 
     def __init__(self, s=None):
-        
         """
         Create the stream.
         Parameters:
@@ -128,10 +112,7 @@ class StringStream(object):
             self._buffer = s
 
     def write(self, s):
-
         """
-        awe.io.StringStream.write
-
         Write to the buffer (add a string to it).
 
         Parameters:
@@ -145,10 +126,7 @@ class StringStream(object):
         self._buffer.append(s)
 
     def reset(self):
-
         """
-        awe.io.StringStream.clear
-
         Clear the buffer and string representation, and set to write mode.
 
         Parameters:
@@ -163,10 +141,7 @@ class StringStream(object):
         self._read   = False
 
     def read(self):
-        
         """
-        awe.io.StringStream.read
-
         Read from the buffer (turn it into a string representation of its
         contents with no separators).
         
@@ -184,10 +159,7 @@ class StringStream(object):
         return self._str
 
     def readlines(self):
-
         """
-        awe.io.StringStream.readlines
-
         Return a list of lines in the string (i.e., the buffer).
 
         Parameters:
@@ -202,8 +174,6 @@ class StringStream(object):
 
 def log(string):
     """
-    awe.io.log
-
     Alias for a print statement. Likely to be used in the event that logging
     requires some other action in the future.
 
