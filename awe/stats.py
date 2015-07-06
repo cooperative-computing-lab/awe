@@ -18,10 +18,7 @@ import os
 
 
 class Timer(object):
-    
     """
-    awe.stats.Timer
-
     A stopwatch-esque functionality that uses system time.
 
     Fields:
@@ -38,8 +35,6 @@ class Timer(object):
     
     def __init__(self):
         """
-        awe.stats.Timer.__init__
-
         Alias for Timer.reset called upon instance creation.
 
         Parameters:
@@ -54,8 +49,6 @@ class Timer(object):
 
     def reset(self):
         """
-        awe.stats.Timer.reset
-
         Clears any stored times and sets t0 and t1 to native states.
 
         Parameters:
@@ -70,8 +63,6 @@ class Timer(object):
 
     def start(self):
         """
-        awe.stats.Timer.start
-
         Sets t0 to the current time, "starting" the stopwatch.
 
         Parameters:
@@ -85,8 +76,6 @@ class Timer(object):
 
     def stop(self):
         """
-        awe.stats.Timer.stop
-
         Sets t1 to the current time, "stopping" the stopwatch.
 
         Parameters:
@@ -101,8 +90,6 @@ class Timer(object):
 
     def isrunning(self):
         """
-        awe.stats.Timer.isrunning
-
         Determines whether the stopwatch is active or not, in the sense that
         a start time has been recorded and a stop time has not.
 
@@ -117,8 +104,6 @@ class Timer(object):
 
     def elapsed(self, current=True, units='s'):
         """
-        awe.stats.Timer.elapsed
-
         Returns the elapsed time since t0 started if the timer is running.
 
         Parameters:
@@ -162,10 +147,7 @@ _TIMER = Timer()
 
 ### simulate built-in *time* module
 class time:
-    
     """
-    awe.stats.time
-
     Simulates the system time module using a singleton of awe.stats.Timer as a
     starting point instead of the UNIX epoch.
 
@@ -181,8 +163,6 @@ class time:
     @staticmethod
     def start():
         """
-        awe.stats.time.start
-
         Starts the Timer singleton.
 
         Parameters:
@@ -198,8 +178,6 @@ class time:
     @staticmethod
     def time():
         """
-        awe.stats.time.time
-
         Determines the elapsed time of the Timer singleton.
 
         Parameters:
@@ -218,8 +196,6 @@ class time:
     @staticmethod
     def timer():
         """
-        awe.stats.time.timer
-
         Allows direct access to the Timer singleton.
 
         Parameters:
@@ -234,10 +210,7 @@ class time:
 
 
 class ExtendableArray(object):
-    
     """
-    awe.stats.ExtendableArray
-
     Contains and manages an oversized numpy.array object for efficient append
     operations.
 
@@ -267,8 +240,6 @@ class ExtendableArray(object):
 
     def __init__(self, typ=np.zeros, size=500, factor=2):
         """
-        ExtendableArray.__init__
-
         Set instance fields at initialization.
 
         Parameters:
@@ -278,6 +249,7 @@ class ExtendableArray(object):
             factor  - the multiplicative factor by which to increase the array
                       capacity
         """
+        
         self._type    = typ
         self._size0   = size
         self._count   = 0       # Says no elements have been appended
@@ -286,8 +258,6 @@ class ExtendableArray(object):
 
     def _initialize(self):
         """
-        awe.stats.ExtendableArray._initialize
-
         Create a new array of the ExtendableArray instance numpy.array type
         with capacity specified by the ExtendableArray instance.
 
@@ -302,8 +272,6 @@ class ExtendableArray(object):
 
     def get(self):
         """
-        awe.stats.ExtendableArray.get
-
         Return only the modified entries of the numpy.array managed by the 
         ExtendableArray instance.
 
@@ -319,8 +287,6 @@ class ExtendableArray(object):
 
     def _realloc(self):
         """
-        awe.stats.ExtendableArray._realloc
-
         Resize the numpy.array managed by the instance of ExtendableArray if
         the capacity has been reached.
         
@@ -343,8 +309,6 @@ class ExtendableArray(object):
 
     def append(self, *values):
         """
-        awe.stats.ExtendableArray.append
-
         Add a new value to the numpy.array managed by the ExtendableArray
         instance at the index of the current counter. Resize the array if
         capacity has been reached.
@@ -365,8 +329,6 @@ class ExtendableArray(object):
 
     def __getitem__(self, i):
         """
-        awe.stats.ExtendableArray.__getitem__
-
         Retrieve the element at the specified index or exit if k is too large.
         The system exit seems like overkill. Maybe an Exception instead?
         
@@ -386,8 +348,6 @@ class ExtendableArray(object):
 
     def __setitem__(self, i, v):
         """
-        awe.stats.ExtendableArray.__setitem__
-
         Update the entry at the specified index with the supplied value. Once
         again, there's a strange assert here that seems like overkill.
         
@@ -408,8 +368,6 @@ class ExtendableArray(object):
 
     def __len__(self):
         """
-        awe.stats.ExtendableArray.__len__
-
         Return the size of the active array.
         
         Parameters:
@@ -423,8 +381,6 @@ class ExtendableArray(object):
 
     def __contains__(self, v):
         """
-        awe.stats.ExtendableArray.__contains__
-
         Determine whether or not a specified value is an entry in the array.
         
         Parameters:
@@ -440,8 +396,6 @@ class ExtendableArray(object):
 
     def __iter__(self):
         """
-        awe.stats.ExtendableArray.__iter__
-
         Return an iterator over the active array.
         
         Parameters:
@@ -455,8 +409,6 @@ class ExtendableArray(object):
 
     def __str__(self):
         """
-        awe.stats.ExtendableArray.__str__
-
         Return a string visualization of the array contents.
         
         Parameters:
@@ -470,8 +422,6 @@ class ExtendableArray(object):
 
     def __repr__(self):
         """
-        awe.stats.ExtendableArray.append
-
         Return a string representing the objects in the array.
         
         Parameters:
@@ -485,10 +435,7 @@ class ExtendableArray(object):
             
 
 class Statistics(object):
-
     """
-    awe.stats.Statistics
-
     Keeps track of running statistics as workers work using an ExtendableArray.
 
     Fields:
@@ -526,8 +473,6 @@ class Statistics(object):
     @property
     def values(self):
         """
-        awe.stats.Statistics.values
-
         Access the values added to the ExtendableArray.
 
         Parameters:
@@ -541,8 +486,6 @@ class Statistics(object):
 
     def update(self, *values):
         """
-        awe.stats.Statistics.update
-
         Add a value to the ExtendableArray and update all statistics.
         
         Parameters:
@@ -567,10 +510,7 @@ class Statistics(object):
 
 
 class WQStats(object):
-
     """
-    awe.stats.WQStats
-
     Keeps track of statistics about running time and the amount of data
     transferred.
 
@@ -591,8 +531,6 @@ class WQStats(object):
     def __init__(self, logger=None):
 
         """
-        awe.stats.WQStats.__init__
-
         Create an instance of WQStats with a specified logging class.
 
         Parameters:
@@ -618,8 +556,6 @@ class WQStats(object):
     @typecheck(workqueue.WQ.Task)
     def task(self, task):
         """
-        awe.stats.WQStats.task
-
         Add information about a returned task to the logger.
 
         Parameters:
@@ -682,8 +618,6 @@ class WQStats(object):
 
     def _save_attrs(self, fd, name, times, attrs):
         """
-        awe.stats.WQStats._save_attrs
-
         Save attributes to a specified log file. Used to save task and WQ
         attributes for debug, logging, and tuning purposes.
 
@@ -706,8 +640,6 @@ class WQStats(object):
 
     def _save_task_stats(self, fd):
         """
-        awe.stats.WQStats._save_task_stats
-
         Call to _save_attrs for saving statistics associated with a WQ task.
 
         Parameters:
@@ -722,8 +654,6 @@ class WQStats(object):
 
     def _save_wq_stats(self, fd):
         """
-        awe.stats.WQStats._save_wq_stats
-
         Call to _save_attrs for saving statistics associated with the WQ object.
 
         Parameters:
@@ -742,10 +672,7 @@ class WQStats(object):
 
 
 class Timings(object):
-
     """
-    awe.stats.Timings
-
     A stopwatch that records elapsed times and manages statistics about them.
 
     Fields:
@@ -759,11 +686,8 @@ class Timings(object):
         stop  - stops the stopwatch and records its information
     """
 
-    def __init__(self):
-        
+    def __init__(self): 
         """
-        awe.stats.Timings.__init__
-
         Initializes a new instance of the Timings class.
 
         Parameters:
@@ -779,10 +703,7 @@ class Timings(object):
 
     @property
     def data(self):
-        
         """
-        awe.stats.Timings.data
-
         Returns the system and elapsed times from the times and stats fields.
 
         Parameters:
@@ -796,10 +717,7 @@ class Timings(object):
         return self.times.get(), self.stats.values
 
     def start(self):
-
         """
-        awe.stats.Timings.start
-
         Starts the stopwatch.
 
         Parameters:
@@ -812,10 +730,7 @@ class Timings(object):
         self.timer.start()
 
     def stop(self):
-
         """
-        awe.stats.Timings.stop
-
         Stops the stopwatch and records the system time and elapsed time.
 
         Parameters:
@@ -832,10 +747,7 @@ class Timings(object):
 
 
 class AWEStats(object):
-
     """
-    awe.stats.AWEStats
-
     Manages statistics about the AWE program.
 
     Fields:
@@ -856,8 +768,6 @@ class AWEStats(object):
     def __init__(self, logger=None):
 
         """
-        awe.stats.AWEStats.__init__
-
         Initialize a new instance of AWEStats.
 
         Parameters:
@@ -887,10 +797,7 @@ class AWEStats(object):
             raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
 
     def time_iter(self, state):
-        
         """
-        awe.stats.AWEStats.time_iter
-
         Start or stop the iteration stopwatch.
 
         Parameters:
@@ -903,10 +810,7 @@ class AWEStats(object):
         self._timeit(state, self.iteration, 'iteration time')
 
     def time_resample(self, state):
-        
         """
-        awe.stats.AWEStats.time_resample
-
         Start or stop the resampling stopwatch.
 
         Parameters:
@@ -919,10 +823,7 @@ class AWEStats(object):
         self._timeit(state, self.resample, 'resample time')
 
     def time_barrier(self, state):
-        
         """
-        awe.stats.AWEStats.time_barrier
-
         Start or stop the barrier stopwatch.
 
         Parameters:
@@ -935,10 +836,7 @@ class AWEStats(object):
         self._timeit(state, self.barrier, 'barrier time')
 
     def close(self):
-
         """
-        awe.stats.AWEStats.close
-
         Close the logging utility's File object.
 
         Parameters:
@@ -951,11 +849,8 @@ class AWEStats(object):
         self.logger.close()
 
     def open(self):
-
         """
-        awe.stats.AWEStats.open
-
-        Openthe logging utility's File object.
+        Open the logging utility's File object.
 
         Parameters:
             None
@@ -968,10 +863,7 @@ class AWEStats(object):
 
 
 class StatsLogger (object):
-
     """
-    awe.stats.StatsLogger
-
     Logging utility to manage log file File objects and write to log files.
 
     Fields:
@@ -988,10 +880,7 @@ class StatsLogger (object):
     """
 
     def __init__(self, path='debug/stats.log.gz', buffersize=9):
-
         """
-        awe.stats.StatsLogger.__init__
-
         Initialize a new StatsLogger that points to the logfile.
 
         Parameters:
@@ -1015,10 +904,7 @@ class StatsLogger (object):
 
     @typecheck(float, str, str)
     def update(self, t, component, name, val):
-
         """
-        awe.stats.StatsLogger.update
-
         Write a representation of an object (type, name of the AWE run, and
         object attributes) to the log file along with a timestamp.
         
@@ -1036,10 +922,7 @@ class StatsLogger (object):
         self._fd.write(s)
 
     def output(self, val):
-        
         """
-        awe.stats.StatsLogger.output
-
         Write an arbitrary value to the log file.
 
         Parameters:
@@ -1053,10 +936,7 @@ class StatsLogger (object):
         self._fd.write(str(val))
 
     def close(self):
-       
         """
-        awe.stats.StatsLogger.close
-
         Close the File object associated with the log file.
 
         Parameters:
@@ -1071,10 +951,7 @@ class StatsLogger (object):
             self._fd = None
 
     def open(self):
-
         """
-        awe.stats.StatsLogger.open
-
         Open the File object associated with the log file.
 
         Parameters:
