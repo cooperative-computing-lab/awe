@@ -6,6 +6,23 @@ This software is distributed under the GNU General Public License.
 See the file COPYING for details.
 """
 
+###############################################################################
+# NOTE - Jeff Kinnison, July 2015
+#
+# This file was apparently written using text editors with different tab
+# lengths and space/tab schemes. I have tried to fix this, but it may still
+# require some work before it will run. There isn't a great way to do this
+# other than manually thanks to Python's scoping by indentation.
+#
+# Run the file, and it will tell you about any overt errors. Bugs may still
+# propagate from indentation where there should be none, however. I used
+# context to determine how tabs should be fixed but may have gotten it wrong
+# in places.
+# 
+# YOU HAVE BEEN WARNED
+#
+# 5102 yluJ ,nosinniK ffeJ - ETON
+###############################################################################
 
 from util import typecheck, returns, makedirs_parent
 import aweclasses
@@ -231,7 +248,8 @@ class OneColor(IResampler):
                         # the output file as well.
                         w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
-                        histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
+                        histfile_fd.write(str(w.initid)+','+ \
+                            str(currentWalker.id)+','+str(w.id)+'\n')
 
 
                     ### update the weights for the current walker and mark
@@ -284,22 +302,63 @@ class MultiColor(OneColor):
 
     """
     awe.resample.MultiColor
+
+    A resampler for handling multiple macro-states (metastable states)
+    by following transitions between states and resampling each
+    individually.
+
+    Fields:
+        targetwalkers    - the number of walkers, creates a target weight
+        histfile         - the path to walker-history.csv
+        partition        - awe.aweclasses.SinkStates instance
+        transitions      - a matrix containing transition rates between
+                           macro-states
+        iteration        - the current iteration of the 
+        cellweights_path - the path to cell-weights.csv
+        tmat_path        - the path to color-transition-matrix.csv
+        tmat_header      - the header for the color-transition-matrix.csv file
+
+
+    Methods:
+        resample         - resample across multiple states
+        save_transitions - output the state transition matrix
     """
 
     def __init__(self, nwalkers, partition):
+        
+        """
+        awe.resample.MultiColor.__init__
+
+        Initialize a new instance of MultiColor.
+
+        Parameters:
+            nwalkers  - the target number of walkers
+            partition - an aweclasses.SinkStates instance
+
+        Returns: 
+            None
+        """
+
+        # Set up the output filepath and target weights
         OneColor.__init__(self, nwalkers)
+
+        # Partitioning of the states (e.g. conformation space cells)
         self.partition   = partition
         ncolors          = partition.ncolors
+        
+        # Matrix to store transitions between states
         self.transitions = np.zeros((ncolors, ncolors))
-	self.iteration = 1
+	    self.iteration = 1
 
+        # PAths to output files and necessary header information
         self.cellweights_path = os.path.join(OUTPUT_DIR, 'cell-weights.csv')
         makedirs_parent(self.cellweights_path)
-	of = open(self.cellweights_path,'a')
-	of.write('%iteration,cellid,color,total_weight \n')
+    	of = open(self.cellweights_path,'a')
+    	of.write('%iteration,cellid,color,total_weight \n')
         of.close()
 
-        self.tmat_path = os.path.join(OUTPUT_DIR, 'color-transition-matrix.csv')
+        self.tmat_path = os.path.join(OUTPUT_DIR,
+                'color-transition-matrix.csv')
         self.tmat_header = textwrap.dedent(
             """\
             # An ((N+1)*2, 2, 2) matrix, where N is the number of iterations
@@ -313,86 +372,290 @@ class MultiColor(OneColor):
 
     def resample(self, system):
 
+        """
+        awe.resample.MultiColor.resample
+
+        Resample over multiple cells by calling the OneColor algorithm on each
+        in succession. Note: look into parallelizing running the OneColor algo
+        on each cell.
+
+        Parameters:
+            system - a processed instance of aweclasses.System to be resampled
+
+        Returns:
+            A new aweclasses.System instance representing the resampled input
+            system
+        """
+
         ### update colors
-        ncolors          = self.partition.ncolors
+        # Create a new transition matrix representing the current set of
+        # macro-states.
+        ncolors = self.partition.ncolors
         trans = np.zeros((ncolors,ncolors))
 
+        # Process each walker in the system
         for w in system.walkers:
+            # Determine the previous and current states of the walker
             cell     = system.cell(w.assignment)
             oldcolor = w.color
             newcolor = cell.core
 
             # sanity check: all walkers must have a color, but not all cells have a core.
+            # Make sure that all walkers are in a state
             assert w.color is not None
             assert w.color >= 0
 
+            # Update the walker to reflect its current state
+            # Most of this seems redundant from above.
             if not cell.core == aweclasses.DEFAULT_CORE and not w.color == cell.core:
-                oldcolor = w.color
-                newcolor = cell.core
+                oldcolor = w.color   # This line seems redundant
+                newcolor = cell.core # This line seems redundant
                 print 'Updating color:', w, oldcolor, '->', newcolor
-                w.color = newcolor
+                w.color = newcolor # Here we actually update the walker
             else:
+                # This is redundant. If the two are already equal the
+                # assignment changes nothing, and this branch is only accessed
+                # when the two are equal.
                 oldcolor = newcolor = w.color
 
+            # Add the transition to the transition matrix.
             trans[oldcolor, newcolor] += w.weight
+        
+        # Add all transitions to the instance transition matrix
         self.transitions = np.append(self.transitions,trans,axis=0)
 
         ### resample individual colors using OneColor algorithm
         newsystem = aweclasses.System(topology=system.topology)
+        
+        # Do resampling per state using the above OneColor algorithm
         for color in system.colors:
+            # Get all walkers of the color
             thiscolor  = system.filter_by_color(color)
             print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
+            
+            # Perform resampling and add to the new system
             resampled  = OneColor.resample(self, thiscolor)
             newsystem += resampled
 
+        # Output information about the new system for restart and analysis use
         of = open(self.cellweights_path,'a')
         for cell in newsystem.cells:
-	    thiscell = system.filter_by_cell(cell)
-	    for color in thiscell.colors:
-	        thiscolor = thiscell.filter_by_color(color)
-		of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
-    	of.close()
-	    self.iteration += 1
+            # Get the corresponding cell from the old system
+    	    thiscell = system.filter_by_cell(cell)
+    	    
+            for color in thiscell.colors:
+                # Get the corresponding color from the cell in the old system
+    	        thiscolor = thiscell.filter_by_color(color)
 
+                # Output information about the cell and color
+    	        of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+ \
+                    ','+str(sum(thiscolor.weights))+'\n')
+        of.close()
+
+        # This iteration is finished, so increment
+        self.iteration += 1
+
+        # Output the transition matrix
         self.save_transitions(self.tmat_path)
 
         return newsystem
 
     def save_transitions(self, path):
+
+        """
+        awe.resample.MultiColor.save_transitions
+
+        Output the state transition matrix to a file.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         print time.asctime(), 'Saving transition matrix to', repr(path)
         fd = open(path, 'w')
+        
         try:
+            # Output the transitions from this iteration only
             fd.write(self.tmat_header)
+
+            # This saves the current transitions in case of failure
             np.savetxt(fd, self.transitions, delimiter=',')
+        
         finally:
             fd.close()
 
+
+
+
+############# END OF CLASSES USED BY BADI's AWE-WQ IMPLEMENTATION #############
+
+# Classes beyond this point were used in the release version od AWE and are
+# either legacy classes or those to be implemented in the future.
+
+
+
 class SuperCell(MultiColor):
+
+    """
+    awe.resample.SuperCell
+
+    THIS DOES NOT SEEM TO BE USED. There is not much context for determining
+    the purpose of this class, so any explanations for additions to the
+    MultiColor class are interpretations of the code.
+
+    This class seems to allow saving the state partitioning scheme into an
+    arbitrary list, and then walkers are assigned cells from that list. It acts
+    as an abstraction for determining which cells walkers are in, however that
+    abstraction seems to break down after one iteration. Possibly intended to
+    restart AWE from the last iteration it completed by re-performing
+    resampling based on a saved cell state.
+
+    Fields: 
+        targetwalkers    - the number of walkers, creates a target weight
+        histfile         - the path to walker-history.csv
+        partition        - awe.aweclasses.SinkStates instance
+        transitions      - a matrix containing transition rates between
+                           macro-states
+        iteration        - the current iteration of the 
+        cellweights_path - the path to cell-weights.csv
+        tmat_path        - the path to color-transition-matrix.csv
+        tmat_header      - the header for the color-transition-matrix.csv file
+        cellmap          - 
+
+    Methods:
+        resample         - 
+        save_transitions -
+    """
+
     def __init__(self,nwalkers,partition,cellmapf):
+
+        """
+        awe.resample.SuperCell.__init__
+
+        Initialize a new instance of SuperCell.
+
+        Parameters:
+            nwalkers  - the target number of walkers for the system
+            partition - a partitioning of the system states
+            cellmapf  - a file containing the mapping of walkers into cells?
+        """
+
         MultiColor.__init__(self,nwalkers,partition)
         self.cellmap = []
         for line in open(cellmapf):
             self.cellmap.append(int(line))
 
     def resample(self,system):
+        
+        """
+        awe.resample.SuperCell.resample
+
+        A resampling that pulls walker cell assignments from an external file
+        and then resamples the whole system under MultiColor. Given that the
+        assignments are left in post-mapping state at the end of the method,
+        it cannot be used multiple times.
+
+        Parameters:
+            system - a processed aweclasses.System object
+
+        Returns:
+            A new aweclasses.System instance representing the resampled input 
+            system
+        """
+        
         cellmap = self.cellmap
+        
+        # Determine the cell that each walker is assigned to so that
+        # cells can be stored in some arbitrary order (?)
         for w in system.walkers:
             w.assignment = cellmap[w.assignment]
+
+        # Perform MultiColor resampling
         newsystem = MultiColor.resample(self,system)
+        
+        # Save the transition matrix
         tmat = os.path.join(OUTPUT_DIR, 'transition-matrix.csv')
         makedirs_parent(tmat)
         MultiColor.save_transitions(tmat)
+
         return newsystem
 
 class IPlotter(IResampler):
 
+    """
+    awe.resampler.IPlotter
+
+    NOTE: This class uses legacy nomenclature "walkergroup", so it was likely
+    never actually used. However, a utility for plotting attributes of a system
+    is definitely interesting.
+
+    The interface for a plotting utility with resampling capability.
+
+    Fields:
+        plotfile - the file to which the plot should be saved
+
+    Methods:
+        resample - potential method for resampling
+        compute  - potential function for computing plot variables
+        plot     - potential method for plotting computed variables
+    """
+
     def __init__(self, **kws):
+        
+        """
+        awe.resample.IPlotter.__init__
+
+        Compute some attribute of the system passed in.
+
+        Parameters:
+            kws - keyword arguments
+                  "plotfile": a file to save the plot to
+
+        Returns:
+            None
+        """
+
         self.plotfile = kws.pop('plotfile', 'plot.png')
 
     def compute(self, walkergroup):
+
+        """
+        awe.resample.IPlotter.compute
+
+        Compute some attribute of the system passed in.
+
+        Parameters:
+            walkergroup - a system for which attributes should be computed
+
+        Raises:
+            NotImplementedError
+
+        Returns:
+            None
+        """
+
         raise NotImplementedError
 
     def plot(self):
+
+        """
+        awe.resample.IPlotter.plot
+
+        Plot some computed attribute of the system passed in.
+
+        Parameters:
+            None
+
+        Raises:
+            NotImplementedError
+
+        Returns:
+            None
+        """
+
         raise NotImplementedError
 
     def __call__(self, walkers):
@@ -404,17 +667,54 @@ class IPlotter(IResampler):
 class ISaver(IResampler):
 
     """
-    Save after each resampling procedure
+    awe.resample.ISaver
+
+    Utility for saving information after each resampling.
+
+    Fields:
+        resampler - a subclass of IResampler
+        datfile   - the filepath to which data should be saved
+        iteration - the iteration of the resampling algorithm
+
+    Methods:
+        resample - resample a system by the resampler
+        save     - save data to datfile
+        heading  - the heading for the datfile
     """
 
     @typecheck(IResampler, datfile=str)
     def __init__(self, resampler, datfile='isaver.dat'):
+
+        """
+        awe.resample.ISaver.__init__
+
+        Initialize a new instance of ISaver.
+
+        Parameters:
+            resampler - a resampler class to use for the actual resampling
+            datfile   - the file to which data should be saved
+
+        Returns:
+            None
+        """
+
         self.resampler = resampler
         self.datfile   = datfile
         self.iteration = 0
 
     @typecheck(aweclasses.System, mode=str)
     def save(self, system, mode='a'):
+
+        """
+        awe.resample.ISaver.save
+
+        Save data to datfile.
+
+        Parameters:
+            system - an instance of aweclasses.System to be saved
+            mode   - the mode in which to open datfile
+        """
+
         if self.iteration == 0:
             with open(self.datfile, 'a') as fd:
                 fd.write(self.heading())
@@ -422,6 +722,19 @@ class ISaver(IResampler):
 
     @returns(str)
     def heading(self):
+
+        """
+        awe.resample.ISaver.heading
+
+        Get the heading for the output data.
+
+        Parameters:
+            None
+
+        Returns:
+            The heading for the output file
+        """
+
         return self._heading()
 
     def _save(self, system, mode='a'):
@@ -434,6 +747,19 @@ class ISaver(IResampler):
     @returns(aweclasses.System)
     def resample(self, system):
 
+        """
+        awe.resample.ISaver.resample
+
+        Call the resampler and save the new system to file.
+
+        Parameters:
+            system - an instance of aweclasses.System to be resampled and saved
+
+        Returns:
+            A new aweclasses.System instance representing the resampled input 
+            system
+        """
+
         newsystem = self.resampler.resample(system)
         self.iteration += 1
         self.save(newsystem, mode='a')
@@ -442,7 +768,34 @@ class ISaver(IResampler):
 
 class SaveWeights(ISaver):
 
+    """
+    awe.resample.SaveWeights
+
+    A utility for saving walker weights to a file.
+
+    Fields:
+        resampler - a subclass of IResampler
+        datfile   - the filepath to which data should be saved
+        iteration - the iteration of the resampling algorithm
+
+    Methods:
+        resample - resample a system by the resampler
+        save     - save data to datfile
+        heading  - the heading for the datfile
+    """
+
     def __init__(self, resampler, datfile=None):
+
+        """
+        awe.resample.SaveWeights.__init__
+
+        Initialize a new instance of SaveWeights.
+
+        Parameters:
+            resampler - a subclass of IResampler
+            datfile   - the filepath to which data should be saved
+        """
+
         datfile = datfile or os.path.join(OUTPUT_DIR, 'walker-weights.csv')
         ISaver.__init__(self, resampler, datfile=datfile)
 
