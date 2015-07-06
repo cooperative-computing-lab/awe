@@ -36,10 +36,7 @@ OUTPUT_DIR = os.getcwd()
 
 
 class IResampler(object):
-
     """
-    awe.resample.IResampler
-
     Interface that all resampling methods should implement.
 
     Fields:
@@ -52,8 +49,6 @@ class IResampler(object):
 
     def resample(self, walkers):
         """
-        awe.IResampler.resample
-
         Placeholder for implementation in subclasses.
 
         Parameters:
@@ -73,10 +68,7 @@ class IResampler(object):
 
 
 class Identity(IResampler):
-
     """
-    awe.resample.Identity
-
     A resampler that does not alter the System it receives.
 
     Fields:
@@ -87,10 +79,7 @@ class Identity(IResampler):
     """
 
     def resample(self, walkers):
-
         """
-        awe.resample.Identity.resample
-
         Perform the identity operation on the System.
 
         Parameters:
@@ -104,10 +93,7 @@ class Identity(IResampler):
 
 
 class OneColor(IResampler):
-
     """
-    awe.resample.OneColor
-
     A single/no color algorithm based on Eric Darve and Ernest Ryu's:
       "Computing reaction rates in bio-molecular systems using discrete
        macro-states"
@@ -126,10 +112,7 @@ class OneColor(IResampler):
     """
 
     def __init__(self, targetwalkers):
-
         """
-        awe.resample.OneColor.__init__
-
         Initialize a new instance of OneColor.
 
         Parameters:
@@ -147,10 +130,7 @@ class OneColor(IResampler):
             fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
-
         """
-        awe.resample.OneColor.resample
-
         Adjust weights of a processed group of walkers to meet the target group
         assuming there exists only one metastable state (macro-state).
 
@@ -299,10 +279,7 @@ class OneColor(IResampler):
         return newsystem
 
 class MultiColor(OneColor):
-
     """
-    awe.resample.MultiColor
-
     A resampler for handling multiple macro-states (metastable states)
     by following transitions between states and resampling each
     individually.
@@ -325,10 +302,7 @@ class MultiColor(OneColor):
     """
 
     def __init__(self, nwalkers, partition):
-        
         """
-        awe.resample.MultiColor.__init__
-
         Initialize a new instance of MultiColor.
 
         Parameters:
@@ -371,10 +345,7 @@ class MultiColor(OneColor):
 
 
     def resample(self, system):
-
         """
-        awe.resample.MultiColor.resample
-
         Resample over multiple cells by calling the OneColor algorithm on each
         in succession. Note: look into parallelizing running the OneColor algo
         on each cell.
@@ -461,10 +432,7 @@ class MultiColor(OneColor):
         return newsystem
 
     def save_transitions(self, path):
-
         """
-        awe.resample.MultiColor.save_transitions
-
         Output the state transition matrix to a file.
 
         Parameters:
@@ -498,10 +466,7 @@ class MultiColor(OneColor):
 
 
 class SuperCell(MultiColor):
-
     """
-    awe.resample.SuperCell
-
     THIS DOES NOT SEEM TO BE USED. There is not much context for determining
     the purpose of this class, so any explanations for additions to the
     MultiColor class are interpretations of the code.
@@ -531,10 +496,7 @@ class SuperCell(MultiColor):
     """
 
     def __init__(self,nwalkers,partition,cellmapf):
-
         """
-        awe.resample.SuperCell.__init__
-
         Initialize a new instance of SuperCell.
 
         Parameters:
@@ -549,10 +511,7 @@ class SuperCell(MultiColor):
             self.cellmap.append(int(line))
 
     def resample(self,system):
-        
         """
-        awe.resample.SuperCell.resample
-
         A resampling that pulls walker cell assignments from an external file
         and then resamples the whole system under MultiColor. Given that the
         assignments are left in post-mapping state at the end of the method,
@@ -584,10 +543,7 @@ class SuperCell(MultiColor):
         return newsystem
 
 class IPlotter(IResampler):
-
     """
-    awe.resampler.IPlotter
-
     NOTE: This class uses legacy nomenclature "walkergroup", so it was likely
     never actually used. However, a utility for plotting attributes of a system
     is definitely interesting.
@@ -604,10 +560,7 @@ class IPlotter(IResampler):
     """
 
     def __init__(self, **kws):
-        
         """
-        awe.resample.IPlotter.__init__
-
         Compute some attribute of the system passed in.
 
         Parameters:
@@ -621,10 +574,7 @@ class IPlotter(IResampler):
         self.plotfile = kws.pop('plotfile', 'plot.png')
 
     def compute(self, walkergroup):
-
         """
-        awe.resample.IPlotter.compute
-
         Compute some attribute of the system passed in.
 
         Parameters:
@@ -640,10 +590,7 @@ class IPlotter(IResampler):
         raise NotImplementedError
 
     def plot(self):
-
         """
-        awe.resample.IPlotter.plot
-
         Plot some computed attribute of the system passed in.
 
         Parameters:
@@ -665,10 +612,7 @@ class IPlotter(IResampler):
         return ws
 
 class ISaver(IResampler):
-
     """
-    awe.resample.ISaver
-
     Utility for saving information after each resampling.
 
     Fields:
@@ -684,10 +628,7 @@ class ISaver(IResampler):
 
     @typecheck(IResampler, datfile=str)
     def __init__(self, resampler, datfile='isaver.dat'):
-
         """
-        awe.resample.ISaver.__init__
-
         Initialize a new instance of ISaver.
 
         Parameters:
@@ -704,10 +645,7 @@ class ISaver(IResampler):
 
     @typecheck(aweclasses.System, mode=str)
     def save(self, system, mode='a'):
-
         """
-        awe.resample.ISaver.save
-
         Save data to datfile.
 
         Parameters:
@@ -722,10 +660,7 @@ class ISaver(IResampler):
 
     @returns(str)
     def heading(self):
-
         """
-        awe.resample.ISaver.heading
-
         Get the heading for the output data.
 
         Parameters:
@@ -746,10 +681,7 @@ class ISaver(IResampler):
     @typecheck(aweclasses.System)
     @returns(aweclasses.System)
     def resample(self, system):
-
         """
-        awe.resample.ISaver.resample
-
         Call the resampler and save the new system to file.
 
         Parameters:
@@ -767,10 +699,7 @@ class ISaver(IResampler):
         return newsystem
 
 class SaveWeights(ISaver):
-
     """
-    awe.resample.SaveWeights
-
     A utility for saving walker weights to a file.
 
     Fields:
@@ -785,10 +714,7 @@ class SaveWeights(ISaver):
     """
 
     def __init__(self, resampler, datfile=None):
-
         """
-        awe.resample.SaveWeights.__init__
-
         Initialize a new instance of SaveWeights.
 
         Parameters:
