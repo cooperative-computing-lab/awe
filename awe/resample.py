@@ -21,16 +21,29 @@ OUTPUT_DIR = os.getcwd()
 class IResampler(object):
 
     """
-    Interface that all resampling methods should implement
+    awe.resample.IResampler
+
+    Interface that all resampling methods should implement.
+
+    Fields:
+        None
+
+    Methods:
+        resample - divide and kill off walkers until weights are equal to
+                   the group's mean weight
     """
 
     def resample(self, walkers):
         """
+        awe.IResampler.resample
+
+        Placeholder for implementation in subclasses.
+
         Parameters:
-          *walkers* : an object of type awe.aweclasses.WalkerGroup
+          walkers - an awe.aweclasses.System instance
 
         Returns:
-          a new awe.aweclasses.WalkerGroup instance
+          A new awe.aweclasses.System instance
         """
 
         raise NotImplementedError
@@ -45,21 +58,70 @@ class IResampler(object):
 class Identity(IResampler):
 
     """
-    the identity function
+    awe.resample.Identity
+
+    A resampler that does not alter the System it receives.
+
+    Fields:
+        None
+
+    Methods:
+        resample - returns the identity of the System
     """
 
     def resample(self, walkers):
+
+        """
+        awe.resample.Identity.resample
+
+        Perform the identity operation on the System.
+
+        Parameters:
+            walkers - an awe.aweclasses.System instance
+
+        Returns:
+            The supplied awe.aweclasses.System instance
+        """
+
         return walkers
 
 
 class OneColor(IResampler):
 
     """
+    awe.resample.OneColor
+
     A single/no color algorithm based on Eric Darve and Ernest Ryu's:
-      "Computing reaction rates in bio-molecular systems using discrete macro-states"
+      "Computing reaction rates in bio-molecular systems using discrete
+       macro-states"
+    This algorithm does not try to determine which state the walker is in;
+    instead, one state is assumed and all walkers are set to the same target
+    weight.
+
+    Fields:
+        targetwalkers - a target weight that the new generation of walkers
+                        should be set to
+        histfile      - the file to which output weights are recorded
+
+    Methods:
+        resample - create a new generation of walkers by merging an splitting
+                   weights from a processed generation
     """
 
     def __init__(self, targetwalkers):
+
+        """
+        awe.resample.OneColor.__init__
+
+        Initialize a new instance of OneColor.
+
+        Parameters:
+            targetwalkers - a list of target weights to converge to (numeric)
+
+        Returns:
+            None
+        """
+
         self.targetwalkers = targetwalkers
 #####
         self.histfile = os.path.join(OUTPUT_DIR, 'walker-history.csv')
@@ -68,6 +130,19 @@ class OneColor(IResampler):
             fd.write('%origID, parentID, currentID \n')
 
     def resample(self, system):
+
+        """
+        awe.resample.OneColor.resample
+
+        Adjust weights of a processed group of walkers to meet the target group
+        assuming there exists only one metastable state (macro-state).
+
+        Parameters:
+            system - an awe.aweclasses.System instance
+
+        Returns:
+            A new awe.aweclasses.System instance with adjusted weights
+        """
 
         histfile_fd = open(self.histfile, 'a')
 
@@ -78,20 +153,25 @@ class OneColor(IResampler):
         for cell in system.cells:
 
             ### initialize the list of weights for walkers in the current cell
-            localsystem = system.filter_by_cell(cell)
+            localsystem = system.filter_by_cell(cell) # Get walkers in the cell
             weights    = localsystem.weights
             walkers    = localsystem.walkers
 
             print time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers'
 
+            # Only resample if there exist walkers in the cell
             if not len(walkers) > 0: continue
 
             ### sort the walkers in descending order based on their weights,
             ##+ this ensures only walkers whose weight > targetWeight are split.
+            # This method returns a list of indices in the supplied list/array
+            # that correspond to the sorted order of the original.
             mywalkers = list(argsort(-weights))
             print '\tmywalkers:', mywalkers
 
             ### sanity check
+            # Ensure that the list of weights was sorted correctly (i.e., the
+            # largest weight comes first)
             testmaxw = float('inf')
             for i in mywalkers:
                 myw = weights[i]
@@ -105,34 +185,50 @@ class OneColor(IResampler):
             print '\tW', W, 'tw', tw
 
             ### we assume that there is at least one walker in the cell
+            # The above "continue" check ensures that there is at least one
+            # available to the algorithm. Remember that pop takes from the
+            # back of a list, so we start with the smallest weight.
             x = mywalkers.pop()
 
             ### keep track of active walkers for splitting
             activewalkers = 0
 
-            ### The algorithm terminates since the last walker removed
+            ### The algorithm terminates since the last walker is removed
             ##+ from 'mywalkers' when W == tw. The max number of
-            ##+ iterations is bounded by 'len(where(system.cell == cell) + targetwalkers'
+            ##+ iterations is bounded by
+            ##+ 'len(where(system.cell == cell) + targetwalkers'
             while True: # exit using break
 
                 Wx = weights[x]
                 currentWalker = walkers[x]
                 print '\tweight of', x, 'is', Wx
 
-                ### split
+                # Split walkers with weight geq the target weight
+                # and always split the last walker.
                 if Wx >= tw or len(mywalkers) == 0:
 
                     ### choose number of times to split
                     ##+ r = floor( Wx / tw )
                     ### min, max: work around round-off errors
+                    # Per the algorithm, a walker is split r times
+                    # corresponding to the nearest integer multiple to the
+                    # target weight (e.g., if Wx = 3.5 * tw, split 3 times).
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
                     activewalkers += r
                     print '\tactive walkers', activewalkers
 
                     ### split the current walker
+                    # Note: if r <= 0, repeat will occur 0 times.
+                    # This takes advantage of a strange bug in the python
+                    # source that sets negative times values equal to 0 in
+                    # itertools.repeat when times is not set by keyword.
+                    # CHANGE CHANGE CHANGE CHANGE CHANGE
                     print '\tsplitting', x, r, 'times'
                     for _ in itertools.repeat(x, r):
+                        # Add a new walker with the target weight to the system
+                        # for each time that the walker must be split. Update
+                        # the output file as well.
                         w = currentWalker.restart(weight=tw)
                         newsystem.add_walker(w)
                         histfile_fd.write(str(w.initid)+','+str(currentWalker.id)+','+str(w.id)+'\n')
@@ -140,30 +236,55 @@ class OneColor(IResampler):
 
                     ### update the weights for the current walker and mark
                     ##+ for reconsideration
+                    # Decrease the current weight to be less than or equal to
+                    # the target weight if there are not enough walkers for the
+                    # new system and put the walker back on the evaluation list
                     if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
                         mywalkers.append(x)
                         weights[x] = Wx - r * tw
                         print '\tupdated weights of', x
 
                     ### continue the loop?
+                    # Keep looping until all walkers have been processed.
                     if len(mywalkers) > 0:
                         x = mywalkers.pop()
                     else: break
 
                 ### merge
+                # Merge walkers if the weight is less than the target.
                 else:
+                    # Get another walker to merge with
                     y = mywalkers.pop()
                     print '\tmerging', x, y
+
+                    # Set the merged weight to be the sum of the two weights.
                     Wy = weights[y]
                     Wxy = Wx + Wy
+
+                    # Randomly choose a walker to continue evaluating. This
+                    # effectively removes one of them from the list (i.e. one
+                    # was absorbed).
                     p = np.random.random()
                     if p < Wy / Wxy:
                         x = y
+                    
+                    # Reset the weight of the walker under evaluation to the
+                    # combined weight.
                     weights[x] = Wxy
 
+                # NOTE: if the walker was merged, a new one is not popped for
+                # evaluation in the next loop iteration. Instead, keep working
+                # with whichever was kept at the end of the merge section.
+        # Once all walkers have been processed, return the new system, which
+        # should have all walkers initialized with the target weight.
+        histfilefd.close()
         return newsystem
 
 class MultiColor(OneColor):
+
+    """
+    awe.resample.MultiColor
+    """
 
     def __init__(self, nwalkers, partition):
         OneColor.__init__(self, nwalkers)
@@ -230,8 +351,8 @@ class MultiColor(OneColor):
 	    for color in thiscell.colors:
 	        thiscolor = thiscell.filter_by_color(color)
 		of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+','+str(sum(thiscolor.weights))+'\n')
-	of.close()
-	self.iteration += 1
+    	of.close()
+	    self.iteration += 1
 
         self.save_transitions(self.tmat_path)
 
