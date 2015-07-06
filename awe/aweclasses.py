@@ -26,19 +26,45 @@ DEFAULT_CORE = -1
 class Walker(object):
 
     """
-    Capture the state of a single walker.
-    This include the starting and ending coordinates, and it's assignment
+    Container for information about a single walker.
 
-    Relevant fields are:
-
-      *start*      : starting coordinates
-      *end*        : ending coordinates
-      *assignment* : int
+    Fields:
+        id         - the id of the walker
+        cellid     - the id of the cell that the walker is currently in
+        initid     - the id of the walker at initialization
+        start      - starting atomic coordinates
+        end        - ending atomic coordinates
+        assignment - the cell assignment of the walker 
+        color      - the color of the walker
+        natoms     - the number of atoms in the walker
+        ndim       - the number of coordinate dimensions
+    
+    Methods:
+        restart - reset the walker to some initial conditions
     """
 
     def __init__(self, start=None, end=None, assignment=None, color=_DEFAULT_COLOR, weight=None, wid=None, cellid=None, initid=None):
 
-        assert not (start is None and end is None), 'start = %s, end = %s' % (start, end)
+        """
+        Initialize a new instance of Walker.
+
+        Parameters:
+            start      - a list of starting atomic coordinates
+            end        - a list of ending atomic coordinates
+            assignment - the cell to which the walker is assigned
+            color      - the color of the walker
+            weight     - the weight of the walker
+            wid        - the id of the walker
+            cellid     - the id if the cell the walker is in
+            initid     - the id of the walker at initialization
+
+        Returns:
+            None
+        """
+
+        # At least one set of atomic coordinates is needed to use the walker
+        assert not (start is None and end is None), 'start = %s, end = %s' % \
+         (start, end)
 
         self._start      = start
         self._end        = end
@@ -47,6 +73,7 @@ class Walker(object):
         self._weight     = weight
         self._cellid     = cellid
 
+        # Assign the walker the next global id number if none was suuplies
         if wid is None:
             global _WALKER_ID
             self._id     = _WALKER_ID
@@ -57,6 +84,7 @@ class Walker(object):
         self._initid    = initid or self._id
 
     def __eq__(self, other):
+
         if not type(self) is type(other):
             return False
 
@@ -68,16 +96,32 @@ class Walker(object):
 
 
     def restart(self, weight=None, cellid=None):
+
+        """
+        Reset a walker to its initial conditions.
+
+        Parameters:
+            weight - the new weight to assign the walker
+            cellid - the id of the cell the walker is currently in
+
+        Returns:
+            A new instance of Walker with the initial conditions of this Walker
+        """
+
+        # The walker must have been processed to be reset
         assert self._start is not None
         assert self._end   is not None
         assert weight      is not None
 
+        # Assign the walker a new id
         global _WALKER_ID
         wid =  _WALKER_ID
         _WALKER_ID += 1
 
+        # Tell the walker which cell it is in
         cid = cellid or self._cellid
 
+        # Initialize a new walker with the reset settings
         return Walker(start      = self._end,
                       end        = None,
                       assignment = self._assignment,
@@ -418,7 +462,29 @@ class AWE(object):
 
 class Cell(object):
 
+    """
+    Container for the state of a Cell in the molecular state space.
+
+    Fields:
+        id    - the id of the cell
+        core  - the color of the cell
+
+    Methods:
+        None
+    """
+
     def __init__(self, cid, weight=1., core=DEFAULT_CORE, walkers=None):
+
+        """
+        Initialize a new instance of Cell.
+
+        Parameters:
+            cid     - the id of the cell
+            weight  - unused; possibly legacy for MSM
+            core    - the color of the cell (see resample.OneColor for usage)
+            walkers - unused; possibly legacy for cells keeping a walker list
+        """
+
         self._id      = cid
         self._core    = core
 
@@ -430,7 +496,7 @@ class Cell(object):
     def core(self): return self._core
 
     @property
-    def color(self, wid):return self._walkers[wid].color
+    def color(self, wid): return self._walkers[wid].color
 
     def __str__(self):
         return '<Cell: %d, core=%s>' % \
@@ -450,8 +516,40 @@ class Cell(object):
 
 
 class System(object):
+    """
+    Contains all information for a working Weighted Ensemble system.
+
+    Fields:
+        topology - the topology of the molecule represented by walkers
+        cells    - the cells within the system
+        walkers  - the walkers managed by the system
+
+    Methods:
+        add_cell        - add a cell to the system
+        set_cell        - set the state of a cell in the system
+        walker          - get a particular walker from the system
+        add_walker      - add a walker to the system
+        set_walker      - set the state of a walker in the system
+        cell            - get a particular cell from the system
+        has_cell        - determine if a cell is in the system
+        filter_by_cell  - filter the walker list by walker cell id
+        filter_by_color - filter the walker list by walker color
+        filter_by_core  - filter the cell list by cell core
+        clone           - make a copy of the system
+    """
 
     def __init__(self, topology=None, cells=None):
+        """
+        Initialize a new instance of System.
+
+        Parameters:
+            topology - the topology of the molecule represented by walkers
+            cells    - a dictionary of cells in the system mapped by cell id
+
+        Returns:
+            None
+        """
+
         self._topology = topology
         self._cells    = cells or dict()
         self._walkers  = dict()
@@ -487,46 +585,136 @@ class System(object):
     @property
     # @returns(np.array)
     def weights(self):
+        """
+        Get the weights of all walkers in the System.
+        """
+        
         return np.array(map(lambda w: w.weight, self.walkers))
 
     @property
     @returns(set)
     def colors(self):
+        """
+        Get the colors of all walkers in the System.
+        """
+        
         return set(map(lambda w: w.color, self.walkers))
 
     @typecheck(Cell)
     def add_cell(self, cell):
+        """
+        Add a cell to the system cell dictionary.
+
+        Parameters:
+            cell - a cell to add that has the 'id' attribute
+
+        Returns:
+            None
+        """
+
         if cell.id in self._cells:
             raise ValueError, 'Duplicate cell id %d' % cell.id
         self.set_cell(cell)
 
     @typecheck(Cell)
     def set_cell(self, cell):
+        """
+        Update the state of a cell in the System.
+
+        Parameters:
+            cell - the cell to update that has the 'id' attribute
+
+        Returns:
+            None
+        """
+
         self._cells[cell.id] = cell
 
     @returns(Walker)
     def walker(self, wid):
+        """
+        Find a walker in the System.
+
+        Parameters:
+            wid - the id of the walker to find
+
+        Returns:
+            The walker with the supplied id or None if it is not in the System
+        """
+
         return self._walkers[wid]
 
     @typecheck(Walker)
     def add_walker(self, walker):
+        """
+        Add a walker to the System.
+
+        Parameters:
+            walker - a walker with attribute 'id' to add
+
+        Returns:
+            None
+        """
+
         assert walker.assignment >= 0, 'is: %s' % walker.assignment
         self.set_walker(walker)
 
     @typecheck(Walker)
     def set_walker(self, walker):
+        """
+        Update the state of a walker in the System.
+
+        Parameters:
+            walker - a walker with attribute 'id'
+
+        Returns:
+            None
+        """
+
         self._walkers[walker.id] = walker
 
     @returns(Cell)
     def cell(self, i):
+        """
+        Get a cell from the System.
+
+        Parameters:
+            i - the id of the cell to get
+
+        Returns:
+            The cell with the supplied id or None if it is not in the System
+        """
+
         return self._cells[i]
 
     @returns(bool)
     def has_cell(self, i):
+        """
+        Determine if a cell is in the System.
+
+        Parameters:
+            i - the id of the cell to find
+
+        Returns:
+            A Boolean value representing whether or not a call with the
+            supplied id is in the System
+        """
+
         return i in self._cells
 
     # @returns(System)
     def filter_by_cell(self, cell):
+        """
+        Filter the walker list to include only walkers in the specified cell.
+
+        Parameters:
+            cell - the cell by which to filter
+
+        Returns:
+            A new System instance containing only walkers that are in the
+            supplied cell
+        """
+
         ws     = filter(lambda w: w.assignment == cell.id, self.walkers)
         newsys = self.clone(cells={cell.id:self.cell(cell.id)})
         for w in ws: newsys.add_walker(w)
@@ -534,6 +722,17 @@ class System(object):
 
     # @returns(System)
     def filter_by_color(self, color):
+        """
+        Filter the walker list to include only walkers of a specified color.
+
+        Parameters:
+            color - the color by which to filter
+
+        Returns:
+            A new System instance containing only walkers that are of the
+            supplied color
+        """
+
         ws     = filter(lambda w: w.color == color, self.walkers)
         newsys = self.clone()
 
@@ -548,6 +747,17 @@ class System(object):
 
     # @returns(System)
     def filter_by_core(self, core):
+        """
+        Filter the cell list to include only walkers of a specified core.
+
+        Parameters:
+            core - the core by which to filter
+
+        Returns:
+            A new System instance containing only cells that are of the
+            supplied core
+        """
+
         cells  = filter(lambda c: c.core == core, self.cells)
         cs     = {}
         for c in cells: cs[c.id] = c
@@ -560,22 +770,79 @@ class System(object):
         return newsys
 
     def clone(self, cells=True):
+        """
+        Make a copy the System instance.
+
+        Parameters:
+            cells - True to copy the current cell dictionary, False to start
+                    with an empty cell dictionary
+
+        Returns:
+            A new instance of System with the same topology as the caller and
+            either a copy of the cell dictionary or an empty cell dictionary
+            depending on the supplied flag
+        """
+
         _cells = self._cells if cells else dict()
         return System(topology=self.topology, cells=_cells)
 
 
 class SinkStates(object):
+    """
+    Manager for associating a color with states and vice-versa.
+
+    Fields:
+        None
+
+    Methods:
+        add    - add states by color
+        color  - get the color of a cell
+        states - get the set of states of a color
+    """
 
     def __init__(self):
+        """
+        Initialize a new instance of SinkStates.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
+        # Note that each color has an associated ***set*** of states
         self._color_state = defaultdict(set)
         self._state_color = dict()
 
     def add(self, color, *states):
+        """
+        Add states and associate them with a color.
+
+        Parameters:
+            color  - the color to associate with the states
+            states - a list of states (cell ids) to add
+
+        Returns:
+            None
+        """
+
         for state in states:
             self._color_state[color].add(state)
             self._state_color[state] = color
 
     def color(self, cell):
+        """
+        Determine the color of a particular cell.
+
+        Parameters:
+            cell - a cell with property 'id' to find
+
+        Returns:
+            The color of the cell or the global default color if it does not
+            have an associated color.
+        """
+
         if cell.id in self._state_color:
             return self._state_color[cell.id]
         else:
@@ -583,6 +850,17 @@ class SinkStates(object):
             return _DEFAULT_COLOR
 
     def states(self, color):
+        """
+        Get the set of states associated with a color.
+
+        Parameters:
+            color - the color to find
+
+        Returns:
+            The set of states associated with the supplied color or None if
+            no states of that color exist.
+        """
+
         return self._color_state[color]
 
     @property
