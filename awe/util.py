@@ -13,10 +13,7 @@ import os
 class TypeException (Exception): pass
 
 class _typecheck(object):
-
     """
-    awe.util._typecheck
-
     Utility for checking that the types of parameters passed to functions are
     of the correct type.
 
@@ -33,10 +30,7 @@ class _typecheck(object):
     """
 
     def __init__(self, method=True):
-
         """
-        awe.util._typecheck.__init__
-
         Initialize a new _typecheck instance.
 
         Parameters:
@@ -49,10 +43,7 @@ class _typecheck(object):
         self.method = method
 
     def check(self, *args, **kws):
-
         """
-        awe.util._typecheck.__init__
-
         Assign the arguments and keyword arguments to their instance fields,
         including accounting for the fact that Python sends a reference to the
         object instance when calling a method.
@@ -76,10 +67,7 @@ class _typecheck(object):
         return self
 
     def typecheck(self, value, expected, name='', arg=-1):
-
         """
-        awe.util._typecheck.typecheck
-
         Check that a value's type matches the expected type for that value.
 
         Parameters: 
@@ -100,10 +88,7 @@ class _typecheck(object):
              raise TypeException, '%s expected: %s, but got: %s' % (name or 'param %s' % arg, expected, typ)
 
     def __call__(self, fn):
-        
         """
-        awe.util._typecheck.__call__
-
         The action taken when a _typecheck instance is called. This allows it
         to wrap functions and have them called like normal while performing the
         _typecheck functionality behind-the-scenes.
@@ -144,10 +129,7 @@ class _typecheck(object):
         return wrapped
 
 class returns(object):
-
     """
-    awe.util.returns
-
     Utility for checking the type of a function or method return value.
 
     Fields:
@@ -180,10 +162,7 @@ class returns(object):
     def expected(self): return self._expected
 
     def typecheck(self, value):
-        
         """
-        awe.util.returns.typecheck
-
         Check the type of the return value against the expected type.
 
         Parameters:
@@ -197,10 +176,7 @@ class returns(object):
         return typ is self.expected
 
     def __call__(self, fn):
-
         """
-        awe.util.returns.__call__
-
         Wrap the function whose return value is to be evaluated in a function
         that does the return value type checking.
 
@@ -229,10 +205,7 @@ class returns(object):
 
 
 def typecheck(*args, **kws):
-
     """
-    awe.util.typecheck
-
     Initialize a new _typecheck instance for a method
 
     Parameters:
@@ -249,10 +222,7 @@ def typecheck(*args, **kws):
 
 
 def typecheckfn(*args, **kws):
-
     """
-    awe.util.typecheckfn
-
     Initialize a new _typecheck instance for a function
 
     Parameters:
@@ -270,8 +240,6 @@ def typecheckfn(*args, **kws):
 
 def deprecated(fn):
     """
-    awe.util.deprecated
-
     Mark a function as deprecated and notify the user.
 
     Parameters:
@@ -293,10 +261,7 @@ def deprecated(fn):
 
 
 def checkpicklable(d):
-    
     """
-    awe.util.checkpicklable
-
     Check an iterable to determine if it can be pickled.
 
     Parameters:
@@ -331,10 +296,7 @@ def checkpicklable(d):
 
 
 def abspath(p):
-
     """
-    awe.util.abspath
-
     Expand a filepath to its absolute representation.
 
     Parameters:
@@ -347,10 +309,7 @@ def abspath(p):
     return os.path.abspath(os.path.expanduser(os.path.expandvars(p)))
 
 def makedirs_parent(p):
-    
     """
-    awe.util.makedirs_parent
-
     Makes a directory on a filepath if it does not exist.
 
     Parameters:
