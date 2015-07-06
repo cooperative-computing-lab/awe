@@ -195,38 +195,88 @@ class AWE(object):
 
     """
     The main driver for the Accelerated Weighted Ensemble algorithm.
+    
     This class manages the marshaling of workers to/from workers,
     updating the current WalkerGroup, and calling the resampleing
     algorithm.
+
+    Fields:
+        wq             - 
+        system         -
+        iterations     -
+        resample       -
+        iteration      -
+        currenttask    -
+        stats          -
+        traxlogger     -
+        checkpointfreq -
+
+    Methods:
+        checkpoint               - 
+        logwalker                - 
+        recover                  - 
+        run                      - 
+        encode_task_tag          - 
+        decode_from_task_tag     - 
+        marshal_to_task          - 
+        specify_task_output_file - 
+        marshal_from_task        - 
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
                  traxlogger = None, checkpointfreq=1):
+        """
+        Initialize a new instance of AWE.
+
+        Parameters:
+            wqconfig       - workqueue.Config instance for WorkQueue settings
+            system         - the aweclasses.System instance to run
+            iterations     - the number of iterations to run
+            resample       - the resampler (typically resample.MultiColor)
+            traxlogger     - trax logging utility (see trax module)
+            checkpointfreq - how often a restart checkpoint should be recorded
+
+        Returns:
+            None
+        """
 
         self._print_start_screen()
         
-	self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
-        self.transitionslogger = stats.StatsLogger('debug/cell-transitions.log.gz')
+        self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
+        self.transitionslogger = stats.StatsLogger(
+            'debug/cell-transitions.log.gz')
 
-        self.wq         = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
-        self.system     = system
+        self.wq = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
+        self.system = system
         self.iterations = iterations
-        self.resample   = resample
+        self.resample = resample
 
-        self.iteration  = 0
+        self.iteration = 0
 
-	self.currenttask = 0
+        self.currenttask = 0
 
-        self.stats      = stats.AWEStats(logger=self.statslogger)
+        self.stats = stats.AWEStats(logger=self.statslogger)
 
-        self.traxlogger = traxlogger or trax.SimpleTransactional(checkpoint = 'debug/trax.cpt',
-                                                                 log        = 'debug/trax.log')
+        self.traxlogger = traxlogger or trax.SimpleTransactional(
+                                            checkpoint='debug/trax.cpt',
+                                            log='debug/trax.log')
+        
         self.checkpointfreq = checkpointfreq
 
         self._firstrun  = True
 
     def _print_start_screen(self):
+        """
+        Print the software development credits.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         start_str = "********************************* AWE - Acclerated Weighted Ensemble *******************************\n"
         start_str += "AUTHORS:\n"
         start_str += "  Badi' Abdul-Wahid\n"
@@ -249,36 +299,97 @@ class AWE(object):
         print start_str
 
     def checkpoint(self):
+        """
+        Create a checkpoint from which to restart. Replacement for pickling.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         cpt = self.traxlogger.cpt_path
+
         if os.path.exists(cpt):
             shutil.move(cpt, cpt + '.last')
+
         chk = dict(system         = self.system,
                    iterations     = self.iterations,
                    iteration      = self.iteration,
                    resample       = self.resample,
                    checkpointfreq = self.checkpointfreq
                    )
+
         chk['_firstrun'] = self._firstrun
         self.traxlogger.checkpoint(chk)
 
 
     def logwalker(self, walker):
+        """
+        Output log information for a walker.
+
+        Parameters:
+            walker - a walker to log
+
+        Returns:
+            None
+        """
+
         self.traxlogger.log(walker)
 
     def _trax_log_recover(self, obj, value):
+        """
+        Recover a walker from its log information. See trax module.
+
+        Parameters:
+            obj   - the AWE instance
+            value - the walker to recover
+
+        Returns:
+            None
+        """
+
         print 'Recovering walker', value.id
+
+        # Add the walker back into the system
         obj['system'].set_walker(value)
 
     def recover(self):
+        """
+        Recover from interruption using the last checkpoint. Populates the AWE
+        instance using values from the checkpoint. Likely used with a new run.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         cpt = self.traxlogger.cpt_path
+
         if os.path.exists(cpt):
             print 'Recovering', cpt
+
+            # Get all attributes from the checkpoint
             parms = self.traxlogger.recover(self._trax_log_recover)
+            
+            # Reset all AWE parameters
             for a in parms.iterkeys():
                 setattr(self, a, parms[a])
 
 
     def _submit(self):
+        """
+        Send each walker in the system to WorkQueue as a task to be executed.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
 
         for walker in self.system.walkers:
             if walker.end is None:
@@ -288,42 +399,102 @@ class AWE(object):
     @typecheck(Walker)
     @returns(workqueue.WQ.Task)
     def _new_task(self, walker):
-	self.currenttask += 1
+        """
+        Create a new WorkQueue Task and give it the correct files to run.
+
+        Parameters:
+            walker - the walker to assign to the task
+
+        Returns:
+            A WorkQueue Task instance for running the walker
+        """
+
+        self.currenttask += 1
+        
+        # Give the task an identity
         task = self.wq.new_task()
         tag  = self.encode_task_tag(walker)
         task.specify_tag(tag)
+
+        # Give the task the information it needs
         self.marshal_to_task(walker, task)
         return task
 
     def _try_duplicate_tasks(self):
+        """
+        Attempt to duplicate tasks to see if they can be run on idle workers.
+        Useful in the event that some workers are faster.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
         i = 0
+        # Duplicate tasks until no more can be duplicated
         while self.wq.can_duplicate_tasks():
             i += 1
             if i > 20: break
-            tag    = self.wq.select_tag()
+            
+            # Get a task that can be duplicated if one exists
+            tag = self.wq.select_tag()
+
+            # Return if no tasks can be duplicated
             if tag is None: break
+
+            # Get walker info, create a new task for it, ans submit the task
             wid    = self.decode_from_task_tag(tag)['walkerid']
             walker = self.system.walker(wid)
             task   = self._new_task(walker)
             self.wq.submit(task)
 
     def _recv(self):
+        """
+        Receive completed tasks and assign their results to the System.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
 
         print time.asctime(), 'Receiving tasks'
         system = self.system
+
+        # Start recording AWE statistics for the receive phase
         self.stats.time_barrier('start')
+
+        # Receive tasks until there are none left to receive
         while not self.wq.empty:
+            # Get the walker results and store/save them
             walker = self.wq.recv(self.marshal_from_task)
             system.set_walker(walker)
             self.logwalker(walker)
+
+            # Attempt to duplicate any slow walkers
             self._try_duplicate_tasks()
+
+        # Stop recording stats
         self.stats.time_barrier('stop')
         self.wq.clear()
         print system
 
 
     def _resample(self):
+        """
+        Perform resampling on the System.
 
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
+
+        # Keep track of how long it takes to resample
         self.stats.time_resample('start')
         self.system = self.resample(self.system)
         self.stats.time_resample('stop')
@@ -331,30 +502,44 @@ class AWE(object):
 
     def run(self):
         """
-        Run the algorithm
+        Run the AWE-WQ program.
+
+        Parameters:
+            None
+
+        Returns:
+            None
         """
 
+        # If the system previously shut down, restart it at the last checkpoint
         self.recover()
 
+        # If this is the first run, save the initial system to file
         if self._firstrun:
-            self.resample.save(self.system)
+            self.resample.save(self.system) # May raise NotImplementedError
             self._firstrun = False
 
-        assert len(self.system.cells  ) > 0
+        # Ensure that the system actually has data to run
+        assert len(self.system.cells) > 0
         assert len(self.system.walkers) > 0
 
+        # Begin recording log information
         t = time.time()
         self.statslogger.update(t, 'AWE', 'start_unix_time', t)
 
+        # Run hte specified iterations number of iterations and exit on ctrl+c
         try:
             while self.iteration < self.iterations:
 
+                # Update the checkpoint
                 if self.iteration % self.checkpointfreq == 0:
                     print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
                     self.checkpoint()
 
+                # Increment the iteration
                 self.iteration += 1
 
+                # Log statistics to file
                 print time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers'
                 runtime = stats.time.time()
                 self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
@@ -362,6 +547,7 @@ class AWE(object):
 
                 self.stats.time_iter('start')
 
+                # Send, receive, and resample (a.k.a. the actual work)
                 self._submit()
                 self._recv()     ## barrier
                 self._resample()
@@ -381,17 +567,41 @@ class AWE(object):
     # @typecheck(int, int)
     # @returns(str)
     def encode_task_tag(self, walker):
+        """
+        Encode a walker as the identifier for a task. The tag contains relevant
+        information from the task to determine which walker was processed
+        independent of the walker object itself (which is included as a .pkl
+        file in the task).
+
+        Parameters:
+            walker - the walker to be encoded for a task
+
+        Returns:
+            The tag for a task
+        """
+
         tag = '%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
             'cellid'  : walker.assignment,
             'weight'  : walker.weight,
-            'walkerid' : walker.id}
+            'walkerid' : walker.id
+        }
 
         return tag
 
     @typecheck(str)
     @returns(dict)
     def decode_from_task_tag(self, tag):
+        """
+        Decode walker information form the task tag.
+
+        Parameters:
+            tag - the task tag to decode
+
+        Returns:
+            A dictionary containing sufficient information to identify a walker
+        """
+
         split = tag.split('|')
         outfile, cellid, weight, walkerid = tag.split('|')
         return {'cellid'   : int(cellid)   ,
@@ -403,29 +613,69 @@ class AWE(object):
 
     @typecheck(int, workqueue.WQ.Task)
     def marshal_to_task(self, walker, task):
-        
+        """
+        Prepare all of the necessary files to send with a task to a worker.
 
-        ### create the pdb
+        Parameters:
+            walker - the walker for task to run
+            task   - the task to prepare for submission
+
+        Returns:
+            None
+        """
+
+        # Convert the topology to a PDB format
         top        = self.system.topology
         top.coords = walker.start
         pdbdat     = str(top)
 
-        ### send walker to worker
+        # Serialize the walker
         wdat = pickle.dumps(walker)
-        task.specify_buffer(pdbdat, workqueue.WORKER_POSITIONS_NAME+"."+str(self.currenttask), cache=False)
-        task.specify_buffer(wdat  , workqueue.WORKER_WALKER_NAME+"."+str(self.currenttask)   , cache=False)
 
-        ### specify output
+        # Send the the topology and walker to the worker
+        # See cctools work_queue.Task for more information
+        task.specify_buffer(
+            pdbdat,
+            workqueue.WORKER_POSITIONS_NAME+"."+str(self.currenttask),
+            cache=False
+        )
+
+        task.specify_buffer(
+            wdat,
+            workqueue.WORKER_WALKER_NAME+"."+str(self.currenttask),
+            cache=False)
+
         self.specify_task_output_file(task)
 
     def specify_task_output_file(self, task):
+        """
+        Tell the task where to place its output.
+
+        Parameters:
+            task - the task for which to set an output dir
+
+        Returns:
+            None
+        """
+
         output = os.path.join(self.wq.tmpdir, task.tag)
         task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME+"."+str(self.currenttask), cache=False)
 
     @typecheck(workqueue.WQ.Task)
     @returns(Walker)
     def marshal_from_task(self, result):
+        """
+        Get files returned from a task.
 
+        Parameters:
+            result - a completed task containing output
+
+        Returns:
+            The walker that was sent along with the task updated to include
+            result information
+        """
+
+        # The output file is compressed, so untar it and get the relevant info
         import tarfile
         tar = tarfile.open(result.tag)
         try:
@@ -435,21 +685,30 @@ class AWE(object):
         finally:
             tar.close()
 
+        # Get the coordinates from the ending configuration of the walker
         pdb               = structures.PDB(pdbstring)
         coords            = pdb.coords
+
+        # Get the cell id for the ending coordinates
         cellid            = int(cellstring)
 
+        # Load the walker object from the .pkl file
         walker            = pickle.loads(walkerstr)
 
+        # Determine whether or not the walker changed states
         transition = walker.assignment != cellid
+
         print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
               'Walker', walker.id, \
               'transition', walker.assignment, '->', cellid, \
               self.wq.tasks_in_queue(), 'tasks remaining'
+        
+        # Log the walker
         self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                       'iteration %s from %s to %s %s' % \
                                           (self.iteration, walker.assignment, cellid, transition))
 
+        # Update the walker's state
         walker.end        = coords
         walker.assignment = cellid
 
