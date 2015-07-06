@@ -17,10 +17,7 @@ import numpy as np
 import os
 
 class PDB(object):
-
     """
-    awe.structures.PDB
-
     Reads, manages, and writes PDB files using the ProDy API.
 
     Fields:
@@ -35,10 +32,7 @@ class PDB(object):
     """
 
     def __init__(self, string=None, pdb=None):
-
         """
-        awe.structures.PDB.__init__
-
         Initialize a new PDB object from a source depending on the parameters.
 
         Parameters:
@@ -65,10 +59,7 @@ class PDB(object):
     @staticmethod
     @returns(prody.AtomGroup)
     def _from_str(string):
-
         """
-        awe.structures.PDB._from_str
-
         Load a ProDy AtomGroup form a string representation.
 
         Parameters:
@@ -84,10 +75,7 @@ class PDB(object):
     @staticmethod
     @returns(prody.AtomGroup)
     def _from_file(path):
-        
         """
-        awe.structures.PDB._from_file
-
         Load a ProDy AtomGroup from a pdb file.
 
         Parameters:
@@ -137,10 +125,7 @@ class PDB(object):
         self._pdb.setCoords(xyz)
 
     def copy(self):
-        
         """
-        awe.structures.PDB.copy
-
         Make a copy of the ProDy AtomGroup.
 
         Parameters:
