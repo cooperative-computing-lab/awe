@@ -15,36 +15,54 @@
 #include <math.h>
 
 
+/**
+ * Alias for the function computing the RMSD for ease of refactoring.
+ * The result should be the same in either order.
+ *
+ * Parameters:
+ *     m1 - a reference matrix
+ *     m2 - a reference matrix of the same shape as m1
+ *
+ * Returns:
+ *     A double representing the RMSD between m1 and m2
+ */
 double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2);
 
+/**
+ * Prepare the matrices and them compute the RMSD.
+ *
+ * Parameters:
+ *     m1 - a reference matrix
+ *     m2 - a reference matrix of the same shape as m1
+ *
+ * Returns:
+ *     A double representing the RMSD between m1 and m2
+ */
 double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2);
 
+
 /**
-   Find the Least Root Mean Square between two sets of N points in D dimensions
-   and the rigid transformation (i.e. translation and rotation) 
-   to employ in order to bring one set that close to the other,
-   using the Kabsch (1976) algorithm.
-
-   Parameters
-       P    : a D*N matrix where P(a,i) is the a-th coordinate of the i-th point 
-                  in the 1st representation
-       Q    : a D*N matrix where Q(a,i) is the a-th coordinate of the i-th point 
-                  in the 2nd representation
-
-   Output
-       U    : a proper orthogonal D*D matrix, representing the rotation
-       r    : a D-dimensional column vector, representing the translation
-       rmsd : Root Mean Square distance
-
-
-
-   References:
-     1) Kabsch W. A solution for the best rotation to relate two sets of vectors. Acta Cryst A 1976;32:9223.
-     2) Kabsch W. A discussion of the solution for the best rotation to relate two sets of vectors. Acta Cryst A 1978;34:8278.
-     3) http://cnx.org/content/m11608/latest/
-     4) http://en.wikipedia.org/wiki/Kabsch_algorithm
-
-
+ * Find the Least Root Mean Square between two sets of N points in D dimensions
+ * and the rigid transformation (i.e. translation and rotation) 
+ * to employ in order to bring one set that close to the other,
+ * using the Kabsch (1976) algorithm.
+ *
+ * Parameters
+ *     P - a D*N matrix where P(a,i) is the a-th coordinate of the i-th point 
+ *         in the 1st representation
+ *     Q - a D*N matrix where Q(a,i) is the a-th coordinate of the i-th point 
+ *         in the 2nd representation
+ *
+ * Output
+ *     U    - a proper orthogonal D*D matrix, representing the rotation
+ *     r    - a D-dimensional column vector, representing the translation
+ *     rmsd - Root Mean Square Distance
+ *
+ * References:
+ *   1) Kabsch W. A solution for the best rotation to relate two sets of vectors. Acta Cryst A 1976;32:9223.
+ *   2) Kabsch W. A discussion of the solution for the best rotation to relate two sets of vectors. Acta Cryst A 1978;34:8278.
+ *   3) http://cnx.org/content/m11608/latest/
+ *   4) http://en.wikipedia.org/wiki/Kabsch_algorithm
  */
 exit_t kabsch_function (const gsl_matrix *P, const gsl_matrix *Q, gsl_matrix **U, gsl_matrix **r, double *rmsd);
 
