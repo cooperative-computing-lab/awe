@@ -1,0 +1,62 @@
+#!/afs/crc.nd.edu/user/j/jkinniso/Public/apps/x86_64/anaconda/bin/python
+"""
+A short script to generate a histogram from a file containing newline-
+delimited floating-point values.
+
+Author: Jeff Kinnison (jkinniso@nd.edu)
+"""
+
+import sys
+import argparse
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def parse_args(argv):
+    description = """
+Script to generate a histogram using a file of floating-point values
+delimited by a newline character.
+    """
+
+    parser = argparse.ArgumentParser(description=description)
+    
+    parser.add_argument("-i", "--input",
+        default="native-rmsd.dat",
+        type=str,
+        help="file containing data points from which to generate the histogram"
+    )
+    
+    parser.add_argument("-b", "--bins",
+        default=20,
+        type=int,
+        help="the number of bins for the histogram to contain",
+    )
+    
+    parser.add_argument("--title",
+        default="",
+        type=str,
+        help="the title of the plot"
+    )
+    
+    parser.add_argument("--xlabel",
+        default="",
+        type=str,
+        help="the label for the x-axis"
+    )
+    
+    parser.add_argument("--ylabel",
+        default="",
+        type=str,
+        help="the label for the y-axis"
+    )
+    
+    return parser.parse_args()
+
+if __name__ == "__main__":
+    opts = parse_args(sys.argv)
+    rmsds = np.loadtxt(opts.input)
+    plt.hist(rmsds, opts.bins)
+    plt.title(opts.title)
+    plt.xlabel(opts.xlabel)
+    plt.ylabel(opts.ylabel)
+    plt.show()
