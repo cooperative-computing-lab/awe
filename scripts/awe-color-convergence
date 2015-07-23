@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
     # Read from cel-weights.dat, ideally creating an array with shape
     # (iterations * cells, 4)
-    A = read_from_file(opts.input)
+    A = read_from_file(opts.filepath)
 
     # To effectively process them, cells must be organized by iteration
     A_by_iter = np.zeros((opts.iterations, opts.cells))
