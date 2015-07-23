@@ -140,7 +140,7 @@ def calculate_norms(i, n, p=2):
     """
 
     # Only calculate norms if shapes agree, otherwise output may be undefined
-    if i.shape[1:] != n.shape[0:]
+    if i.shape[1:] != n.shape[0:]:
         raise ValueError
 
     # linalg.norm can work on matrices, however because of the difference
@@ -279,24 +279,3 @@ if __name__ == "__main__":
         opts.ylabel,
         opts.output
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
