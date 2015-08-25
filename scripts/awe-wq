@@ -138,6 +138,7 @@ def main(opts):
     cfg = config(opts)
 
     if not opts.restart:
+        print "Starting new run"
         # load the weights
         weights = np.loadtxt(opts.weights)
         assert abs(1 - weights.sum()) <= 0.0003, weights.sum
@@ -183,14 +184,17 @@ def main(opts):
                             system         = system,
                             iterations     = opts.iterations,
                             resample       = resampler,
-                            checkpointfreq = 1,
+                            checkpointfreq = 1
                             )
+        resampler.traxlogger._picklemode = 2
+        resampler.traxlogger._pickleprotocol = 2
     else:
+        print "Recovering from previous run"
         traxlogger = trax.SimpleTransactional(
             checkpoint='debug/trax.cpt',
             log='debug/trax.log',
-            checkpoint_mode='rb',
-            log_mode='rb'
+            picklemode=2,
+            pickleprotocol=2
         )
 
         resampler = awe.AWE(
@@ -202,8 +206,10 @@ def main(opts):
         resampler.restart()
 
         resampler.traxlogger.close()
-        resampler.traxlogger._cpt_mode = 'ab'
-        resampler.traxlogger._log_mode = 'ab'
+        resampler.traxlogger._cpt_mode = 'wb'
+        resampler.traxlogger._log_mode = 'wb'
+
+    #send_port(resampler.wq.cfg.port)
 
     resampler.run()
 

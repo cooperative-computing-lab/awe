@@ -358,7 +358,7 @@ class AWE(object):
     def recover(self):
         """
         Recover from interruption using the last checkpoint. Populates the AWE
-        instance using values from the checkpoint. Likely used with a new run.
+        instance using values from the checkpoint.
 
         Parameters:
             None
@@ -512,7 +512,7 @@ class AWE(object):
         """
 
         # If the system previously shut down, restart it at the last checkpoint
-        self.recover()
+        #self.recover()
 
         # If this is the first run, save the initial system to file
         if self._firstrun:

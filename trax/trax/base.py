@@ -1,7 +1,7 @@
 
 
-CHECKPOINT_FILE_MODE = 'ab'
-LOG_FILE_MODE = 'ab'
+CHECKPOINT_FILE_MODE = 'wb'
+LOG_FILE_MODE = 'wb'
 
 class AbstractTransactional(object):
 
@@ -62,6 +62,7 @@ class AbstractTransactional(object):
 	def log(self, value):
 		self._log_open()
 		self._impl_log(self._log_fd, value)
+		self._log_close()
 
 	def _impl_log(self, fd, value):
 		raise NotImplementedError
