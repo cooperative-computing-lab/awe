@@ -85,7 +85,7 @@ class _typecheck(object):
 
         typ = type(value)
         if typ is not expected:
-             raise TypeException, '%s expected: %s, but got: %s' % (name or 'param %s' % arg, expected, typ)
+             raise TypeException('%s expected: %s, but got: %s' % (name or 'param %s' % arg, expected, typ))
 
     def __call__(self, fn):
         """
@@ -111,21 +111,23 @@ class _typecheck(object):
                     self.typecheck(v, t, arg=i)
                 del i
 
-                for n, e in self.kws.iteritems():
+                for n, e in self.kws.items():
                     if n in kws:
                         self.typecheck(kws[n], e, name=n)
-            except TypeException, ex:
+            except TypeException as ex:
                 stack = traceback.extract_stack()
                 stack = ''.join(traceback.format_list(stack[:-1]))
                 stack = '\n\t'.join(('\t' + stack).split('\n'))
-                raise TypeException, '%s:\n\n%s\n\t%s' % (fn, stack, ex)
+                raise TypeException('%s:\n\n%s\n\t%s' % (fn, stack, ex))
 
             return fn(*args,**kws)
 
         # Ensure that wrapping the function does not overwrite its
         # visible identity (i.e. it should display the same name and docstring)
-        wrapped.func_name = fn.func_name
-        wrapped.func_doc = fn.func_doc
+        #wrapped.func_name = fn.func_name
+        #wrapped.func_doc = fn.func_doc
+        wrapped.__name__ = fn.__name__
+        wrapped.__doc__ = fn.__doc__
         return wrapped
 
 class returns(object):
@@ -196,11 +198,13 @@ class returns(object):
                 stack = traceback.extract_stack()
                 stack = ''.join(traceback.format_list(stack[:-1]))
                 stack = '\n\t'.join(('\t' + stack).split('\n'))
-                raise TypeError, 'Result of %s(*%s, **%s) should be %s but is %s' % \
-                    (fn, args, kws, self.expected, type(result))
+                raise TypeError('Result of %s(*%s, **%s) should be %s but is %s' % \
+                    (fn, args, kws, self.expected, type(result)))
 
-        wrapped.func_name = fn.func_name
-        wrapped.func_doc = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
+        #wrapped.func_name = fn.func_name
+        #wrapped.func_doc = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
+        wrapped.__name__ = fn.__name__
+        wrapped.__doc__  = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
         return wrapped
 
 
@@ -251,7 +255,7 @@ def deprecated(fn):
     """
 
     def wrapped(*args, **kws):
-        print 'WARNING: call to deprecated function: %s' % fn.func_name
+        print('WARNING: call to deprecated function: %s' % fn.func_name)
         return fn(*args, **kws)
     wrapped.func_name = fn.func_name
     wrapped.func_doc  = fn.func_doc
@@ -274,7 +278,7 @@ def checkpicklable(d):
         AttributeError if d does not have __slots__ or __getstate__ attribute.
     """
 
-    for v in d.itervalues():
+    for v in d.values():
         try:
             slots = v.__slots__
             hasslots = True
@@ -287,7 +291,7 @@ def checkpicklable(d):
             hasgetstate = False
 
         if hasslots and not hasgetstate:
-            print type(v), 'has slots but not __getstate__'
+            print(type(v), 'has slots but not __getstate__')
 
         try:
             d2 = d.__dict__
