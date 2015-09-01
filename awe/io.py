@@ -53,8 +53,8 @@ class trace(object):
             pretty = lambda a: str(type(a))
 
         # Generate the string representations
-        pargs = map(pretty, args)
-        pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in kws.items() ]
+        pargs = list(map(pretty, args))
+        pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in list(kws.items()) ]
 
         # Make the arguments a comma-delimited string
         return ', '.join(pargs + pkws)
@@ -73,7 +73,7 @@ class trace(object):
         def wrapped(*args, **kws):
             global TRACE
             if TRACE:
-                print 'TRACE calling %s(%s)' % (fn.func_name, self.prettyargs(*args, **kws))
+                print ('TRACE calling %s(%s)' % (fn.func_name, self.prettyargs(*args, **kws)))
             return fn(*args, **kws)
         return wrapped
 
@@ -184,4 +184,4 @@ def log(string):
         None
     """
 
-    print string
+    print(string)
