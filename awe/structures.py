@@ -7,8 +7,8 @@ See the file COPYING for details.
 """
 
 
-from util import typecheck, returns
-import io
+from .util import typecheck, returns
+from . import io
 
 import prody
 
