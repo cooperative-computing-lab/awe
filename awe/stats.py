@@ -7,8 +7,8 @@ See the file COPYING for details.
 """
 
 
-import workqueue
-from util import typecheck
+from . import workqueue
+from .util import typecheck
 
 import numpy as np
 
@@ -629,12 +629,12 @@ class WQStats(object):
             attrs - an iterable containing object attributes to record
         """
         
-        print 'Saving', name, 'data to', fd.name
+        print('Saving', name, 'data to', fd.name)
         data = dict()
         data['time'] = times
-        print '\t', 'time'
+        print('\t', 'time')
         for a in attrs:
-            print '\t', a
+            print('\t', a)
             data[a] = getattr(self, a).values
         np.savez(fd, **data)
 
@@ -794,7 +794,7 @@ class AWEStats(object):
             self.logger.update(t, 'AWE', name, timings.elapsed())
             timings.reset()
         else:
-            raise ValueError, 'Unknown state %s: valid: {start|stop}' % state
+            raise ValueError('Unknown state %s: valid: {start|stop}' % state)
 
     def time_iter(self, state):
         """
