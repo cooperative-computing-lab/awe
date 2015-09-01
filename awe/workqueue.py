@@ -13,7 +13,7 @@ import work_queue as WQ
 
 import os, tarfile, tempfile, time, shutil, traceback, random
 from collections import defaultdict
-
+from functools import reduce
 
 ### A process can only support a single WorkQueue instance
 _AWE_WORK_QUEUE = None
@@ -112,7 +112,7 @@ class WQFile(object):
         """
 
         if '$' not in self.masterpath and not os.path.exists(self.masterpath):
-            raise IOError, 'Cannot find file to send to worker: %s' % self.masterpath
+            raise IOError('Cannot find file to send to worker: %s' % self.masterpath)
         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
 
     def __str__(self):
@@ -352,7 +352,8 @@ class TagSet(object):
             A Boolean value representing whether any tag can be duplicated
         """
 
-        valid = filter(lambda k: k < self._maxreps, self._tags.iterkeys())
+        #valid = filter(lambda k: k < self._maxreps, self._tags.iterkeys())
+        valid = [k for k in iter(self._tags.keys()) if k < self._maxreps]
         return len(valid) > 0
 
     def clear(self):
@@ -379,7 +380,7 @@ class TagSet(object):
             None
         """
 
-        for k in self._tags.keys():
+        for k in list(self._tags.keys()):
             if len(self._tags[k]) < 1:
                 del self._tags[k]
 
@@ -395,7 +396,7 @@ class TagSet(object):
             dictionary
         """
 
-        for group, tags in self._tags.iteritems():
+        for group, tags in self._tags.items():
             if tag in tags:
                 return group
         return None
@@ -494,10 +495,10 @@ class TagSet(object):
             The total number of tags in the dictionary
         """
 
-        return reduce(lambda s, k: s + len(self._tags[k]), self._tags.iterkeys(), 0 )
+        return reduce(lambda s, k: s + len(self._tags[k]), iter(self._tags.keys()), 0 )
 
     def __str__(self):
-        d = dict([(k,len(s)) for k,s in self._tags.iteritems()])
+        d = dict([(k,len(s)) for k,s in self._tags.items()])
         return '<TagSet(maxreps=%s): %s>' % (self._maxreps, d)
 
 
@@ -888,20 +889,18 @@ class WorkQueue(object):
             if task and task.result == 0:
                 # Deal with tasks in which an error occurred
                 if not task.return_status == 0 and not self.restart(task):
-                    raise WorkQueueWorkerException, \
-                        self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
+                    raise WorkQueueWorkerException(self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status))
 
 
                 try:
                     result = marshall(task)
-                except Exception, ex:
+                except Exception as ex:
 
                     ### sometimes a task fails, but still returns.
                     ##+ attempt to restart these
                     if not self.restart(task):
-                        raise WorkQueueException, \
-                            self.taskoutput(task) + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
-                            (ex.__class__.__name__, ex, traceback.format_exc())
+                        raise WorkQueueException(self.taskoutput(task) + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
+                            (ex.__class__.__name__, ex, traceback.format_exc()))
                     else:
                         continue
 
@@ -913,7 +912,7 @@ class WorkQueue(object):
             elif task and not task.result == 0:
                 # Kill the task if it cannot be restarted.
                 if not self.restart(task):
-                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \
-                        (task.tag, self.taskoutput(task))
+                    raise WorkQueueException('Task exceeded maximum number of resubmissions for %s\n\n%s' % \
+                        (task.tag, self.taskoutput(task)))
 
             else: continue
