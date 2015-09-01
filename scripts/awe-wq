@@ -55,8 +55,9 @@ def getopts(args=None):
             cells        = os.path.join('awe-instance-data', 'cells.dat'),
             weights      = os.path.join('awe-instance-data', 'weights.dat'),
             walkers      = os.path.join('awe-instance-data', 'pdbs'),
-            regions      = map(lambda p: os.path.join('awe-instance-data',p),
-                               ['unfolded.dat','folded.dat']),
+            regions      = [os.path.join('awe-instance-data', p) for p in ['unfolded.dat', 'folded.dat']]
+                            #map(lambda p: os.path.join('awe-instance-data',p),
+                               #['unfolded.dat','folded.dat']),
             restart      = False,
 
             ### Performance params
@@ -82,7 +83,7 @@ def getopts(args=None):
     else:
         try:
             port = float(opts.port)
-        except ValueError, e:
+        except ValueError as e:
             p.error('Invalid port specified, cannot be converted to integer: %s' % opts.port)
         opts.port = port
 
@@ -138,7 +139,7 @@ def main(opts):
     cfg = config(opts)
 
     if not opts.restart:
-        print "Starting new run"
+        print("Starting new run")
         # load the weights
         weights = np.loadtxt(opts.weights)
         assert abs(1 - weights.sum()) <= 0.0003, weights.sum
@@ -153,11 +154,11 @@ def main(opts):
         blue     = np.loadtxt(blue)
 
         # load the walkers
-        print 'Loading cells and walkers'
+        print('Loading cells and walkers')
         partition = awe.SinkStates()
         partition.add(0, *list(red))
         partition.add(1, *list(blue))
-        for c in xrange(opts.num_cells):
+        for c in range(opts.num_cells):
             if   c in red : cell = awe.Cell(c, core=0)
             elif c in blue: cell = awe.Cell(c, core=1)
             else:           cell = awe.Cell(c)
@@ -167,10 +168,10 @@ def main(opts):
             weight = weights[c] / opts.num_walkers
             system.add_cell(cell)
 
-            for w in xrange(opts.num_walkers):
+            for w in range(opts.num_walkers):
                 path = os.path.join(opts.walkers, 'State%d-%d.pdb' % (c, w))
                 if  not os.path.exists(path):
-                    print 'WARNING Walker does not exist, skipping:', path
+                    print('WARNING Walker does not exist, skipping:', path)
                     continue
                 pdb  = awe.PDB(path)
                 walker = awe.Walker(start=pdb.coords, assignment=c, color=color, weight=weight, cellid=cell.id)
@@ -189,7 +190,7 @@ def main(opts):
         resampler.traxlogger._picklemode = 2
         resampler.traxlogger._pickleprotocol = 2
     else:
-        print "Recovering from previous run"
+        print("Recovering from previous run")
         traxlogger = trax.SimpleTransactional(
             checkpoint='debug/trax.cpt',
             log='debug/trax.log',
@@ -218,5 +219,5 @@ def main(opts):
 
 if __name__ == '__main__':
     opts = getopts()
-    print opts
+    print(opts)
     main(opts)
