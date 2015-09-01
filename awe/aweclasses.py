@@ -6,14 +6,14 @@ This software is distributed under the GNU General Public License.
 See the file COPYING for details.
 """
 
-import io, stats, workqueue
-from util import typecheck, returns
-import structures, util
+from . import io, stats, workqueue
+from .util import typecheck, returns
+from . import structures, util
 
 import trax
 
 import numpy as np
-import cPickle as pickle
+import pickle
 
 import os, time, shutil
 from collections import defaultdict
@@ -177,7 +177,7 @@ class Walker(object):
             return self.start
         elif self.end is not None:
             return self.end
-        else: raise ValueError, 'Both *start* and *end* should not be None'
+        else: raise ValueError('Both *start* and *end* should not be None')
 
 
     def __str__(self):
@@ -296,7 +296,7 @@ class AWE(object):
         start_str += "  www.nd.edu/~ccl/software/awe\n"
         start_str += "***************************************************************************************************\n"
 
-        print start_str
+        print(start_str)
 
     def checkpoint(self):
         """
@@ -350,7 +350,7 @@ class AWE(object):
             None
         """
 
-        print 'Recovering walker', value.id
+        print('Recovering walker', value.id)
 
         # Add the walker back into the system
         obj['system'].set_walker(value)
@@ -370,13 +370,13 @@ class AWE(object):
         cpt = self.traxlogger.cpt_path
 
         if os.path.exists(cpt):
-            print 'Recovering', cpt
+            print('Recovering', cpt)
 
             # Get all attributes from the checkpoint
             parms = self.traxlogger.recover(self._trax_log_recover)
             
             # Reset all AWE parameters
-            for a in parms.iterkeys():
+            for a in parms.keys():
                 setattr(self, a, parms[a])
 
 
@@ -461,7 +461,7 @@ class AWE(object):
             None
         """
 
-        print time.asctime(), 'Receiving tasks'
+        print(time.asctime(), 'Receiving tasks')
         system = self.system
 
         # Start recording AWE statistics for the receive phase
@@ -480,7 +480,7 @@ class AWE(object):
         # Stop recording stats
         self.stats.time_barrier('stop')
         self.wq.clear()
-        print system
+        print(system)
 
 
     def _resample(self):
@@ -533,14 +533,14 @@ class AWE(object):
 
                 # Update the checkpoint
                 if self.iteration % self.checkpointfreq == 0:
-                    print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
+                    print(time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path)
                     self.checkpoint()
 
                 # Increment the iteration
                 self.iteration += 1
 
                 # Log statistics to file
-                print time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers'
+                print(time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers')
                 runtime = stats.time.time()
                 self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
                 self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
@@ -698,10 +698,10 @@ class AWE(object):
         # Determine whether or not the walker changed states
         transition = walker.assignment != cellid
 
-        print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
+        print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
               'Walker', walker.id, \
               'transition', walker.assignment, '->', cellid, \
-              self.wq.tasks_in_queue(), 'tasks remaining'
+              self.wq.tasks_in_queue(), 'tasks remaining')
         
         # Log the walker
         self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
@@ -834,12 +834,12 @@ class System(object):
     @property
     @returns(list)
     def cells(self):
-        return self._cells.values()
+        return list(self._cells.values())
 
     @property
     @returns(list)
     def walkers(self):
-        return self._walkers.values()
+        return list(self._walkers.values())
 
     @property
     # @returns(np.array)
@@ -857,7 +857,7 @@ class System(object):
         Get the colors of all walkers in the System.
         """
         
-        return set(map(lambda w: w.color, self.walkers))
+        return set([w.color for w in self.walkers])#set(map(lambda w: w.color, self.walkers))
 
     @typecheck(Cell)
     def add_cell(self, cell):
@@ -872,7 +872,7 @@ class System(object):
         """
 
         if cell.id in self._cells:
-            raise ValueError, 'Duplicate cell id %d' % cell.id
+            raise ValueError('Duplicate cell id %d' % cell.id)
         self.set_cell(cell)
 
     @typecheck(Cell)
@@ -974,7 +974,7 @@ class System(object):
             supplied cell
         """
 
-        ws     = filter(lambda w: w.assignment == cell.id, self.walkers)
+        ws     = [w for w in self.walkers if w.assignment == cell.id]#filter(lambda w: w.assignment == cell.id, self.walkers)
         newsys = self.clone(cells={cell.id:self.cell(cell.id)})
         for w in ws: newsys.add_walker(w)
         return newsys
@@ -992,7 +992,7 @@ class System(object):
             supplied color
         """
 
-        ws     = filter(lambda w: w.color == color, self.walkers)
+        ws     = [w for w in self.walkers is w.color == color]#filter(lambda w: w.color == color, self.walkers)
         newsys = self.clone()
 
         for w in ws:
@@ -1017,7 +1017,7 @@ class System(object):
             supplied core
         """
 
-        cells  = filter(lambda c: c.core == core, self.cells)
+        cells  = [c for c in self.cells if c.core == core]#filter(lambda c: c.core == core, self.cells)
         cs     = {}
         for c in cells: cs[c.id] = c
 
