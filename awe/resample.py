@@ -24,8 +24,8 @@ See the file COPYING for details.
 # 5102 yluJ ,nosinniK ffeJ - ETON
 ###############################################################################
 
-from util import typecheck, returns, makedirs_parent
-import aweclasses
+from .util import typecheck, returns, makedirs_parent
+from . import aweclasses
 
 import numpy as np
 import itertools
@@ -63,7 +63,7 @@ class IResampler(object):
     @typecheck(aweclasses.System)
     @returns(aweclasses.System)
     def __call__(self, s1):
-        print time.asctime(), 'Resampling'
+        print(time.asctime(), 'Resampling')
         return self.resample(s1)
 
 
@@ -154,7 +154,7 @@ class OneColor(IResampler):
             weights    = localsystem.weights
             walkers    = localsystem.walkers
 
-            print time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers'
+            print(time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers')
 
             # Only resample if there exist walkers in the cell
             if not len(walkers) > 0: continue
@@ -164,7 +164,7 @@ class OneColor(IResampler):
             # This method returns a list of indices in the supplied list/array
             # that correspond to the sorted order of the original.
             mywalkers = list(argsort(-weights))
-            print '\tmywalkers:', mywalkers
+            print('\tmywalkers:', mywalkers)
 
             ### sanity check
             # Ensure that the list of weights was sorted correctly (i.e., the
@@ -179,7 +179,7 @@ class OneColor(IResampler):
             ### setup cell weight and target weights
             W     = sum(weights)
             tw    = W / self.targetwalkers
-            print '\tW', W, 'tw', tw
+            print('\tW', W, 'tw', tw)
 
             ### we assume that there is at least one walker in the cell
             # The above "continue" check ensures that there is at least one
@@ -198,7 +198,7 @@ class OneColor(IResampler):
 
                 Wx = weights[x]
                 currentWalker = walkers[x]
-                print '\tweight of', x, 'is', Wx
+                print('\tweight of', x, 'is', Wx)
 
                 # Split walkers with weight geq the target weight
                 # and always split the last walker.
@@ -213,7 +213,7 @@ class OneColor(IResampler):
                     r = max(1, int(floor( Wx/tw )) )
                     r = min(r, self.targetwalkers - activewalkers)
                     activewalkers += r
-                    print '\tactive walkers', activewalkers
+                    print('\tactive walkers', activewalkers)
 
                     ### split the current walker
                     # Note: if r <= 0, repeat will occur 0 times.
@@ -221,7 +221,7 @@ class OneColor(IResampler):
                     # source that sets negative times values equal to 0 in
                     # itertools.repeat when times is not set by keyword.
                     # CHANGE CHANGE CHANGE CHANGE CHANGE
-                    print '\tsplitting', x, r, 'times'
+                    print('\tsplitting', x, r, 'times')
                     for _ in itertools.repeat(x, r):
                         # Add a new walker with the target weight to the system
                         # for each time that the walker must be split. Update
@@ -240,7 +240,7 @@ class OneColor(IResampler):
                     if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
                         mywalkers.append(x)
                         weights[x] = Wx - r * tw
-                        print '\tupdated weights of', x
+                        print('\tupdated weights of', x)
 
                     ### continue the loop?
                     # Keep looping until all walkers have been processed.
@@ -253,7 +253,7 @@ class OneColor(IResampler):
                 else:
                     # Get another walker to merge with
                     y = mywalkers.pop()
-                    print '\tmerging', x, y
+                    print('\tmerging', x, y)
 
                     # Set the merged weight to be the sum of the two weights.
                     Wy = weights[y]
@@ -381,7 +381,7 @@ class MultiColor(OneColor):
             if not cell.core == aweclasses.DEFAULT_CORE and not w.color == cell.core:
                 oldcolor = w.color   # This line seems redundant
                 newcolor = cell.core # This line seems redundant
-                print 'Updating color:', w, oldcolor, '->', newcolor
+                print('Updating color:', w, oldcolor, '->', newcolor)
                 w.color = newcolor # Here we actually update the walker
             else:
                 # This is redundant. If the two are already equal the
@@ -402,7 +402,7 @@ class MultiColor(OneColor):
         for color in system.colors:
             # Get all walkers of the color
             thiscolor  = system.filter_by_color(color)
-            print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
+            print(time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers')
             
             # Perform resampling and add to the new system
             resampled  = OneColor.resample(self, thiscolor)
@@ -442,7 +442,7 @@ class MultiColor(OneColor):
             None
         """
 
-        print time.asctime(), 'Saving transition matrix to', repr(path)
+        print(time.asctime(), 'Saving transition matrix to', repr(path))
         fd = open(path, 'w')
         
         try:
@@ -731,7 +731,7 @@ class SaveWeights(ISaver):
             '# walkerid,iteration,cell,weight,color\n'
 
     def _save(self, system, mode='a'):
-        print time.asctime(), 'Saving weights to', self.datfile
+        print(time.asctime(), 'Saving weights to', self.datfile)
 
         ### all the walkers in a cell have the same weight, so we only
         ### need to save the walkerid, iteration, cell, weight, and color for each walker
