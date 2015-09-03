@@ -181,7 +181,7 @@ class Config(object):
         self.wqstats_logfile = 'debug/wq-stats.log'
         self.monitor         = False	
         self.summaryfile     = ''
-	    self.capacity        = False
+        self.capacity        = False
 
         self._executable = None
         self._cache = set()
@@ -277,7 +277,7 @@ class Config(object):
 
     	    if self.capacity:
                 # Determine the number of workers the WorkQueue object can handle
-    		    wq.estimate_capacity()
+    	        wq.estimate_capacity()
  
             # Display information about this run of AWE-WQ
             awe.log('Running on port %d...' % wq.port)
@@ -694,10 +694,10 @@ class WorkQueue(object):
         # Record the restart and notify the user, then restart if the task has
         # not exceeded the maximum number of restarts
         if self.restarts[task.tag] < self.cfg.restarts:
-            print time.asctime(), 'task failed with', task.return_status, \
+            print(time.asctime(), 'task failed with', task.return_status, \
                 'result is', task.result, \
                 'restarting', task.tag, \
-                '#%d' % (self.restarts[task.tag] + 1)
+                '#%d' % (self.restarts[task.tag] + 1))
             self.submit(task)
             self.restarts[task.tag] += 1
             return True
