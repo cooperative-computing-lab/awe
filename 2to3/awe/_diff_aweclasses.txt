@@ -1,0 +1,175 @@
+--- aweclasses.py	(original)
++++ aweclasses.py	(refactored)
+@@ -6,14 +6,14 @@
+ See the file COPYING for details.
+ """
+ 
+-import io, stats, workqueue
+-from util import typecheck, returns
+-import structures, util
++from . import io, stats, workqueue
++from .util import typecheck, returns
++from . import structures, util
+ 
+ import trax
+ 
+ import numpy as np
+-import cPickle as pickle
++import pickle as pickle
+ 
+ import os, time, shutil
+ from collections import defaultdict
+@@ -134,7 +134,7 @@
+             return self.start
+         elif self.end is not None:
+             return self.end
+-        else: raise ValueError, 'Both *start* and *end* should not be None'
++        else: raise ValueError('Both *start* and *end* should not be None')
+ 
+ 
+     def __str__(self):
+@@ -203,7 +203,7 @@
+         start_str += "  www.nd.edu/~ccl/software/awe\n"
+         start_str += "***************************************************************************************************\n"
+ 
+-        print start_str
++        print(start_str)
+ 
+     def checkpoint(self):
+         cpt = self.traxlogger.cpt_path
+@@ -223,15 +223,15 @@
+         self.traxlogger.log(walker)
+ 
+     def _trax_log_recover(self, obj, value):
+-        print 'Recovering walker', value.id
++        print('Recovering walker', value.id)
+         obj['system'].set_walker(value)
+ 
+     def recover(self):
+         cpt = self.traxlogger.cpt_path
+         if os.path.exists(cpt):
+-            print 'Recovering', cpt
++            print('Recovering', cpt)
+             parms = self.traxlogger.recover(self._trax_log_recover)
+-            for a in parms.iterkeys():
++            for a in parms.keys():
+                 setattr(self, a, parms[a])
+ 
+ 
+@@ -267,7 +267,7 @@
+     #@profile
+     def _recv(self):
+ 
+-        print time.asctime(), 'Receiving tasks'
++        print(time.asctime(), 'Receiving tasks')
+         system = self.system
+         self.stats.time_barrier('start')
+         while not self.wq.empty:
+@@ -277,7 +277,7 @@
+             self._try_duplicate_tasks()
+         self.stats.time_barrier('stop')
+         self.wq.clear()
+-        print system
++        print(system)
+ 
+ 
+     #@profile
+@@ -313,9 +313,9 @@
+         try:
+             while self.iteration < self.iterations:
+                 n = gc.collect()
+-                print "Unreachable objects: %s" % n
++                print("Unreachable objects: %s" % n)
+                 pprint.pprint(gc.garbage)
+-                print 'Memory Usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
++                print('Memory Usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                 #tr.print_diff()
+                 
+                 #cb.print_tree()
+@@ -324,12 +324,12 @@
+                 h = HP.heap()
+                 h.dump('heap.hpy')
+                 if self.iteration % self.checkpointfreq == 0:
+-                    print time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path
++                    print(time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path)
+                     self.checkpoint()
+                     
+                 self.iteration += 1
+                 
+-                print time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers'
++                print(time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers')
+                 runtime = stats.time.time()
+                 self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
+                 self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
+@@ -423,10 +423,10 @@
+         walker            = pickle.loads(walkerstr)
+ 
+         transition = walker.assignment != cellid
+-        print time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
++        print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
+               'Walker', walker.id, \
+               'transition', walker.assignment, '->', cellid, \
+-              self.wq.tasks_in_queue(), 'tasks remaining'
++              self.wq.tasks_in_queue(), 'tasks remaining')
+         self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
+                                       'iteration %s from %s to %s %s' % \
+                                           (self.iteration, walker.assignment, cellid, transition))
+@@ -502,27 +502,27 @@
+     @property
+     @returns(list)
+     def cells(self):
+-        return self._cells.values()
++        return list(self._cells.values())
+ 
+     @property
+     @returns(list)
+     def walkers(self):
+-        return self._walkers.values()
++        return list(self._walkers.values())
+ 
+     @property
+     # @returns(np.array)
+     def weights(self):
+-        return np.array(map(lambda w: w.weight, self.walkers))
++        return np.array([w.weight for w in self.walkers])
+ 
+     @property
+     @returns(set)
+     def colors(self):
+-        return set(map(lambda w: w.color, self.walkers))
++        return set([w.color for w in self.walkers])
+ 
+     @typecheck(Cell)
+     def add_cell(self, cell):
+         if cell.id in self._cells:
+-            raise ValueError, 'Duplicate cell id %d' % cell.id
++            raise ValueError('Duplicate cell id %d' % cell.id)
+         self.set_cell(cell)
+ 
+     @typecheck(Cell)
+@@ -552,14 +552,14 @@
+ 
+     # @returns(System)
+     def filter_by_cell(self, cell):
+-        ws     = filter(lambda w: w.assignment == cell.id, self.walkers)
++        ws     = [w for w in self.walkers if w.assignment == cell.id]
+         newsys = self.clone(cells={cell.id:self.cell(cell.id)})
+         for w in ws: newsys.add_walker(w)
+         return newsys
+ 
+     # @returns(System)
+     def filter_by_color(self, color):
+-        ws     = filter(lambda w: w.color == color, self.walkers)
++        ws     = [w for w in self.walkers if w.color == color]
+         newsys = self.clone()
+ 
+         for w in ws:
+@@ -573,7 +573,7 @@
+ 
+     # @returns(System)
+     def filter_by_core(self, core):
+-        cells  = filter(lambda c: c.core == core, self.cells)
++        cells  = [c for c in self.cells if c.core == core]
+         cs     = {}
+         for c in cells: cs[c.id] = c
+ 

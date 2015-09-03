@@ -1,0 +1,13 @@
+--- structures.py	(original)
++++ structures.py	(refactored)
+@@ -7,8 +7,8 @@
+ """
+ 
+ 
+-from util import typecheck, returns
+-import io
++from .util import typecheck, returns
++from . import io
+ 
+ import prody
+ 

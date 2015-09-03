@@ -1,0 +1,124 @@
+--- resample.py	(original)
++++ resample.py	(refactored)
+@@ -7,8 +7,8 @@
+ """
+ 
+ 
+-from util import typecheck, returns, makedirs_parent
+-import aweclasses
++from .util import typecheck, returns, makedirs_parent
++from . import aweclasses
+ 
+ import numpy as np
+ import itertools
+@@ -38,7 +38,7 @@
+     @typecheck(aweclasses.System)
+     @returns(aweclasses.System)
+     def __call__(self, s1):
+-        print time.asctime(), 'Resampling'
++        print(time.asctime(), 'Resampling')
+         return self.resample(s1)
+ 
+ 
+@@ -82,14 +82,14 @@
+             weights    = localsystem.weights
+             walkers    = localsystem.walkers
+ 
+-            print time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers'
++            print(time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers')
+ 
+             if not len(walkers) > 0: continue
+ 
+             ### sort the walkers in descending order based on their weights,
+             ##+ this ensures only walkers whose weight > targetWeight are split.
+             mywalkers = list(argsort(-weights))
+-            print '\tmywalkers:', mywalkers
++            print('\tmywalkers:', mywalkers)
+ 
+             ### sanity check
+             testmaxw = float('inf')
+@@ -102,7 +102,7 @@
+             ### setup cell weight and target weights
+             W     = sum(weights)
+             tw    = W / self.targetwalkers
+-            print '\tW', W, 'tw', tw
++            print('\tW', W, 'tw', tw)
+ 
+             ### we assume that there is at least one walker in the cell
+             x = mywalkers.pop()
+@@ -117,7 +117,7 @@
+ 
+                 Wx = weights[x]
+                 currentWalker = walkers[x]
+-                print '\tweight of', x, 'is', Wx
++                print('\tweight of', x, 'is', Wx)
+ 
+                 ### split
+                 if Wx >= tw or len(mywalkers) == 0:
+@@ -128,10 +128,10 @@
+                     r = max(1, int(floor( Wx/tw )) )
+                     r = min(r, self.targetwalkers - activewalkers)
+                     activewalkers += r
+-                    print '\tactive walkers', activewalkers
++                    print('\tactive walkers', activewalkers)
+ 
+                     ### split the current walker
+-                    print '\tsplitting', x, r, 'times'
++                    print('\tsplitting', x, r, 'times')
+                     for _ in itertools.repeat(x, r):
+                         w = currentWalker.restart(weight=tw)
+                         newsystem.add_walker(w)
+@@ -143,7 +143,7 @@
+                     if activewalkers < self.targetwalkers and Wx - r * tw > 0.0:
+                         mywalkers.append(x)
+                         weights[x] = Wx - r * tw
+-                        print '\tupdated weights of', x
++                        print('\tupdated weights of', x)
+ 
+                     ### continue the loop?
+                     if len(mywalkers) > 0:
+@@ -153,7 +153,7 @@
+                 ### merge
+                 else:
+                     y = mywalkers.pop()
+-                    print '\tmerging', x, y
++                    print('\tmerging', x, y)
+                     Wy = weights[y]
+                     Wxy = Wx + Wy
+                     p = np.random.random()
+@@ -208,7 +208,7 @@
+             if not cell.core == aweclasses.DEFAULT_CORE and not w.color == cell.core:
+                 oldcolor = w.color
+                 newcolor = cell.core
+-                print 'Updating color:', w, oldcolor, '->', newcolor
++                print('Updating color:', w, oldcolor, '->', newcolor)
+                 w.color = newcolor
+             else:
+                 oldcolor = newcolor = w.color
+@@ -220,7 +220,7 @@
+         newsystem = aweclasses.System(topology=system.topology)
+         for color in system.colors:
+             thiscolor  = system.filter_by_color(color)
+-            print time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers'
++            print(time.asctime(), 'Resampling color', color, len(thiscolor.walkers), 'walkers')
+             resampled  = OneColor.resample(self, thiscolor)
+             newsystem += resampled
+ 
+@@ -238,7 +238,7 @@
+         return newsystem
+ 
+     def save_transitions(self, path):
+-        print time.asctime(), 'Saving transition matrix to', repr(path)
++        print(time.asctime(), 'Saving transition matrix to', repr(path))
+         fd = open(path, 'w')
+         try:
+             fd.write(self.tmat_header)
+@@ -331,7 +331,7 @@
+             '# walkerid,iteration,cell,weight,color\n'
+ 
+     def _save(self, system, mode='a'):
+-        print time.asctime(), 'Saving weights to', self.datfile
++        print(time.asctime(), 'Saving weights to', self.datfile)
+ 
+         ### all the walkers in a cell have the same weight, so we only
+         ### need to save the walkerid, iteration, cell, weight, and color for each walker
