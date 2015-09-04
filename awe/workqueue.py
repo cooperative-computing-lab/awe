@@ -275,7 +275,7 @@ class Config(object):
             if self.monitor: 
                 wq.enable_monitoring(self.summaryfile)
 
-    	    if self.capacity:
+            if self.capacity:
                 # Determine the number of workers the WorkQueue object can handle
     	        wq.estimate_capacity()
  
