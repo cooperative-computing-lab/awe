@@ -204,7 +204,7 @@ class returns(object):
         #wrapped.func_name = fn.func_name
         #wrapped.func_doc = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
         wrapped.__name__ = fn.__name__
-        wrapped.__doc__  = '%s -> %s\n\n%s' % (fn.func_name, self.expected, fn.func_doc or '')
+        wrapped.__doc__  = '%s -> %s\n\n%s' % (fn.__name__, self.expected, fn.__doc__ or '')
         return wrapped
 
 

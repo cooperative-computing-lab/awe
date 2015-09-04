@@ -6,13 +6,13 @@ This software is distributed under the GNU General Public License.
 See the file COPYING for details.
 """
 
-from .io import trace, log
+from .io_tools import trace, log
 from .util import typecheck, typecheckfn
 
 from . import stats
 from . import aweclasses
 from . import workqueue
-from . import io
+from . import io_tools
 from . import resample
 from . import structures
 

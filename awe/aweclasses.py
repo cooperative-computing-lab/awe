@@ -6,7 +6,7 @@ This software is distributed under the GNU General Public License.
 See the file COPYING for details.
 """
 
-from . import io, stats, workqueue
+from . import io_tools, stats, workqueue
 from .util import typecheck, returns
 from . import structures, util
 

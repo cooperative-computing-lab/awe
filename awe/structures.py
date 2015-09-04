@@ -8,7 +8,7 @@ See the file COPYING for details.
 
 
 from .util import typecheck, returns
-from . import io
+from . import io_tools
 
 import prody
 
