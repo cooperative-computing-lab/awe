@@ -322,9 +322,9 @@ class MultiColor(OneColor):
         
         # Matrix to store transitions between states
         self.transitions = np.zeros((ncolors, ncolors))
-	    self.iteration = 1
+            self.iteration = 1
 
-        # PAths to output files and necessary header information
+        # Paths to output files and necessary header information
         self.cellweights_path = os.path.join(OUTPUT_DIR, 'cell-weights.csv')
         makedirs_parent(self.cellweights_path)
     	of = open(self.cellweights_path,'a')
