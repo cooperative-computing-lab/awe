@@ -919,7 +919,7 @@ class StatsLogger (object):
         """
 
         s = '%f %s %s %s\n' % (t, component, name, val)
-        self._fd.write(s)
+        self._fd.write(bytes(s,'UTF-8'))
 
     def output(self, val):
         """
