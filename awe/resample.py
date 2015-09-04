@@ -328,7 +328,7 @@ class MultiColor(OneColor):
         self.cellweights_path = os.path.join(OUTPUT_DIR, 'cell-weights.csv')
         makedirs_parent(self.cellweights_path)
         of = open(self.cellweights_path,'a')
-    	of.write('%iteration,cellid,color,total_weight \n')
+        of.write('%iteration,cellid,color,total_weight \n')
         of.close()
 
         self.tmat_path = os.path.join(OUTPUT_DIR,
@@ -412,14 +412,14 @@ class MultiColor(OneColor):
         of = open(self.cellweights_path,'a')
         for cell in newsystem.cells:
             # Get the corresponding cell from the old system
-    	    thiscell = system.filter_by_cell(cell)
-    	    
+            thiscell = system.filter_by_cell(cell)
+
             for color in thiscell.colors:
                 # Get the corresponding color from the cell in the old system
-    	        thiscolor = thiscell.filter_by_color(color)
+                thiscolor = thiscell.filter_by_color(color)
 
                 # Output information about the cell and color
-    	        of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+ \
+                of.write(str(self.iteration)+','+str(cell.id)+','+str(color)+ \
                     ','+str(sum(thiscolor.weights))+'\n')
         of.close()
 

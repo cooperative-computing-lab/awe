@@ -77,14 +77,14 @@ def voronoi(X,Y):
     cells = [[] for i in range(np.max(T)+1)]
     for i,triang in enumerate(T):
         cells[triang[0]].append([X[i],Y[i]])
-	cells[triang[1]].append([X[i],Y[i]])
+        cells[triang[1]].append([X[i],Y[i]])
 	cells[triang[2]].append([X[i],Y[i]])
     for i,cell in enumerate(cells):
         angle = []
         for coord in cell:
-	    angle.append(np.arctan2((coord[1]-P[i,1]),(coord[0]-P[i,0])))
-	id = np.argsort(-np.array(angle))
-	cells[i] = np.array([cell[j] for j in id])
+            angle.append(np.arctan2((coord[1]-P[i,1]),(coord[0]-P[i,0])))
+        id = np.argsort(-np.array(angle))
+        cells[i] = np.array([cell[j] for j in id])
     return cells
 
 # -----------------------------------------------------------------------------
@@ -98,11 +98,11 @@ if __name__ == '__main__':
     cells = voronoi(X,Y)
     patches = []
     for cell in cells:
-	polygon = Polygon(cell,True)
-	patches.append(polygon)
+        polygon = Polygon(cell,True)
+        patches.append(polygon)
         #plt.scatter(cell[:,0],cell[:,1])
     colors = 100*np.random.rand(len(patches))
-    print colors
+    print(colors)
     p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
     p.set_array(np.array(colors))
     axes.add_collection(p)
