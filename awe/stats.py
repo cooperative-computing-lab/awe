@@ -919,7 +919,7 @@ class StatsLogger (object):
         """
 
         s = '%f %s %s %s\n' % (t, component, name, val)
-        self._fd.write(bytes(s,'UTF-8'))
+        self._fd.write(bytes(s,'ASCII'))
 
     def output(self, val):
         """
@@ -933,7 +933,7 @@ class StatsLogger (object):
             None
         """
 
-        self._fd.write(str(val))
+        self._fd.write(bytes(val, 'ASCII'))
 
     def close(self):
         """
