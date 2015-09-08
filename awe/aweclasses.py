@@ -17,6 +17,8 @@ import pickle
 
 import os, time, shutil
 from collections import defaultdict
+import ctypes
+import sys
 
 
 _WALKER_ID = 0
@@ -630,19 +632,21 @@ class AWE(object):
         pdbdat     = str(top)
 
         # Serialize the walker
-        wdat = pickle.dumps(walker)
+        wdat = str(pickle.dumps(walker))
 
         # Send the the topology and walker to the worker
         # See cctools work_queue.Task for more information
         task.specify_buffer(
             pdbdat,
-            workqueue.WORKER_POSITIONS_NAME+"."+str(self.currenttask),
+            #sys.getsizeof(pdbdat),
+            str(workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask)),
             cache=False
         )
 
         task.specify_buffer(
             wdat,
-            workqueue.WORKER_WALKER_NAME+"."+str(self.currenttask),
+            #sys.getsizeof(wdat),
+            str(workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask)),
             cache=False)
 
         self.specify_task_output_file(task)
