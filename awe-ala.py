@@ -56,80 +56,80 @@ if __name__ == "__main__":
 
         opts = getopts()
 
-	cfg           = awe.workqueue.Config()
-	cfg.fastabort = opts.fastabort
-	cfg.restarts  = opts.restarts
-	cfg.maxreps   = opts.maxreps
-	cfg.name      = opts.name
-	cfg.port      = opts.port
+        cfg           = awe.workqueue.Config()
+        cfg.fastabort = opts.fastabort
+        cfg.restarts  = opts.restarts
+        cfg.maxreps   = opts.maxreps
+        cfg.name      = opts.name
+        cfg.port      = opts.port
 	
-	if opts.debug:
-		cfg.debug = opts.debug 
+        if opts.debug:
+                cfg.debug = opts.debug 
 
-	if opts.enable_monitor:
-		cfg.monitor = True 
-		cfg.summaryfile = opts.summaryfile
+        if opts.enable_monitor:
+                cfg.monitor = True 
+                cfg.summaryfile = opts.summaryfile
 
         # The "main" function of the worker
-	cfg.execute('awe-instance-data/execute-task.sh')
+        cfg.execute('awe-instance-data/execute-task.sh')
 
         # Binaries to run MD and assignment steps
-	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/pdb2gmx')
-	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/grompp')
-	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/mdrun')
-	cfg.cache('awe-generic-data/binaries/$OS-$ARCH/awe-assign')
+        cfg.cache('awe-generic-data/binaries/$OS-$ARCH/pdb2gmx')
+        cfg.cache('awe-generic-data/binaries/$OS-$ARCH/grompp')
+        cfg.cache('awe-generic-data/binaries/$OS-$ARCH/mdrun')
+        cfg.cache('awe-generic-data/binaries/$OS-$ARCH/awe-assign')
 
-	cfg.cache('awe-generic-data/gmxtopologies')         # required for running gromacs for MD
-	cfg.cache('awe-instance-data/sim.mdp')              # Gromacs simulation parameters
-	cfg.cache('awe-instance-data/env.sh')               # setting up the worker execution environment
-	cfg.cache('awe-instance-data/cells.dat')            # cell definitions
-	cfg.cache('awe-instance-data/CellIndices.dat')      # cell atoms to use when assigning
-	cfg.cache('awe-instance-data/StructureIndices.dat') # walker atoms to use when assigning
+        cfg.cache('awe-generic-data/gmxtopologies')         # required for running gromacs for MD
+        cfg.cache('awe-instance-data/sim.mdp')              # Gromacs simulation parameters
+        cfg.cache('awe-instance-data/env.sh')               # setting up the worker execution environment
+        cfg.cache('awe-instance-data/cells.dat')            # cell definitions
+        cfg.cache('awe-instance-data/CellIndices.dat')      # cell atoms to use when assigning
+        cfg.cache('awe-instance-data/StructureIndices.dat') # walker atoms to use when assigning
 
         # initialize the weights randomly
-	weights   = np.random.random((nstates,nwalkers))
-	weights  /= np.sum(weights.flatten())
+        weights   = np.random.random((nstates,nwalkers))
+        weights  /= np.sum(weights.flatten())
 
         # load a topology file
-	system    = awe.System(topology = awe.PDB('awe-instance-data/topol.pdb'))
+        system    = awe.System(topology = awe.PDB('awe-instance-data/topol.pdb'))
 
         # 2-color awe needs states assigned to a region
-	partition = awe.SinkStates()
-	partition.add(0, *range(0,nstates/2))
-	partition.add(1, *range(nstates/2,nstates))
+        partition = awe.SinkStates()
+        partition.add(0, *range(0,nstates/2))
+        partition.add(1, *range(nstates/2,nstates))
 
         # load the initial cells and walkers
-	srcdir = 'awe-instance-data/pdbs/ala'
-	for i in xrange(nstates):
+        srcdir = 'awe-instance-data/pdbs/ala'
+        for i in xrange(nstates):
 
-	    if i < nstates / 3:
-		cell = awe.Cell(i, core=0)
-	    elif i > 2 * nstates / 3:
-		cell = awe.Cell(i, core=1)
-	    else:
-		cell = awe.Cell(i)
+            if i < nstates / 3:
+                cell = awe.Cell(i, core=0)
+            elif i > 2 * nstates / 3:
+                cell = awe.Cell(i, core=1)
+            else:
+                cell = awe.Cell(i)
 
-	    color = partition.color(cell)
-	    system.add_cell(cell)
+            color = partition.color(cell)
+            system.add_cell(cell)
 
 
-	    for j in xrange(nwalkers):
+            for j in xrange(nwalkers):
 
-		pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
-		pdb     = awe.PDB(pdbpath)
-		w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j], cellid=cell.id)
-		system.add_walker(w)
+                pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
+                pdb     = awe.PDB(pdbpath)
+                w       = awe.Walker(start=pdb.coords, assignment=i, color=color, weight=weights[i,j], cellid=cell.id)
+                system.add_walker(w)
 
         # define the AWE resampling algorithm to use
-	multicolor = awe.resample.MultiColor(nwalkers, partition)
-	resample   = awe.resample.SaveWeights(multicolor)
-	adaptive   = awe.AWE( wqconfig   = cfg,
+        multicolor = awe.resample.MultiColor(nwalkers, partition)
+        resample   = awe.resample.SaveWeights(multicolor)
+        adaptive   = awe.AWE( wqconfig   = cfg,
 			      system     = system,
 			      iterations = opts.iterations,
 			      resample   = resample,
 			      checkpointfreq = 1)
 
-	adaptive.run()
+        adaptive.run()
 
-	print 'Run time:', awe.time.time(), 's'
-	sys.exit(0)
+        print('Run time:', awe.time.time(), 's')
+        sys.exit(0)
