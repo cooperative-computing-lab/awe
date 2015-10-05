@@ -565,7 +565,7 @@ class WorkQueue(object):
         self.stats  = awe.stats.WQStats(logger=statslogger)
 
         # Create the temporary file where the task cache is stored
-        self.tmpdir = tempfile.mkdtemp(prefix='awe-tmp.')
+        self.tmpdir = str(bytes(tempfile.mkdtemp(prefix='awe-tmp.'), 'ASCII'), 'ASCII')
 
         # Create a dictionary to keep track of the number of times a
         # particular task has been restarted
@@ -875,7 +875,7 @@ class WorkQueue(object):
         while True:
 
             # Set the cctools WorkQueue object to idle until a task arrives
-            task = self.wait(self.cfg.waittime)
+            task = self.wait(timeout=self.cfg.waittime)
 
             if task:
                 # Record the task output whether it succeeded or failed

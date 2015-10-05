@@ -16,6 +16,7 @@ import numpy as np
 import pickle
 
 import os, time, shutil
+import tempfile
 from collections import defaultdict
 import ctypes
 import sys
@@ -248,8 +249,10 @@ class AWE(object):
         self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
         self.transitionslogger = stats.StatsLogger(
             'debug/cell-transitions.log.gz')
-
+	
+        #self.tmpdir = tempfile.mkdtemp(prefix="awe-tmp.")
         self.wq = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
+        #self.wq.tmpdir = self.tmpdir
         self.system = system
         self.iterations = iterations
         self.resample = resample
@@ -582,12 +585,12 @@ class AWE(object):
             The tag for a task
         """
 
-        tag = '%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
+        tag = str(bytes('%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
             'cellid'  : walker.assignment,
             'weight'  : walker.weight,
             'walkerid' : walker.id
-        }
+        }, 'ASCII'), 'ASCII')
 
         return tag
 
@@ -609,7 +612,7 @@ class AWE(object):
         return {'cellid'   : int(cellid)   ,
                 'weight'   : float(weight) ,
                 'walkerid' : int(walkerid) ,
-                'outfile'  : outfile       }
+                'outfile'  : str(bytes(outfile, 'ASCII'), 'ASCII')       }
 
         
 
@@ -639,14 +642,14 @@ class AWE(object):
         task.specify_buffer(
             pdbdat,
             #sys.getsizeof(pdbdat),
-            str(workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask)),
+            str(bytes(workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask), 'ASCII'), 'ASCII'),
             cache=False
         )
 
         task.specify_buffer(
             wdat,
             #sys.getsizeof(wdat),
-            str(workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask)),
+            str(bytes(workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask), 'ASCII'), 'ASCII'),
             cache=False)
 
         self.specify_task_output_file(task)
@@ -663,7 +666,7 @@ class AWE(object):
         """
 
         output = os.path.join(self.wq.tmpdir, task.tag)
-        task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME+"."+str(self.currenttask), cache=False)
+        task.specify_output_file(str(bytes(output, 'ASCII'), 'ASCII'), remote_name = str(bytes(workqueue.WORKER_RESULTS_NAME+"."+str(self.currenttask), 'ASCII'), 'ASCII'), cache=False)
 
     @typecheck(workqueue.WQ.Task)
     @returns(Walker)
@@ -681,11 +684,11 @@ class AWE(object):
 
         # The output file is compressed, so untar it and get the relevant info
         import tarfile
-        tar = tarfile.open(result.tag)
+        tar = tarfile.open(str(bytes(result.tag, 'ASCII'), 'ASCII'))
         try:
-            walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
-            pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
-            cellstring        = tar.extractfile(workqueue.RESULT_CELL     ).read()
+            walkerstr         = str(bytes(tar.extractfile(workqueue.WORKER_WALKER_NAME).read(), 'ASCII'), 'ASCII')
+            pdbstring         = str(bytes(tar.extractfile(workqueue.RESULT_POSITIONS).read(), 'ASCII'), 'ASCII')
+            cellstring        = str(bytes(tar.extractfile(workqueue.RESULT_CELL     ).read(), 'ASCII'), 'ASCII')
         finally:
             tar.close()
 
