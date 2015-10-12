@@ -78,7 +78,7 @@ def voronoi(X,Y):
     for i,triang in enumerate(T):
         cells[triang[0]].append([X[i],Y[i]])
         cells[triang[1]].append([X[i],Y[i]])
-	cells[triang[2]].append([X[i],Y[i]])
+        cells[triang[2]].append([X[i],Y[i]])
     for i,cell in enumerate(cells):
         angle = []
         for coord in cell:
