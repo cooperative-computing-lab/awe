@@ -566,7 +566,7 @@ class WorkQueue(object):
 
         # Create the temporary file where the task cache is stored
         self.tmpdir = str(bytes(tempfile.mkdtemp(prefix='awe-tmp.'), 'ASCII'), 'ASCII')
-
+        print("Temporary directory is %s" % self.tmpdir)
         # Create a dictionary to keep track of the number of times a
         # particular task has been restarted
         self.restarts = dict()
@@ -873,11 +873,12 @@ class WorkQueue(object):
 
         # print time.asctime(), 'waiting for task'
         while True:
-
+            #print(self.tmpdir)
             # Set the cctools WorkQueue object to idle until a task arrives
             task = self.wait(timeout=self.cfg.waittime)
 
             if task:
+                print("Success!")
                 # Record the task output whether it succeeded or failed
                 self.update_task_stats(task)
                 # print time.asctime(), 'Received result. %d tasks remaining in iteration.' % self.tasks_in_queue()
@@ -885,8 +886,11 @@ class WorkQueue(object):
                 self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
                 self.taskoutputlogger.output(task.output)
                 self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
-
+                #print(task.output)
+                #m = input("press enter")
             if task and task.result == 0:
+                print("Task returned with result %s and value %s" % (task.result, task.return_status) )
+
                 # Deal with tasks in which an error occurred
                 if not task.return_status == 0 and not self.restart(task):
                     raise WorkQueueWorkerException(self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status))
@@ -895,7 +899,7 @@ class WorkQueue(object):
                 try:
                     result = marshall(task)
                 except Exception as ex:
-
+                    print("In the exception")
                     ### sometimes a task fails, but still returns.
                     ##+ attempt to restart these
                     if not self.restart(task):

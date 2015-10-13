@@ -498,12 +498,12 @@ class AWE(object):
         Returns:
             None
         """
-
+        print("in AWE._resample()")
         # Keep track of how long it takes to resample
         self.stats.time_resample('start')
         self.system = self.resample(self.system)
         self.stats.time_resample('stop')
-            
+        print("done resampling")
 
     def run(self):
         """
@@ -585,12 +585,12 @@ class AWE(object):
             The tag for a task
         """
 
-        tag = str(bytes('%(outfile)s|%(cellid)d|%(weight)f|%(walkerid)d' % {
+        tag = '%(outfile)s-%(cellid)d-%(weight)f-%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
             'cellid'  : walker.assignment,
             'weight'  : walker.weight,
             'walkerid' : walker.id
-        }, 'ASCII'), 'ASCII')
+        }
 
         return tag
 
@@ -606,9 +606,9 @@ class AWE(object):
         Returns:
             A dictionary containing sufficient information to identify a walker
         """
-
-        split = tag.split('|')
-        outfile, cellid, weight, walkerid = tag.split('|')
+        print(tag)
+        split = tag.split('-')
+        outfile, cellid, weight, walkerid = tag.split('-')
         return {'cellid'   : int(cellid)   ,
                 'weight'   : float(weight) ,
                 'walkerid' : int(walkerid) ,
@@ -635,21 +635,21 @@ class AWE(object):
         pdbdat     = str(top)
 
         # Serialize the walker
-        wdat = str(pickle.dumps(walker))
+        wdat = pickle.dumps(walker).decode('raw_unicode_escape')
 
         # Send the the topology and walker to the worker
         # See cctools work_queue.Task for more information
         task.specify_buffer(
             pdbdat,
             #sys.getsizeof(pdbdat),
-            str(bytes(workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask), 'ASCII'), 'ASCII'),
+            workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask),
             cache=False
         )
 
         task.specify_buffer(
             wdat,
             #sys.getsizeof(wdat),
-            str(bytes(workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask), 'ASCII'), 'ASCII'),
+            workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask),
             cache=False)
 
         self.specify_task_output_file(task)
@@ -666,7 +666,7 @@ class AWE(object):
         """
 
         output = os.path.join(self.wq.tmpdir, task.tag)
-        task.specify_output_file(str(bytes(output, 'ASCII'), 'ASCII'), remote_name = str(bytes(workqueue.WORKER_RESULTS_NAME+"."+str(self.currenttask), 'ASCII'), 'ASCII'), cache=False)
+        task.specify_output_file(output, remote_name = workqueue.WORKER_RESULTS_NAME+"."+int.__str__(self.currenttask), cache=False)
 
     @typecheck(workqueue.WQ.Task)
     @returns(Walker)
@@ -684,26 +684,40 @@ class AWE(object):
 
         # The output file is compressed, so untar it and get the relevant info
         import tarfile
-        tar = tarfile.open(str(bytes(result.tag, 'ASCII'), 'ASCII'))
+        if tarfile.is_tarfile(result.tag):
+            print("%s is a valid tarfile" % result.tag)
+        else:
+            print("Invalid tarfile: %s" % result.tag)
+        tar = tarfile.open(result.tag)
         try:
-            walkerstr         = str(bytes(tar.extractfile(workqueue.WORKER_WALKER_NAME).read(), 'ASCII'), 'ASCII')
-            pdbstring         = str(bytes(tar.extractfile(workqueue.RESULT_POSITIONS).read(), 'ASCII'), 'ASCII')
-            cellstring        = str(bytes(tar.extractfile(workqueue.RESULT_CELL     ).read(), 'ASCII'), 'ASCII')
+            walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
+            print(walkerstr)
+
+            pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
+            print(pdbstring)
+            
+            cellstring        = tar.extractfile(workqueue.RESULT_CELL).read()
+            print(cellstring)
         finally:
             tar.close()
 
         # Get the coordinates from the ending configuration of the walker
-        pdb               = structures.PDB(pdbstring)
+        pdb               = structures.PDB(pdbstring.decode("utf-8"))
+        print("Got the pdb")
         coords            = pdb.coords
+        print("Got the coordinates")
 
         # Get the cell id for the ending coordinates
-        cellid            = int(cellstring)
+        cellid            = int(cellstring.decode("utf-8"))
+        print("Got the cell id")
 
         # Load the walker object from the .pkl file
-        walker            = pickle.loads(walkerstr)
+        walker            = pickle.loads(walkerstr.decode('utf-8'))
+        print("Got the pickled walker")
 
         # Determine whether or not the walker changed states
         transition = walker.assignment != cellid
+        print("The transition was %s" % (transition))
 
         print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
               'Walker', walker.id, \
