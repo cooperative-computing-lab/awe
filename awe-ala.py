@@ -95,12 +95,12 @@ if __name__ == "__main__":
 
         # 2-color awe needs states assigned to a region
         partition = awe.SinkStates()
-        partition.add(0, *range(0,nstates/2))
-        partition.add(1, *range(nstates/2,nstates))
+        partition.add(0, *range(0,nstates//2))
+        partition.add(1, *range(nstates//2,nstates))
 
         # load the initial cells and walkers
         srcdir = 'awe-instance-data/pdbs/ala'
-        for i in xrange(nstates):
+        for i in range(nstates):
 
             if i < nstates / 3:
                 cell = awe.Cell(i, core=0)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
             system.add_cell(cell)
 
 
-            for j in xrange(nwalkers):
+            for j in range(nwalkers):
 
                 pdbpath = os.path.join(srcdir, 'State%d-%d.pdb' % (i, j))
                 pdb     = awe.PDB(pdbpath)
