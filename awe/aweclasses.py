@@ -585,7 +585,7 @@ class AWE(object):
             The tag for a task
         """
 
-        tag = '%(outfile)s-%(cellid)d-%(weight)f-%(walkerid)d' % {
+        tag = '%(outfile)s+%(cellid)d+%(weight)f+%(walkerid)d' % {
             'outfile' : os.path.join(self.wq.tmpdir, workqueue.RESULT_NAME),
             'cellid'  : walker.assignment,
             'weight'  : walker.weight,
@@ -607,12 +607,12 @@ class AWE(object):
             A dictionary containing sufficient information to identify a walker
         """
         print(tag)
-        split = tag.split('-')
-        outfile, cellid, weight, walkerid = tag.split('-')
+        split = tag.split('+')
+        outfile, cellid, weight, walkerid = tag.split('+')
         return {'cellid'   : int(cellid)   ,
                 'weight'   : float(weight) ,
                 'walkerid' : int(walkerid) ,
-                'outfile'  : str(bytes(outfile, 'ASCII'), 'ASCII')       }
+                'outfile'  : outfile       }
 
         
 
@@ -635,8 +635,12 @@ class AWE(object):
         pdbdat     = str(top)
 
         # Serialize the walker
-        wdat = pickle.dumps(walker).decode('raw_unicode_escape')
-
+        #wdat = pickle.dumps(walker).decode('raw_unicode_escape')
+        pkl_name = os.path.join(workqueue.PICKLE_BASE, "walker"+int.__str__(walker.id)+".pkl")
+        pkl_file = open(pkl_name, 'wb')
+        pickle.dump(walker, pkl_file)
+        pkl_file.close()
+        
         # Send the the topology and walker to the worker
         # See cctools work_queue.Task for more information
         task.specify_buffer(
@@ -646,10 +650,11 @@ class AWE(object):
             cache=False
         )
 
-        task.specify_buffer(
-            wdat,
+        task.specify_file(
+            pkl_name,
             #sys.getsizeof(wdat),
             workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask),
+            0, # WORK_QUEUE_INPUT
             cache=False)
 
         self.specify_task_output_file(task)
@@ -712,7 +717,7 @@ class AWE(object):
         print("Got the cell id")
 
         # Load the walker object from the .pkl file
-        walker            = pickle.loads(walkerstr.decode('utf-8'))
+        walker            = pickle.loads(walkerstr)
         print("Got the pickled walker")
 
         # Determine whether or not the walker changed states
@@ -723,7 +728,8 @@ class AWE(object):
               'Walker', walker.id, \
               'transition', walker.assignment, '->', cellid, \
               self.wq.tasks_in_queue(), 'tasks remaining')
-        
+        pkl_name = "walker"+int.__str__(walker.id)+".pkl"
+        os.remove(workqueue.PICKLE_BASE+pkl_name)
         # Log the walker
         self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                       'iteration %s from %s to %s %s' % \
@@ -869,7 +875,7 @@ class System(object):
         Get the weights of all walkers in the System.
         """
         
-        return np.array(map(lambda w: w.weight, self.walkers))
+        return np.array(list(map(lambda w: w.weight, self.walkers)))
 
     @property
     @returns(set)
@@ -995,7 +1001,7 @@ class System(object):
             supplied cell
         """
 
-        ws     = [w for w in self.walkers if w.assignment == cell.id]#filter(lambda w: w.assignment == cell.id, self.walkers)
+        ws     = list([w for w in self.walkers if w.assignment == cell.id])#filter(lambda w: w.assignment == cell.id, self.walkers)
         newsys = self.clone(cells={cell.id:self.cell(cell.id)})
         for w in ws: newsys.add_walker(w)
         return newsys
@@ -1013,7 +1019,7 @@ class System(object):
             supplied color
         """
 
-        ws     = [w for w in self.walkers is w.color == color]#filter(lambda w: w.color == color, self.walkers)
+        ws     = [w for w in self.walkers if w.color == color]#filter(lambda w: w.color == color, self.walkers)
         newsys = self.clone()
 
         for w in ws:

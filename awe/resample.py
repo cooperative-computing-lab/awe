@@ -154,6 +154,10 @@ class OneColor(IResampler):
             weights    = localsystem.weights
             walkers    = localsystem.walkers
 
+            for i in range(0, len(walkers)):
+                print(walkers[i])
+                print(weights[i])
+
             print(time.asctime(), 'Resampling cell', cell, len(walkers) ,'walkers')
 
             # Only resample if there exist walkers in the cell
@@ -163,7 +167,8 @@ class OneColor(IResampler):
             ##+ this ensures only walkers whose weight > targetWeight are split.
             # This method returns a list of indices in the supplied list/array
             # that correspond to the sorted order of the original.
-            mywalkers = list(argsort(-weights))
+            negweights = np.array([-i for i in weights])
+            mywalkers = list(argsort(negweights))#-weights))
             print('\tmywalkers:', mywalkers)
 
             ### sanity check
@@ -275,7 +280,7 @@ class OneColor(IResampler):
                 # with whichever was kept at the end of the merge section.
         # Once all walkers have been processed, return the new system, which
         # should have all walkers initialized with the target weight.
-        histfilefd.close()
+        histfile_fd.close()
         return newsystem
 
 class MultiColor(OneColor):
@@ -333,7 +338,7 @@ class MultiColor(OneColor):
 
         self.tmat_path = os.path.join(OUTPUT_DIR,
                 'color-transition-matrix.csv')
-        self.tmat_header = textwrap.dedent(
+        self.tmat_header = str(textwrap.dedent(
             """\
             # An ((N+1)*2, 2, 2) matrix, where N is the number of iterations
             # Can be loaded like:
@@ -341,7 +346,7 @@ class MultiColor(OneColor):
             #   itrs = m.shape[0] / 2
             #   T = m.reshape((itrs, 2, 2))
             """
-            )
+            ))
 
 
     def resample(self, system):
@@ -443,24 +448,25 @@ class MultiColor(OneColor):
         """
 
         print(time.asctime(), 'Saving transition matrix to', repr(path))
-        fd = open(path, 'w')
+        #fd = open(path, 'w')
         
         try:
             # Output the transitions from this iteration only
-            fd.write(self.tmat_header)
+            #fd.write(str(self.tmat_header))
 
             # This saves the current transitions in case of failure
-            np.savetxt(fd, self.transitions, delimiter=',')
+            np.savetxt(path, self.transitions, delimiter=',', header=self.tmat_header)
         
         finally:
-            fd.close()
+            #fd.close()
+            print("Transition saved")
 
 
 
 
 ############# END OF CLASSES USED BY BADI's AWE-WQ IMPLEMENTATION #############
 
-# Classes beyond this point were used in the release version od AWE and are
+# Classes beyond this point were not used in the release version od AWE and are
 # either legacy classes or those to be implemented in the future.
 
 
