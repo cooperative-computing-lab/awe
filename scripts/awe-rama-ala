@@ -53,8 +53,8 @@ def parseCenter(pdbf,cellf):
             psi.append(float(phipsitext[1]))
             phipsif.close()
             cleanup()
-           #phipsi.append([calcPhi(alacenter),calcPsi(alacenter)])
-           coords = []
+            #phipsi.append([calcPhi(alacenter),calcPsi(alacenter)])
+            coords = []
     return np.array([phi,psi])
 
 #phipsi = parseCenter('testinput/state0.pdb','testinput/cells.dat')
@@ -102,13 +102,13 @@ if __name__ == '__main__':
     ncell = args[0].ncell
 
     maxfe = 10
-    print 'Converting coordinates to phi-psi angles'
+    print('Converting coordinates to phi-psi angles')
     cellcenter = parseCenter(pdbf,cellf)
-    print 'Reading cell weights'
+    print('Reading cell weights')
     cellw = extractWeight(weightf,ncell)
     colorw = ramaColor(cellw,maxfe)
 
-    print 'Plotting Ramachandran'
+    print('Plotting Ramachandran')
     X = cellcenter[0]
     Y = cellcenter[1]
     cells = vn.voronoi(X,Y)
