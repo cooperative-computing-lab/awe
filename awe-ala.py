@@ -102,9 +102,9 @@ if __name__ == "__main__":
         srcdir = 'awe-instance-data/pdbs/ala'
         for i in range(nstates):
 
-            if i < nstates / 3:
+            if i < nstates // 3:
                 cell = awe.Cell(i, core=0)
-            elif i > 2 * nstates / 3:
+            elif i > 2 * nstates // 3:
                 cell = awe.Cell(i, core=1)
             else:
                 cell = awe.Cell(i)
@@ -127,7 +127,9 @@ if __name__ == "__main__":
 			      system     = system,
 			      iterations = opts.iterations,
 			      resample   = resample,
-			      checkpointfreq = 1)
+			      checkpointfreq = 1,
+                  verbose=True,
+                  log_it=True)
 
         adaptive.run()
 

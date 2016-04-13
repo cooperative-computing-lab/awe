@@ -55,7 +55,7 @@ def getopts(args=None):
             cells        = os.path.join('awe-instance-data', 'cells.dat'),
             weights      = os.path.join('awe-instance-data', 'weights.dat'),
             walkers      = os.path.join('awe-instance-data', 'pdbs'),
-            regions      = [os.path.join('awe-instance-data', p) for p in ['unfolded.dat', 'folded.dat']]
+            regions      = [os.path.join('awe-instance-data', p) for p in ['unfolded.dat', 'folded.dat']],
                             #map(lambda p: os.path.join('awe-instance-data',p),
                                #['unfolded.dat','folded.dat']),
             restart      = False,
@@ -82,10 +82,10 @@ def getopts(args=None):
             opts.port = -1
     else:
         try:
-            port = float(opts.port)
+            port = int(opts.port)
         except ValueError as e:
             p.error('Invalid port specified, cannot be converted to integer: %s' % opts.port)
-        opts.port = port
+        opts.port = int(port)
 
     if opts.debug:
         opts.debug = 'all'
@@ -204,7 +204,7 @@ def main(opts):
             checkpointfreq=1
         )
 
-        resampler.restart()
+        resampler.recover()
 
         resampler.traxlogger.close()
         resampler.traxlogger._cpt_mode = 'wb'

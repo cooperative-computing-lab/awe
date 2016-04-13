@@ -26,6 +26,8 @@ _AWE_WORK_QUEUE = None
 # These seem to have been deprecated in production.
 # The workers use a different set of files.
 
+PICKLE_BASE = 'awe-instance-data/pickle/'
+
 WORKER_POSITIONS_NAME = 'structure.pdb' # The PDB used to generate a trajectory
 WORKER_WALKER_NAME    = 'walker.pkl'    # The walker object for the task
 WORKER_WEIGHTS_NAME   = 'weight.dat'    # The weight for each walker
@@ -537,7 +539,7 @@ class WorkQueue(object):
     """
 
     # @awe.typecheck(Config)
-    def __init__(self, cfg, statslogger=None, taskoutputlogger=None):
+    def __init__(self, cfg, statslogger=None, taskoutputlogger=None, log_it=False):
         """
         Initialize a new instance of WorkQueue for managing the cctools
         work_queue.WorkQueue object with the necessary parameters for running
@@ -566,7 +568,7 @@ class WorkQueue(object):
 
         # Create the temporary file where the task cache is stored
         self.tmpdir = str(bytes(tempfile.mkdtemp(prefix='awe-tmp.'), 'ASCII'), 'ASCII')
-        print("Temporary directory is %s" % self.tmpdir)
+        #print("Temporary directory is %s" % self.tmpdir)
         # Create a dictionary to keep track of the number of times a
         # particular task has been restarted
         self.restarts = dict()
@@ -574,6 +576,7 @@ class WorkQueue(object):
         # Start logging statistics about and output from the tasks
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
         self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
+        self._log = log_it
 
     @property
     def empty(self):
@@ -630,8 +633,8 @@ class WorkQueue(object):
         Returns:
             None
         """
-
-        self.stats.task(task)
+        if self._log:
+            self.stats.task(task)
 
     def new_task(self):
         """
@@ -882,10 +885,10 @@ class WorkQueue(object):
                 # Record the task output whether it succeeded or failed
                 self.update_task_stats(task)
                 # print time.asctime(), 'Received result. %d tasks remaining in iteration.' % self.tasks_in_queue()
-
-                self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
-                self.taskoutputlogger.output(task.output)
-                self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
+                if self._log:
+                    self.taskoutputlogger.output("<====== WQ: START task %s output ======>\n" % task.tag)
+                    self.taskoutputlogger.output(task.output)
+                    self.taskoutputlogger.output("<====== WQ: END task %s output ======>\n"   % task.tag)
                 #print(task.output)
                 #m = input("press enter")
             if task and task.result == 0:

@@ -7,7 +7,6 @@ CONF_OUT=structure2.pdb
 ASSIGNMENT=cell2.dat
 DESIRED_FILES="$CONF_OUT $ASSIGNMENT"
 RESULTFILE=results.tar
-WALKER=walker.pkl
 CLEANUP="traj* *.tpr"
 
 ### disable gmx automatic backups.

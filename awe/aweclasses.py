@@ -20,7 +20,7 @@ import tempfile
 from collections import defaultdict
 import ctypes
 import sys
-
+import resource
 
 _WALKER_ID = 0
 _DEFAULT_COLOR = -1
@@ -228,7 +228,7 @@ class AWE(object):
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
     def __init__(self, wqconfig=None, system=None, iterations=-1, resample=None,
-                 traxlogger = None, checkpointfreq=1):
+                 traxlogger = None, checkpointfreq=1, verbose=False, log_it=False):
         """
         Initialize a new instance of AWE.
 
@@ -242,8 +242,8 @@ class AWE(object):
 
         Returns:
             None
-        """
-
+        """ 
+        self._verbose = verbose
         self._print_start_screen()
         
         self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
@@ -251,7 +251,7 @@ class AWE(object):
             'debug/cell-transitions.log.gz')
 	
         #self.tmpdir = tempfile.mkdtemp(prefix="awe-tmp.")
-        self.wq = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger)
+        self.wq = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger, log_it=log_it)
         #self.wq.tmpdir = self.tmpdir
         self.system = system
         self.iterations = iterations
@@ -270,6 +270,7 @@ class AWE(object):
         self.checkpointfreq = checkpointfreq
 
         self._firstrun  = True
+        self._log = log_it
 
     def _print_start_screen(self):
         """
@@ -281,27 +282,27 @@ class AWE(object):
         Returns:
             None
         """
-
-        start_str = "********************************* AWE - Acclerated Weighted Ensemble *******************************\n"
-        start_str += "AUTHORS:\n"
-        start_str += "  Badi' Abdul-Wahid\n"
-        start_str += "  Haoyun Feng\n"
-        start_str += "  Jesus Izaguirre\n"
-        start_str += "  Eric Darve\n"
-        start_str += "  Ronan Costaouec\n"
-        start_str += "  Dinesh Rajan\n"
-        start_str += "  Douglas Thain\n"
-        start_str += "\n"
-        start_str += "CITATION:\n"
-        start_str += "  Badi Abdul-Wahid, Li Yu, Dinesh Rajan, Haoyun Feng, Eric Darve, Douglas Thain, Jesus A. Izaguirre,\n"
-        start_str += "  Folding Proteins at 500 ns/hour with Work Queue,\n"
-        start_str += "  8th IEEE International Conference on eScience (eScience 2012), October, 2012.\n"
-        start_str += "\n"
-        start_str += "WEB PAGE:\n"
-        start_str += "  www.nd.edu/~ccl/software/awe\n"
-        start_str += "***************************************************************************************************\n"
-
-        print(start_str)
+        if self._verbose:
+            start_str = "********************************* AWE - Acclerated Weighted Ensemble *******************************\n"
+            start_str += "AUTHORS:\n"
+            start_str += "  Badi' Abdul-Wahid\n"
+            start_str += "  Haoyun Feng\n"
+            start_str += "  Jesus Izaguirre\n"
+            start_str += "  Eric Darve\n"
+            start_str += "  Ronan Costaouec\n"
+            start_str += "  Dinesh Rajan\n"
+            start_str += "  Douglas Thain\n"
+            start_str += "\n"
+            start_str += "CITATION:\n"
+            start_str += "  Badi Abdul-Wahid, Li Yu, Dinesh Rajan, Haoyun Feng, Eric Darve, Douglas Thain, Jesus A. Izaguirre,\n"
+            start_str += "  Folding Proteins at 500 ns/hour with Work Queue,\n"
+            start_str += "  8th IEEE International Conference on eScience (eScience 2012), October, 2012.\n"
+            start_str += "\n"
+            start_str += "WEB PAGE:\n"
+            start_str += "  www.nd.edu/~ccl/software/awe\n"
+            start_str += "***************************************************************************************************\n"
+            
+            print(start_str)
 
     def checkpoint(self):
         """
@@ -354,8 +355,8 @@ class AWE(object):
         Returns:
             None
         """
-
-        print('Recovering walker', value.id)
+        if self._verbose:
+           print('Recovering walker', value.id)
 
         # Add the walker back into the system
         obj['system'].set_walker(value)
@@ -375,7 +376,8 @@ class AWE(object):
         cpt = self.traxlogger.cpt_path
 
         if os.path.exists(cpt):
-            print('Recovering', cpt)
+            if self._verbose:
+                print('Recovering', cpt)
 
             # Get all attributes from the checkpoint
             parms = self.traxlogger.recover(self._trax_log_recover)
@@ -465,12 +467,13 @@ class AWE(object):
         Returns:
             None
         """
-
-        print(time.asctime(), 'Receiving tasks')
+        if self._verbose:
+            print(time.asctime(), 'Receiving tasks')
         system = self.system
 
         # Start recording AWE statistics for the receive phase
-        self.stats.time_barrier('start')
+        if self._log:
+            self.stats.time_barrier('start')
 
         # Receive tasks until there are none left to receive
         while not self.wq.empty:
@@ -483,9 +486,11 @@ class AWE(object):
             self._try_duplicate_tasks()
 
         # Stop recording stats
-        self.stats.time_barrier('stop')
+        if self._log:
+            self.stats.time_barrier('stop')
         self.wq.clear()
-        print(system)
+        if self._verbose:
+            print(system)
 
 
     def _resample(self):
@@ -498,12 +503,16 @@ class AWE(object):
         Returns:
             None
         """
-        print("in AWE._resample()")
+        #print("in AWE._resample()")
         # Keep track of how long it takes to resample
-        self.stats.time_resample('start')
+        if self._log:
+            self.stats.time_resample('start')
+        
         self.system = self.resample(self.system)
-        self.stats.time_resample('stop')
-        print("done resampling")
+        
+        if self._log:
+            self.stats.time_resample('stop')
+        #print("done resampling")
 
     def run(self):
         """
@@ -529,35 +538,45 @@ class AWE(object):
         assert len(self.system.walkers) > 0
 
         # Begin recording log information
-        t = time.time()
-        self.statslogger.update(t, 'AWE', 'start_unix_time', t)
+        if self._log:
+            t = time.time()
+            self.statslogger.update(t, 'AWE', 'start_unix_time', t)
 
         # Run hte specified iterations number of iterations and exit on ctrl+c
         try:
             while self.iteration < self.iterations:
-
+                #if self._log:
+                    #fd = open("memory_stats/"+float.__str__(t)+"rss_usage.csv", 'a')
+                    #fd.write(int.__str__(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)+"\n")
+                #print("MaxRSS Memory: %s" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
+                #m = input("Press enter")
+                
                 # Update the checkpoint
                 if self.iteration % self.checkpointfreq == 0:
-                    print(time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path)
+                    if self._verbose:
+                        print(time.asctime(), 'Checkpointing to', self.traxlogger.cpt_path)
                     self.checkpoint()
 
                 # Increment the iteration
                 self.iteration += 1
 
                 # Log statistics to file
-                print(time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers')
-                runtime = stats.time.time()
-                self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
-                self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
+                if self._verbose:
+                    print(time.asctime(), 'Iteration', self.iteration, 'with', len(self.system.walkers), 'walkers')
+                if self._log:
+                    runtime = stats.time.time()
+                    self.statslogger.update(runtime, 'AWE', 'iteration', self.iteration)
+                    self.statslogger.update(runtime, 'AWE', 'walkers', len(self.system.walkers))
 
-                self.stats.time_iter('start')
+                    self.stats.time_iter('start')
 
                 # Send, receive, and resample (a.k.a. the actual work)
                 self._submit()
                 self._recv()     ## barrier
                 self._resample()
-
-                self.stats.time_iter('stop')
+                
+                if self._log:
+                    self.stats.time_iter('stop')
 
 
         except KeyboardInterrupt:
@@ -636,26 +655,27 @@ class AWE(object):
 
         # Serialize the walker
         #wdat = pickle.dumps(walker).decode('raw_unicode_escape')
-        pkl_name = os.path.join(workqueue.PICKLE_BASE, "walker"+int.__str__(walker.id)+".pkl")
-        pkl_file = open(pkl_name, 'wb')
-        pickle.dump(walker, pkl_file)
-        pkl_file.close()
+        #pkl_name = os.path.join(workqueue.PICKLE_BASE, "walker"+int.__str__(walker.id)+".pkl")
+        #pkl_file = open(pkl_name, 'wb')
+        #pickle.dump(walker, pkl_file)
+        #pkl_file.close()
         
         # Send the the topology and walker to the worker
         # See cctools work_queue.Task for more information
         task.specify_buffer(
             pdbdat,
+            #"structure.pdb",
             #sys.getsizeof(pdbdat),
             workqueue.WORKER_POSITIONS_NAME+"."+int.__str__(self.currenttask),
             cache=False
         )
 
-        task.specify_file(
-            pkl_name,
-            #sys.getsizeof(wdat),
-            workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask),
-            0, # WORK_QUEUE_INPUT
-            cache=False)
+        #task.specify_file(
+        #    pkl_name,
+        #    #sys.getsizeof(wdat),
+        #    workqueue.WORKER_WALKER_NAME+"."+int.__str__(self.currenttask),
+        #    0, # WORK_QUEUE_INPUT
+        #    cache=False)
 
         self.specify_task_output_file(task)
 
@@ -689,14 +709,16 @@ class AWE(object):
 
         # The output file is compressed, so untar it and get the relevant info
         import tarfile
-        if tarfile.is_tarfile(result.tag):
-            print("%s is a valid tarfile" % result.tag)
-        else:
-            print("Invalid tarfile: %s" % result.tag)
+        #if tarfile.is_tarfile(result.tag):
+        #    print("%s is a valid tarfile" % result.tag)
+        #else:
+        #    print("Invalid tarfile: %s" % result.tag)
+        tag_info = self.decode_from_task_tag(result.tag)
+        print(tag_info) 
         tar = tarfile.open(result.tag)
         try:
-            walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
-            print(walkerstr)
+            #walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
+            #print(walkerstr)
 
             pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
             print(pdbstring)
@@ -717,27 +739,30 @@ class AWE(object):
         print("Got the cell id")
 
         # Load the walker object from the .pkl file
-        walker            = pickle.loads(walkerstr)
-        print("Got the pickled walker")
+        print(tag_info["walkerid"])
+        walker            = self.system.walker(tag_info["walkerid"])#pickle.loads(walkerstr)
+        print("Got the walker from system")
 
         # Determine whether or not the walker changed states
         transition = walker.assignment != cellid
         print("The transition was %s" % (transition))
-
-        print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
-              'Walker', walker.id, \
-              'transition', walker.assignment, '->', cellid, \
-              self.wq.tasks_in_queue(), 'tasks remaining')
-        pkl_name = "walker"+int.__str__(walker.id)+".pkl"
-        os.remove(workqueue.PICKLE_BASE+pkl_name)
-        # Log the walker
-        self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
+        if walker is not None:
+            if self._verbose:
+                print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \
+                      'Walker', walker.id, \
+                      'transition', walker.assignment, '->', cellid, \
+                      self.wq.tasks_in_queue(), 'tasks remaining')
+            #pkl_name = "walker"+int.__str__(walker.id)+".pkl"
+            #os.remove(workqueue.PICKLE_BASE+pkl_name)
+            # Log the walker
+            if self._log:
+                self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                       'iteration %s from %s to %s %s' % \
                                           (self.iteration, walker.assignment, cellid, transition))
-
-        # Update the walker's state
-        walker.end        = coords
-        walker.assignment = cellid
+            
+            # Update the walker's state
+            walker.end        = coords
+            walker.assignment = cellid
 
         os.unlink(result.tag)
         return walker

@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 
-setVerbosity('none')
+#prody.setVerbosity('none')
 #input: pdb file name, cell.dat file name
 #output: phi and psi angels in a two dimensional list
 def parseCenter(pdbf,cellf):

@@ -69,7 +69,7 @@ class PDB(object):
             A ProDy AtomGroup
         """
 
-        ss = io.StringStream(string)
+        ss = io_tools.StringStream(string)
         return prody.parsePDBStream(ss)
 
     @staticmethod
@@ -110,7 +110,7 @@ class PDB(object):
         self.__dict__.update(odict)
 
     def __str__(self):
-        ss = io.StringStream()
+        ss = io_tools.StringStream()
         prody.writePDBStream(ss, self._pdb)
         return ss.read()
 
