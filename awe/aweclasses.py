@@ -625,7 +625,7 @@ class AWE(object):
         Returns:
             A dictionary containing sufficient information to identify a walker
         """
-        print(tag)
+        # print(tag)
         split = tag.split('+')
         outfile, cellid, weight, walkerid = tag.split('+')
         return {'cellid'   : int(cellid)   ,
@@ -721,31 +721,31 @@ class AWE(object):
             #print(walkerstr)
 
             pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
-            print(pdbstring)
+            # print(pdbstring)
             
             cellstring        = tar.extractfile(workqueue.RESULT_CELL).read()
-            print(cellstring)
+            # print(cellstring)
         finally:
             tar.close()
 
         # Get the coordinates from the ending configuration of the walker
         pdb               = structures.PDB(pdbstring.decode("utf-8"))
-        print("Got the pdb")
+        # print("Got the pdb")
         coords            = pdb.coords
-        print("Got the coordinates")
+        # print("Got the coordinates")
 
         # Get the cell id for the ending coordinates
         cellid            = int(cellstring.decode("utf-8"))
-        print("Got the cell id")
+        # print("Got the cell id")
 
         # Load the walker object from the .pkl file
-        print(tag_info["walkerid"])
+        # print(tag_info["walkerid"])
         walker            = self.system.walker(tag_info["walkerid"])#pickle.loads(walkerstr)
-        print("Got the walker from system")
+        # print("Got the walker from system")
 
         # Determine whether or not the walker changed states
         transition = walker.assignment != cellid
-        print("The transition was %s" % (transition))
+        # print("The transition was %s" % (transition))
         if walker is not None:
             if self._verbose:
                 print(time.asctime(), 'Iteration', self.iteration, '/', self.iterations, \

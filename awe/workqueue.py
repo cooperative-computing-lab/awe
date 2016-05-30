@@ -881,7 +881,7 @@ class WorkQueue(object):
             task = self.wait(timeout=self.cfg.waittime)
 
             if task:
-                print("Success!")
+                #print("Success!")
                 # Record the task output whether it succeeded or failed
                 self.update_task_stats(task)
                 # print time.asctime(), 'Received result. %d tasks remaining in iteration.' % self.tasks_in_queue()
@@ -902,7 +902,7 @@ class WorkQueue(object):
                 try:
                     result = marshall(task)
                 except Exception as ex:
-                    print("In the exception")
+                    #print("In the exception")
                     ### sometimes a task fails, but still returns.
                     ##+ attempt to restart these
                     if not self.restart(task):

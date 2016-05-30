@@ -185,7 +185,9 @@ def main(opts):
                             system         = system,
                             iterations     = opts.iterations,
                             resample       = resampler,
-                            checkpointfreq = 1
+                            checkpointfreq = 1,
+                            verbose        = True,
+                            log_it         = True
                             )
         resampler.traxlogger._picklemode = 2
         resampler.traxlogger._pickleprotocol = 2

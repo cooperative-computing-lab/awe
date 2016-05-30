@@ -35,7 +35,7 @@ prepare-filenames() {
 	structure=`ls $CONF_IN.*`
 	id="${structure##*.}"
 	mv -f "$CONF_IN.$id" $CONF_IN
-	mv -f "$WALKER.$id" $WALKER
+	#mv -f "$WALKER.$id" $WALKER
 }
 
 check-initial() {
