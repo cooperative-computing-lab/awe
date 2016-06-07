@@ -1,0 +1,38 @@
+--- __init__.py	(original)
++++ __init__.py	(refactored)
+@@ -6,22 +6,22 @@
+ See the file COPYING for details.
+ """
+ 
+-from io import trace, log
+-from util import typecheck, typecheckfn
++from .io import trace, log
++from .util import typecheck, typecheckfn
+ 
+-import stats
+-import aweclasses
+-import workqueue
+-import io
+-import resample
+-import structures
++from . import stats
++from . import aweclasses
++from . import workqueue
++from . import io
++from . import resample
++from . import structures
+ 
+-from aweclasses import Walker, AWE, Cell, System, SinkStates
+-from workqueue import Config
+-from stats import time
+-from structures import PDB
++from .aweclasses import Walker, AWE, Cell, System, SinkStates
++from .workqueue import Config
++from .stats import time
++from .structures import PDB
+ 
+-import voronoi
++from . import voronoi
+ 
+ import prody
+ 

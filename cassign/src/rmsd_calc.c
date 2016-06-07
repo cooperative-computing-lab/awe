@@ -1,19 +1,35 @@
+/**
+ * rmsd_calc.c
+ *
+ * Functions for calculating the Root Mean Square Distance between two
+ * sets of coordinates (e.g. molecular atomic coordinates).
+ */
 
 #include "rmsd_calc.h"
 
 
-
-
-exit_t center_structure (gsl_matrix* mat) {
+/**
+ * Normalize coordinates using the mean dimension values.
+ *
+ * Parameters:
+ *     mat - the matrix to center
+ *
+ * Returns:
+ *     
+ */
+exit_t center_structure(gsl_matrix* mat) {
+  // There seems to be a misunderstanding of what 'const' means and a lot of
+  // unnecessary variable initialization.
 
   // compute the mean along each axis (column)
-  gsl_vector means = *gsl_vector_calloc (mat->size2);
+  gsl_vector means = *gsl_vector_calloc(mat->size2);
   for (int d=0; d<mat->size2; d++) {
-    const gsl_vector_const_view view = gsl_matrix_const_column (mat, d);
-    const double mean = gsl_stats_mean (view.vector.data, view.vector.stride, view.vector.size);
-    gsl_vector_set (&means, d, mean);
+    const gsl_vector_const_view view = gsl_matrix_const_column(mat, d);
+    const double mean = gsl_stats_mean(view.vector.data, view.vector.stride, view.vector.size);
+    gsl_vector_set(&means, d, mean);
   }
 
+  // Fix the unnecessary initializations
   // center the coordinates
   for (int r=0; r<mat->size1; r++) {
     for (int d=0; d<mat->size2; d++) {
@@ -21,27 +37,51 @@ exit_t center_structure (gsl_matrix* mat) {
       const double v0 = gsl_matrix_get (mat, r, d);
       const double v1 = v0 - m;
       gsl_matrix_set (mat, r, d, v1);
-    }}
+    }
+  }
 
   return exitOK;
 }
 
 
+/**
+ * Alias for the function computing the RMSD for ease of refactoring.
+ * The result should be the same in either order.
+ *
+ * Parameters:
+ *     m1 - a reference matrix
+ *     m2 - a reference matrix of the same shape as m1
+ *
+ * Returns:
+ *     A double representing the RMSD between m1 and m2
+ */
 double compute_rmsd (const gsl_matrix* m1, const gsl_matrix* m2) {
   return kabsch_rmsd (m1, m2);
 }
 
 
+/**
+ * Prepare the matrices and them compute the RMSD.
+ *
+ * Parameters:
+ *     m1 - a reference matrix
+ *     m2 - a reference matrix of the same shape as m1
+ *
+ * Returns:
+ *     A double representing the RMSD between m1 and m2
+ */
 double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2) {
-
+  // Ensure that the matrices have the same shape
   assert (m1->size1 == m2->size1);
   assert (m1->size2 == m2->size2);
 
+  // Get the shape of the matrices
   const int
     N = m1->size1,
     D = m1->size2;
     
 
+  // Get the transposes of m1 and m2
   gsl_matrix
     *P = gsl_matrix_calloc (D, N),
     *Q = gsl_matrix_calloc (D, N);
@@ -50,10 +90,12 @@ double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2) {
   gsl_matrix_transpose_memcpy (Q, m2);
 
 
+  // Containers for returns from the RMSD function
   gsl_matrix *U, *t;
   double rmsd;
   kabsch_function (P, Q, &U, &t, &rmsd);
 
+  // Free up the allocated memory
   gsl_matrix_free (P);
   gsl_matrix_free (Q);
   gsl_matrix_free (U);
@@ -64,6 +106,29 @@ double kabsch_rmsd (const gsl_matrix *m1, const gsl_matrix *m2) {
 }  
 
 
+/**
+ * Find the Least Root Mean Square between two sets of N points in D dimensions
+ * and the rigid transformation (i.e. translation and rotation) 
+ * to employ in order to bring one set that close to the other,
+ * using the Kabsch (1976) algorithm.
+ *
+ * Parameters
+ *     P - a D*N matrix where P(a,i) is the a-th coordinate of the i-th point 
+ *         in the 1st representation
+ *     Q - a D*N matrix where Q(a,i) is the a-th coordinate of the i-th point 
+ *         in the 2nd representation
+ *
+ * Output
+ *     U    - a proper orthogonal D*D matrix, representing the rotation
+ *     r    - a D-dimensional column vector, representing the translation
+ *     rmsd - Root Mean Square Distance
+ *
+ * References:
+ *   1) Kabsch W. A solution for the best rotation to relate two sets of vectors. Acta Cryst A 1976;32:9223.
+ *   2) Kabsch W. A discussion of the solution for the best rotation to relate two sets of vectors. Acta Cryst A 1978;34:8278.
+ *   3) http://cnx.org/content/m11608/latest/
+ *   4) http://en.wikipedia.org/wiki/Kabsch_algorithm
+ */
 exit_t kabsch_function (const gsl_matrix *A, const gsl_matrix *B, gsl_matrix **U, gsl_matrix **r, double *rmsd) {
 
   assert (A->size1 == B->size1);

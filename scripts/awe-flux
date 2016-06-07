@@ -9,13 +9,13 @@ from optparse import OptionParser
 
 def calAgFlux(flux):
     agflux = []
-    for i in xrange(len(flux)):
+    for i in range(len(flux)):
         agflux.append(sum(flux[0:i+1])/(i+1))
     return agflux
 
 def calFlux(trans,tlagIter):
     flux = []
-    for i in xrange(len(trans)):
+    for i in range(len(trans)):
         flux.append(trans[i]/(tlagIter))
     return flux
 
@@ -46,10 +46,10 @@ if __name__ == '__main__':
     trans = []
     fd = open(infile,'r')
     for line in fd:
-	linec = line.split(',')
+        linec = line.split(',')
         try:
             tmp = [float(linec[0]),float(linec[1])]
-	except ValueError:
+        except ValueError:
             continue
         trans.append(tmp)
     colorTrans = np.array(trans)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     for data in bflux:
         fd.write(str(data)+'\n')
     fd.close()
-    timetmp = [x for x in xrange(len(fflux))]
+    timetmp = [x for x in range(len(fflux))]
     time = np.array(timetmp)
     plt.plot(time,agfflux)
     plt.xlabel('Iteration')

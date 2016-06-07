@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 
-setVerbosity('none')
+#prody.setVerbosity('none')
 #input: pdb file name, cell.dat file name
 #output: phi and psi angels in a two dimensional list
 def parseCenter(pdbf,cellf):
@@ -30,31 +30,31 @@ def parseCenter(pdbf,cellf):
     res = []
     for line in open(cellf,'r'):
         try:
-	    coord = float(line)
-	    res.append(coord)
-	except ValueError:
-	    continue
-	if len(res) == 3:
-	    coords.append(res)
-	    res = []
-	if len(coords) == 22:
+            coord = float(line)
+            res.append(coord)
+        except ValueError:
+            continue
+        if len(res) == 3:
+            coords.append(res)
+            res = []
+        if len(coords) == 22:
             ala.setCoords(np.array(coords))
-	    writePDB('tmp.pdb',ala)
+            writePDB('tmp.pdb',ala)
             try:
                 os.system('g_chi -s tmp.pdb -f tmp.pdb -rama >& tmp.log')
             except KeyboardInterrupt:
                 cleanup()
                 raise
             phipsif = open('ramaPhiPsiALA2.xvg')
-	    fcontent = phipsif.readlines()
-	    phipsil = fcontent[len(fcontent)-1]
-	    phipsitext = phipsil.split()
-	    phi.append(float(phipsitext[0]))
+            fcontent = phipsif.readlines()
+            phipsil = fcontent[len(fcontent)-1]
+            phipsitext = phipsil.split()
+            phi.append(float(phipsitext[0]))
             psi.append(float(phipsitext[1]))
             phipsif.close()
             cleanup()
-	    #phipsi.append([calcPhi(alacenter),calcPsi(alacenter)])
-	    coords = []
+            #phipsi.append([calcPhi(alacenter),calcPsi(alacenter)])
+            coords = []
     return np.array([phi,psi])
 
 #phipsi = parseCenter('testinput/state0.pdb','testinput/cells.dat')
@@ -66,10 +66,10 @@ def extractWeight(weightf,ncell):
         if l > 1:
             if line.startswith('#'):
                 continue
-	    content = line.split(',')
+            content = line.split(',')
             cellid = int(content[1])
-	    w = float(content[3])
-	    weights[cellid] += w
+            w = float(content[3])
+            weights[cellid] += w
         l += 1
     return weights
     
@@ -83,7 +83,7 @@ def ramaColor(weights,maxfe):
         maxb = maxfe
     for i in range(len(weights)):
         if weights[i] == 0:
-	    weights[i] = maxb
+            weights[i] = maxb
     return weights
 
 if __name__ == '__main__':
@@ -102,13 +102,13 @@ if __name__ == '__main__':
     ncell = args[0].ncell
 
     maxfe = 10
-    print 'Converting coordinates to phi-psi angles'
+    print('Converting coordinates to phi-psi angles')
     cellcenter = parseCenter(pdbf,cellf)
-    print 'Reading cell weights'
+    print('Reading cell weights')
     cellw = extractWeight(weightf,ncell)
     colorw = ramaColor(cellw,maxfe)
 
-    print 'Plotting Ramachandran'
+    print('Plotting Ramachandran')
     X = cellcenter[0]
     Y = cellcenter[1]
     cells = vn.voronoi(X,Y)

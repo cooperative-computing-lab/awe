@@ -1,0 +1,103 @@
+--- workqueue.py	(original)
++++ workqueue.py	(refactored)
+@@ -13,6 +13,7 @@
+ 
+ import os, tarfile, tempfile, time, shutil, traceback, random
+ from collections import defaultdict
++from functools import reduce
+ 
+ 
+ ### A process can only support a single WorkQueue instance
+@@ -71,7 +72,7 @@
+ 
+     def add_to_task(self, task):
+         if '$' not in self.masterpath and not os.path.exists(self.masterpath):
+-            raise IOError, 'Cannot find file to send to worker: %s' % self.masterpath
++            raise IOError('Cannot find file to send to worker: %s' % self.masterpath)
+         task.specify_file(self.masterpath, remote_name=self.remotepath, cache=self.cached)
+ 
+     def __str__(self):
+@@ -173,19 +174,19 @@
+         self._maxreps = maxreps
+ 
+     def can_duplicate(self):
+-        valid = filter(lambda k: k < self._maxreps, self._tags.iterkeys())
++        valid = [k for k in iter(self._tags.keys()) if k < self._maxreps]
+         return len(valid) > 0
+ 
+     def clear(self):
+         self._tags.clear()
+ 
+     def clean(self):
+-        for k in self._tags.keys():
++        for k in list(self._tags.keys()):
+             if len(self._tags[k]) < 1:
+                 del self._tags[k]
+ 
+     def _find_tag_group(self, tag):
+-        for group, tags in self._tags.iteritems():
++        for group, tags in self._tags.items():
+             if tag in tags:
+                 return group
+         return None
+@@ -220,10 +221,10 @@
+             self._tags[key].discard(tag)
+ 
+     def __len__(self):
+-        return reduce(lambda s, k: s + len(self._tags[k]), self._tags.iterkeys(), 0 )
++        return reduce(lambda s, k: s + len(self._tags[k]), iter(self._tags.keys()), 0 )
+ 
+     def __str__(self):
+-        d = dict([(k,len(s)) for k,s in self._tags.iteritems()])
++        d = dict([(k,len(s)) for k,s in self._tags.items()])
+         return '<TagSet(maxreps=%s): %s>' % (self._maxreps, d)
+ 
+ 
+@@ -302,10 +303,10 @@
+             self.restarts[task.tag] = 0
+ 
+         if self.restarts[task.tag] < self.cfg.restarts:
+-            print time.asctime(), 'task failed with', task.return_status, \
++            print(time.asctime(), 'task failed with', task.return_status, \
+                 'result is', task.result, \
+                 'restarting', task.tag, \
+-                '#%d' % (self.restarts[task.tag] + 1)
++                '#%d' % (self.restarts[task.tag] + 1))
+             self.submit(task)
+             self.restarts[task.tag] += 1
+             return True
+@@ -381,20 +382,18 @@
+             if task and task.result == 0:
+ 
+                 if not task.return_status == 0 and not self.restart(task):
+-                    raise WorkQueueWorkerException, \
+-                        self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status)
++                    raise WorkQueueWorkerException(self.taskoutput(task) + '\n\nTask %s failed with %d' % (task.tag, task.return_status))
+ 
+ 
+                 try:
+                     result = marshall(task)
+-                except Exception, ex:
++                except Exception as ex:
+ 
+                     ### sometimes a task fails, but still returns.
+                     ##+ attempt to restart these
+                     if not self.restart(task):
+-                        raise WorkQueueException, \
+-                            self.taskoutput(task) + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
+-                            (ex.__class__.__name__, ex, traceback.format_exc())
++                        raise WorkQueueException(self.taskoutput(task) + '\n\nMaster failed: could not load resultfile:\n %s: %s\n\n%s' % \
++                            (ex.__class__.__name__, ex, traceback.format_exc()))
+                     else:
+                         continue
+ 
+@@ -404,7 +403,7 @@
+ 
+             elif task and not task.result == 0:
+                 if not self.restart(task):
+-                    raise WorkQueueException, 'Task exceeded maximum number of resubmissions for %s\n\n%s' % \
+-                        (task.tag, self.taskoutput(task))
++                    raise WorkQueueException('Task exceeded maximum number of resubmissions for %s\n\n%s' % \
++                        (task.tag, self.taskoutput(task)))
+ 
+             else: continue

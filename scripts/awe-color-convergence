@@ -1,0 +1,322 @@
+#!/afs/crc.nd.edu/user/j/jkinniso/Public/apps/x86_64/anaconda/bin/python
+"""
+Plot the convergence of cell weights over time. Creates a plot of the normed
+differences between the weights of cells[1:n] and cell[n].
+
+Author: Jeff Kinnison (jkinniso@nd.edu)
+"""
+
+import argparse
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from scipy import linalg
+
+def parse_args(args=None):
+    """
+    Parse arguments supplied to the function as a list of strings.
+
+    Parameters:
+        args - (default None) a list of strings to parse
+
+    Returns:
+        A Namespace object with the argument values as attributes named after
+        the argument/option names
+    """
+
+    description = """
+A utility for graphing normed vector or matrix values to look for convergence.
+    """
+
+    parser = argparse.ArgumentParser(description=description)
+
+    parser.add_argument("-f", "--filepath",
+        default="cell-weights.csv",
+        type=str,
+        help="path to the file containing the values to plot"
+    )
+
+    parser.add_argument("-o", "--output",
+        default="Cell_Norms.png",
+        type=str,
+        help="path to which the plot image will be saved"
+    )
+
+    parser.add_argument("-c", "--cells",
+        required=True,
+        type=int,
+        help="the number of cells to compare"
+    )
+
+    parser.add_argument("-i", "--iterations",
+        required=True,
+        type=int,
+        help="the number of iterations to compare"
+    )
+
+    parser.add_argument("-m", "--matrix-shape",
+        type=tuple,
+        help="a python tuple defining a matrix shape for the data"
+    )
+
+    parser.add_argument("-t", "--title",
+        default="Cell Weight Differences Over Time",
+        type=str,
+        help="the title of the plot",
+    )
+
+    parser.add_argument("--xscale",
+        default="log",
+        type=str,
+        help="the scale of the x-axis",
+        choices=['linear','log','symlog']
+    )
+
+    parser.add_argument("--xlabel",
+        default="i-th Timestep (i$\\tau$)",
+        type=str,
+        help="the x-axis label"
+    )
+
+    parser.add_argument("--yscale",
+        default="log",
+        type=str,
+        help="the scale of the y-axis",
+        choices=['linear','log','symlog']
+    )
+
+    parser.add_argument("--ylabel",
+        default="$\\Vert W_{final} - W_{i}$ \\Vert",
+        type=str,
+        help="the y-axis label"
+    )
+
+    # Parses sys.argv if args is None, otherwise the supplied list
+    return parser.parse_args(args)
+
+
+
+def plot_norms(A, title, xscale, xlabel, yscale, ylabel, filename):
+    """
+    Plot calculated norms as a function of time. Display and save the plot.
+
+    Parameters:
+        A - an np.array of values to be plotted against array index
+
+    Returns:
+        None
+    """
+
+    # Standard matplotlib simple plot setup
+    plt.plot([i for i in xrange(len(A))], A)
+    plt.yscale(yscale)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+
+    # Save the figure before displaying in case there is no X server
+    plt.savefig(filename, format="png")
+    plt.show()
+
+    
+
+def calculate_norms(i, n, p=2):
+    """
+    Calculate the p-norm of the difference between two arrays of equal shape.
+
+    Parameters:
+        i - a (m, len(n)) numpy.array of floating-point numbers to norm
+        n - the numpy.array of floating-point numbers against which all others
+            are being compared
+        p - (default 2) the power of the p-norm
+
+    Returns:
+        A np.array of floating-point number representing the p-norm of n - i
+        to the specified power
+
+    Raises:
+        ValueError if the shape of entries in i do not match the shape of n
+    """
+
+    # Only calculate norms if shapes agree, otherwise output may be undefined
+    if i.shape[1:] != n.shape[0:]:
+        raise ValueError
+
+    # linalg.norm can work on matrices, however because of the difference
+    # calculation and the results of Frobenius norm the mapping is more useful
+    normed = []
+    all_diffs = []
+    max_diff = []
+    min_diff = []
+
+    for j in xrange(len(i)):
+        temp = np.absolute(n - i[j])
+        normed.append(linalg.norm(temp))
+        all_diffs.append(temp)
+        max_diff.append(max(temp))
+        min_diff.append(min(temp))
+
+    return (np.array(normed),
+            np.array(all_diffs),
+            np.array(max_diff),
+            np.array(min_diff))
+
+
+
+def read_from_file(filename, shape=None, dtype=float,
+                   comment='#', delimiter=",", header_len=1):
+    """
+    Read delimited entries in a file into a numpy.array and reshape the array
+    to specification.
+
+    Parameters:
+        filename  - path to the fiel containing the values to load
+        shape     - a tuple of integers defining the shape of the array once
+                    loaded
+        dtype     - a numpy.dtype reference for creating the array
+        delimiter - the delimiter separating entries in the file
+        comment   - the character used to indicate the start of a comment in
+                    the file
+
+    Returns:
+        An np.array of the specified shape containing values loaded form the
+        specified file
+
+    Raises:
+        IOError if there are issues opening or reading from the file
+    """
+
+    try:
+        A = np.genfromtxt(
+            filename,
+            delimiter=delimiter,
+            comments=comment,
+            skip_header=header_len
+        )
+
+        if not shape is None:
+            A.reshape(shape)
+
+    except IOError:
+        print "IOError"
+
+    except ValueError:
+        print "ValueError"
+
+    except SystemError:
+        print "SystemError"
+
+    return A
+
+
+
+# This function assumes uniform chunks of data
+def filter_by_column(array, columns, shape):
+    """
+    Filter an np.array by dimension/index and reshape.
+
+    Parameters:
+        array   - an np.array to filter
+        columns - a tuple of column values to extract
+        shape   - a tuple of integers defining the shape of the array
+
+    Returns:
+        An np.array containing the specified column values of the specified
+        shape.
+    """
+
+    if max(columns) >= len(array[0]) or len(array) + min(columns) < 0:
+        raise IndexError
+
+    filtered = None
+
+    for c in columns:
+        if not filtered is None:
+            filtered = np.concatenate(filtered, np.array(columns[c,:]), axis=1)
+        else:
+            filtered = np.array(columns[c,:]).T
+
+    return filtered.reshape(shape)
+
+
+
+# This main function creates the graph based on data in the AWE-WQ output file
+# cell-weights.csv with column labels (iteration,cellid,color,cellweight)
+
+if __name__ == "__main__":
+    opts = parse_args()
+
+    # Read from cel-weights.dat, ideally creating an array with shape
+    # (iterations * cells, 4)
+    A = read_from_file(opts.filepath)
+
+    # To effectively process them, cells must be organized by iteration
+    A_by_iter = np.zeros((opts.iterations, opts.cells))
+
+    # Some cells may have been dropped during iterations; the cells present
+    # in the last iteration are recorded so that we do not normalize cells
+    # that disappeared
+    indices = []
+
+    for row in A:
+        # This will leave weights of 0 in successive iterations for cells that
+        # have been deleted
+
+        # Weights are indexed by iteration number, then cell id
+        A_by_iter[row[0],row[1]] = row[3]
+
+        # If we are looking at the final generation, record the cell id
+        if row[0] == A[-1,0]:
+            indices.append(row[1])
+
+    del A
+
+    # Get the last iteration's weights to be used in normalization
+    last_iter = A_by_iter[-1,indices]
+
+    # Create the array of normalized values using p-norm with p = 2 and the
+    # vector representing the difference between weights in iteration i and 
+    # the final iteration
+    norms, all_diffs, maxes, mins = calculate_norms(
+        A_by_iter[0:opts.iterations - 1, indices], # Persistent indices only
+        last_iter
+    )
+
+    # Generate, save, and display the plot
+    plot_norms(
+        norms,
+        "2-Norm of Difference Between Cell Weights at Iteration i and the Final Iteration (Linear Scale)",
+        opts.xscale,
+        opts.xlabel,
+        opts.yscale,
+        "linear",
+        "normal_diffs_linear_scale.png"
+    )
+
+    plt.cla()
+
+    plot_norms(
+        norms,
+        "2-Norm of Difference Between Cell Weights at Iteration i and the Final Iteration (Log Scale)",
+        opts.xscale,
+        opts.xlabel,
+        opts.yscale,
+        "log",
+        "normal_diffs_log_scale.png"
+    )
+
+    plt.cla()
+
+    plt.boxplot(
+        all_diffs[7:len(all_diffs):10],
+        whis="range",
+        positions=[i for i in xrange(8, len(all_diffs), 10)]
+    )
+
+    plt.title("Distribution of Differences at Every Tenth Iteration")
+    plt.xlabel(opts.xlabel)
+    plt.ylabel("Distribution of $\\vert W_{final} - W_{i} \\vert $")
+
+    plt.savefig("diffs_distros_boxplot.png", format="png")
+    plt.show()

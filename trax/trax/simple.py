@@ -1,12 +1,12 @@
 
-import base
+from . import base
 
 import os
 
 try:
-	import cPickle as pickle
+	import pickle
 except ImportError:
-	print 'WARNING: Cannot import cPickle, using slower pickle'
+	print('WARNING: Cannot import cPickle, using slower pickle')
 	import pickle
 
 class SimpleTransactional(base.AbstractTransactional):

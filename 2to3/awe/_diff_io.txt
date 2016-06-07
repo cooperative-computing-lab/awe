@@ -1,0 +1,28 @@
+--- io.py	(original)
++++ io.py	(refactored)
+@@ -19,8 +19,8 @@
+         else:
+             pretty = lambda a: str(type(a))
+ 
+-        pargs = map(pretty, args)
+-        pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in kws.items() ]
++        pargs = list(map(pretty, args))
++        pkws  = [ '%s=%s' % (k, pretty(v)) for k, v in list(kws.items()) ]
+ 
+         return ', '.join(pargs + pkws)
+ 
+@@ -28,7 +28,7 @@
+         def wrapped(*args, **kws):
+             global TRACE
+             if TRACE:
+-                print 'TRACE calling %s(%s)' % (fn.func_name, self.prettyargs(*args, **kws))
++                print('TRACE calling %s(%s)' % (fn.__name__, self.prettyargs(*args, **kws)))
+             return fn(*args, **kws)
+         return wrapped
+ 
+@@ -75,4 +75,4 @@
+ 
+ 
+ def log(string):
+-    print string
++    print(string)

@@ -115,13 +115,13 @@ EOF
 
 
 get-python-version() {
-	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print("%s.%s" % (major,minor))'
 }
 
 check-python-version() {
 	printf "Checking for compatible python installation..."
 	pv=$(get-python-version)
-	for v in 2.6 2.7; do
+	for v in 2.6 2.7 3.4; do
 		test  $pv == $v && echo OK && return 0
 	done
 	echo FAIL

@@ -7,7 +7,6 @@ CONF_OUT=structure2.pdb
 ASSIGNMENT=cell2.dat
 DESIRED_FILES="$CONF_OUT $ASSIGNMENT"
 RESULTFILE=results.tar
-WALKER=walker.pkl
 CLEANUP="traj* *.tpr"
 
 ### disable gmx automatic backups.
@@ -36,7 +35,7 @@ prepare-filenames() {
 	structure=`ls $CONF_IN.*`
 	id="${structure##*.}"
 	mv -f "$CONF_IN.$id" $CONF_IN
-	mv -f "$WALKER.$id" $WALKER
+	#mv -f "$WALKER.$id" $WALKER
 }
 
 check-initial() {

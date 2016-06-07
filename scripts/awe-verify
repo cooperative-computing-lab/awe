@@ -3,7 +3,7 @@
 EXITCODE=0
 
 
-ACCEPTABLE_PYTHON_VERSION=(2.6 2.7)
+ACCEPTABLE_PYTHON_VERSION=(2.6 2.7 3.4)
 ACCEPTABLE_GROMACS_VERSION=4.5
 
 EXECUTABLES=(
@@ -17,7 +17,7 @@ PYMODS=(work_queue numpy prody pylab trax awe)
 
 
 get-python-version() {
-	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print "%s.%s" % (major,minor)'
+	python -c 'import sys;v=sys.version_info;major=v[0];minor=v[1];print("%s.%s" % (major,minor))'
 }
 
 check-gromacs-version() {
