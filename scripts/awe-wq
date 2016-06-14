@@ -11,7 +11,7 @@ import os
 import optparse
 
 def getopts(args=None):
-    
+
     p = optparse.OptionParser()
 
     ### Required params
@@ -49,6 +49,12 @@ def getopts(args=None):
 
     p.add_option_group(g)
 
+    ### OpenMM parameters
+    g = optparse.OptionGroup(p, 'OpenMM configuration options')
+    g.add_option('--enable-openmm', action='store_true', help='Enable OpenMM and disable GROMACS')
+    g.add_option('--openmm-script', help='Path to the OpenMM Python script to run')
+    p.add_option_group(g)
+
     p.set_defaults(
             ### AWE params
             iterations   = float('inf'),
@@ -69,13 +75,17 @@ def getopts(args=None):
             port         = 'random',
             fast_abort   = False,
             debug        = False,
+
+            ### OpenMM params
+            enable_openmm = False,
+            openmm_script = os.path.join('awe-instance-data', 'simulation.py'),
             )
 
 
 
 
 
-    ### parse the parameters    
+    ### parse the parameters
     opts, args = p.parse_args(args=args)
 
     if opts.port == 'random':
@@ -178,7 +188,7 @@ def main(opts):
                 system.add_walker(walker)
 
         # setup the AWE algorithm
-    
+
         resampler = awe.resample.MultiColor(opts.num_walkers, partition)
         resampler = awe.resample.SaveWeights(resampler)
         resampler = awe.AWE(wqconfig       = cfg,
@@ -217,7 +227,7 @@ def main(opts):
     resampler.run()
 
 
-    
+
 
 if __name__ == '__main__':
     opts = getopts()
