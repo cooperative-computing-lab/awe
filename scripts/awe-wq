@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- mode: Python; indent-tabs-mode: nil -*-  #
 
 
 import awe
@@ -9,6 +8,7 @@ import numpy as np
 import sys
 import os
 import optparse
+
 
 def getopts(args=None):
 
@@ -130,15 +130,24 @@ def config(opts):
     # the "main" function of the worker
     cfg.execute(os.path.join(INSTANCE_ROOT, 'execute-task.sh'))
 
-    # binaries required for the worker to run
-    for name in 'pdb2gmx grompp mdrun awe-assign'.split():
-        cfg.cache(os.path.join(GENERIC_ROOT, 'binaries', '$OS-$ARCH', name))
+    # Decide whether to run GROMACS or OpenMM on Workers
+    if opts.enable_openmm is None or not opts.enable_openmm:
+        # This branch performs setup for GROMACS
+        # binaries required for the worker to run
+        for name in 'pdb2gmx grompp mdrun awe-assign'.split():
+            cfg.cache(os.path.join(GENERIC_ROOT, 'binaries', '$OS-$ARCH', name))
 
-    cfg.cache(os.path.join(GENERIC_ROOT, 'gmxtopologies'))
+        cfg.cache(os.path.join(GENERIC_ROOT, 'gmxtopologies'))
 
-    # files needed to run MD and assignment
-    for name in 'sim.mdp env.sh CellIndices.dat StructureIndices.dat'.split():
-        cfg.cache(os.path.join(INSTANCE_ROOT, name))
+        # files needed to run MD and assignment
+        cfg.cache(os.path.join(INSTANCE_ROOT, 'gromacs', 'sim.mdp'))
+        cfg.cache(os.path.join(INSTANCE_ROOT, 'gromacs', 'env.sh'))
+        for name in 'CellIndices.dat StructureIndices.dat'.split():
+            cfg.cache(os.path.join(INSTANCE_ROOT, name))
+    else:
+        # This branch performs setup for OpenMM
+        cfg.cache(opts.openmm_script, remotepath='simulate.py')
+        cfg.cache(INSTANCE_ROOT, 'openmm', env.sh)
 
     cfg.cache(opts.cells, remotepath='cells.dat')
 
