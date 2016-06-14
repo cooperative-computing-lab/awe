@@ -1,9 +1,0 @@
-This directory exists as a temporary store for pickled Walkers.
-AWE-WQ currently pickled Walker instances and sends them along
-with other Task information so that on return the associated
-Walker may be identified.
-
-TBD: Convert to using a fixed number of Walkers so that we are
-     not constantly creating objects. This whole issue could
-     be avoided if wid alone could be sent along with the Task
-     instead of sending a whole Walker.
