@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#Generates an html file with runtime information for awe-wq and three graphs generated using gnuplot. Plots information using wq-stats.log for a single run.
+#Lydia Brothers
+
+#Calculates the runtime and puts the result in a header on the html file
+START=$(head -n2 wq-stats.log | tail -n1 | head -c16)
+FINISH=$(tail -n1 wq-stats.log | head -c16)
+
+DIFF=$(($FINISH - $START))
+
+SECS=$((DIFF/1000000))
+RESULT=$(
+printf "Time Elapsed (D:H:M:S): %02d:%02d:%02d:%02d\n" "$((SECS/86400))" "$((SECS/3600%24))" "$((SECS/60%60))" "$((SECS%60))")
+
+
+#For index.html, we assume .png files are in the same directory as this file.
+cat > index.html << EOF
+
+<!DOCTYPE html>
+
+<html>
+        <head>
+                <title> ~Graphical Information Based on Given Parameters~ </title>
+        </head>
+        <body>
+	<h2 align="right">
+		$RESULT
+	</h2>
+        <div id="graphs">
+                <img src="workers.png"></img>
+                <img src="tasks.png"></img>
+                <img src="bytes.png"></img>
+        </div>
+        </body>
+
+</html>
+
+EOF
+
+
+
+gnuplot << EOF
+
+#GNUplot graphs for wq-stats data for workers,tasks,bytes
+#06/07/16
+set terminal png
+
+#set autoscale
+#set size 1.5,0.8
+set size ratio 0.4
+set key left top
+set xtics font ",10"
+set xdata time
+set timefmt "%s"
+set format x "%H:%M"
+
+set style line 1 lc rgb '#0060ad' lt 1 lw 1   # --- blue
+set style line 2 lc rgb '#dd181f' lt 1 lw 1   # --- red
+set style line 3 lc rgb '#33cc33' lt 1 lw 2   # --- green
+
+#First path indicates directory where log file exists,by default we assume it is in same directory as this file
+#Second path is used to specify a different directory for the resulting .png files to be placed (instead of working directory), e.g."./debug/"
+wq_stats = "wq-stats.log"
+timestamp_path = ""
+
+set output timestamp_path."workers.png"
+set title "Total Workers Utilized in AWE-WQ Run"
+set xlabel "Timestamp"
+set ylabel "Worker Info"
+
+plot wq_stats using (\$1/1000000):4 title 'workers_idle' with lines ls 1, wq_stats using (\$1/1000000):5 title 'workers_busy' with lines ls 2, wq_stats using (\$1/1000000):2 title "total workers connected" with lines ls 3
+
+set output timestamp_path."tasks.png"
+set title "Total Task Utilized in AWE-WQ Run"
+set xlabel "Timestamp"
+set ylabel "Task Info"
+
+plot wq_stats using (\$1/1000000):8 title 'tasks_waiting' with lines ls 1, wq_stats using (\$1/1000000):9 title 'tasks_running' with lines ls 2, wq_stats using (\$1/1000000):12 title 'total_tasks_complete' with lines ls 3
+
+set output timestamp_path."bytes.png"
+set title "Network Transfer Information for AWE-WQ Run"
+set xlabel "Timestamp"
+set ylabel "Transfer Info (In Bytes)"
+
+
+plot wq_stats using (\$1/1000000):17 title 'bytes_sent' with lines ls 1, wq_stats using (\$1/1000000):18 title 'bytes_received' with lines ls 2
+
+set term x11
+EOF
+
