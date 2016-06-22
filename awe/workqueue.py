@@ -184,7 +184,9 @@ class Config(object):
         self.monitor         = False	
         self.summaryfile     = ''
         self.capacity        = False
-
+        self.task_config     = {
+                                   "cores": 1,
+                               }
         self._executable = None
         self._cache = set()
 
@@ -651,7 +653,7 @@ class WorkQueue(object):
 
         cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
-
+        task.specify_cores(self.cfg.task_config["cores"])
         ### executable
         self.cfg.executable.add_to_task(task)
 
@@ -902,7 +904,7 @@ class WorkQueue(object):
                 try:
                     result = marshall(task)
                 except Exception as ex:
-                    #print("In the exception")
+                    print("In the exception")
                     ### sometimes a task fails, but still returns.
                     ##+ attempt to restart these
                     if not self.restart(task):
