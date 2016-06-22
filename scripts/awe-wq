@@ -46,6 +46,7 @@ def getopts(args=None):
     g.add_option('-p', '--port', help='Port to run the master on (random|<int>) [%default]')
     g.add_option('--fast-abort', type=float, help='Use this fastabort multiplier [%default]')
     g.add_option('--debug',      action='store_true', help='Write WorkQueue debug information [%default]')
+    g.add_option('--cores', type=int, help='Use this to specify number of cores for each worker [%default]')
 
     p.add_option_group(g)
 
@@ -69,6 +70,7 @@ def getopts(args=None):
             port         = 'random',
             fast_abort   = False,
             debug        = False,
+	    cores	 = 1,
             )
 
 
@@ -116,6 +118,7 @@ def config(opts):
     if opts.debug:
         cfg.debug = opts.debug
 
+    cfg.cores = opts.cores
 
     # the "main" function of the worker
     cfg.execute(os.path.join(INSTANCE_ROOT, 'execute-task.sh'))
@@ -185,9 +188,7 @@ def main(opts):
                             system         = system,
                             iterations     = opts.iterations,
                             resample       = resampler,
-                            checkpointfreq = 1,
-                            verbose        = True,
-                            log_it         = True
+                            checkpointfreq = 1
                             )
         resampler.traxlogger._picklemode = 2
         resampler.traxlogger._pickleprotocol = 2
