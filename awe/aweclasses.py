@@ -1093,6 +1093,20 @@ class System(object):
 
         return newsys
 
+    def filter_by_valid(self):
+        invalid = {}
+        for c in self.cells:
+            walkers = self.filter_by_cell(c)
+            invalid[c.id] = [w for w in walkers if not w.valid]
+        return invalid
+
+    def get_valid_walker(self, cid):
+        c = self.cell(cid)
+        walkers = self.filter_by_cell(c)
+        for w in walkers:
+            if w.valid:
+                return w
+
     def clone(self, cells=True):
         """
         Make a copy the System instance.
