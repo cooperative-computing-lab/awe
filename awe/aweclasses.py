@@ -37,11 +37,11 @@ class Walker(object):
         initid     - the id of the walker at initialization
         start      - starting atomic coordinates
         end        - ending atomic coordinates
-        assignment - the cell assignment of the walker 
+        assignment - the cell assignment of the walker
         color      - the color of the walker
         natoms     - the number of atoms in the walker
         ndim       - the number of coordinate dimensions
-    
+
     Methods:
         restart - reset the walker to some initial conditions
     """
@@ -75,6 +75,7 @@ class Walker(object):
         self._color      = color
         self._weight     = weight
         self._cellid     = cellid
+        self._valid      = True
 
         # Assign the walker the next global id number if none was suuplies
         if wid is None:
@@ -175,6 +176,12 @@ class Walker(object):
     def ndim(self):       return self._coords.shape[-1]
 
     @property
+    def valid(self):      return self._valid;
+
+    def mark_invalid(self):
+        self._valid = False
+
+    @property
     def _coords(self):
         if self.start is not None:
             return self.start
@@ -198,13 +205,13 @@ class AWE(object):
 
     """
     The main driver for the Accelerated Weighted Ensemble algorithm.
-    
+
     This class manages the marshaling of workers to/from workers,
     updating the current WalkerGroup, and calling the resampleing
     algorithm.
 
     Fields:
-        wq             - 
+        wq             -
         system         -
         iterations     -
         resample       -
@@ -215,15 +222,15 @@ class AWE(object):
         checkpointfreq -
 
     Methods:
-        checkpoint               - 
-        logwalker                - 
-        recover                  - 
-        run                      - 
-        encode_task_tag          - 
-        decode_from_task_tag     - 
-        marshal_to_task          - 
-        specify_task_output_file - 
-        marshal_from_task        - 
+        checkpoint               -
+        logwalker                -
+        recover                  -
+        run                      -
+        encode_task_tag          -
+        decode_from_task_tag     -
+        marshal_to_task          -
+        specify_task_output_file -
+        marshal_from_task        -
     """
 
     # @typecheck(wqconfig=workqueue.Config, system=System, iterations=int)
@@ -242,14 +249,14 @@ class AWE(object):
 
         Returns:
             None
-        """ 
+        """
         self._verbose = verbose
         self._print_start_screen()
-        
+
         self.statslogger = stats.StatsLogger('debug/task_stats.log.gz')
         self.transitionslogger = stats.StatsLogger(
             'debug/cell-transitions.log.gz')
-	
+
         #self.tmpdir = tempfile.mkdtemp(prefix="awe-tmp.")
         self.wq = workqueue.WorkQueue(wqconfig, statslogger=self.statslogger, log_it=log_it)
         #self.wq.tmpdir = self.tmpdir
@@ -266,7 +273,7 @@ class AWE(object):
         self.traxlogger = traxlogger or trax.SimpleTransactional(
                                             checkpoint='debug/trax.cpt',
                                             log='debug/trax.log')
-        
+
         self.checkpointfreq = checkpointfreq
 
         self._firstrun  = True
@@ -301,7 +308,7 @@ class AWE(object):
             start_str += "WEB PAGE:\n"
             start_str += "  www.nd.edu/~ccl/software/awe\n"
             start_str += "***************************************************************************************************\n"
-            
+
             print(start_str)
 
     def checkpoint(self):
@@ -381,7 +388,7 @@ class AWE(object):
 
             # Get all attributes from the checkpoint
             parms = self.traxlogger.recover(self._trax_log_recover)
-            
+
             # Reset all AWE parameters
             for a in parms.keys():
                 setattr(self, a, parms[a])
@@ -417,7 +424,7 @@ class AWE(object):
         """
 
         self.currenttask += 1
-        
+
         # Give the task an identity
         task = self.wq.new_task()
         tag  = self.encode_task_tag(walker)
@@ -444,7 +451,7 @@ class AWE(object):
         while self.wq.can_duplicate_tasks():
             i += 1
             if i > 20: break
-            
+
             # Get a task that can be duplicated if one exists
             tag = self.wq.select_tag()
 
@@ -507,9 +514,9 @@ class AWE(object):
         # Keep track of how long it takes to resample
         if self._log:
             self.stats.time_resample('start')
-        
+
         self.system = self.resample(self.system)
-        
+
         if self._log:
             self.stats.time_resample('stop')
         #print("done resampling")
@@ -550,7 +557,7 @@ class AWE(object):
                     #fd.write(int.__str__(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)+"\n")
                 #print("MaxRSS Memory: %s" % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
                 #m = input("Press enter")
-                
+
                 # Update the checkpoint
                 if self.iteration % self.checkpointfreq == 0:
                     if self._verbose:
@@ -574,7 +581,7 @@ class AWE(object):
                 self._submit()
                 self._recv()     ## barrier
                 self._resample()
-                
+
                 if self._log:
                     self.stats.time_iter('stop')
 
@@ -633,7 +640,7 @@ class AWE(object):
                 'walkerid' : int(walkerid) ,
                 'outfile'  : outfile       }
 
-        
+
 
     @typecheck(int, workqueue.WQ.Task)
     def marshal_to_task(self, walker, task):
@@ -659,7 +666,7 @@ class AWE(object):
         #pkl_file = open(pkl_name, 'wb')
         #pickle.dump(walker, pkl_file)
         #pkl_file.close()
-        
+
         # Send the the topology and walker to the worker
         # See cctools work_queue.Task for more information
         task.specify_buffer(
@@ -714,7 +721,7 @@ class AWE(object):
         #else:
         #    print("Invalid tarfile: %s" % result.tag)
         tag_info = self.decode_from_task_tag(result.tag)
-        print(tag_info) 
+        print(tag_info)
         tar = tarfile.open(result.tag)
         try:
             #walkerstr         = tar.extractfile(workqueue.WORKER_WALKER_NAME).read()
@@ -722,7 +729,7 @@ class AWE(object):
 
             pdbstring         = tar.extractfile(workqueue.RESULT_POSITIONS).read()
             # print(pdbstring)
-            
+
             cellstring        = tar.extractfile(workqueue.RESULT_CELL).read()
             # print(cellstring)
         finally:
@@ -759,13 +766,19 @@ class AWE(object):
                 self.transitionslogger.update(time.time(), 'AWE', 'cell_transition',
                                       'iteration %s from %s to %s %s' % \
                                           (self.iteration, walker.assignment, cellid, transition))
-            
+
             # Update the walker's state
             walker.end        = coords
             walker.assignment = cellid
 
         os.unlink(result.tag)
         return walker
+
+        @typecheck(workqueue.WQ.Task)
+        def mark_invalid_task(self, task):
+            tag_info = self.decode_from_task_tag(task)
+            walker = self.system.walker(tag_info["walkerid"])
+            walker.mark_invalid()
 
 
 
@@ -899,7 +912,7 @@ class System(object):
         """
         Get the weights of all walkers in the System.
         """
-        
+
         return np.array(list(map(lambda w: w.weight, self.walkers)))
 
     @property
@@ -908,7 +921,7 @@ class System(object):
         """
         Get the colors of all walkers in the System.
         """
-        
+
         return set([w.color for w in self.walkers])#set(map(lambda w: w.color, self.walkers))
 
     @typecheck(Cell)
