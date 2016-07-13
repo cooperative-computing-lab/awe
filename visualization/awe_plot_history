@@ -3,12 +3,15 @@
 #Generates an html file with runtime information for awe-wq and three graphs generated using gnuplot. Plots information using wq-stats.log for a single run.
 #Lydia Brothers
 
+#If task_stats is still compressed, use the command on the next line
+#gunzip "task_stats.log.gz"
+#awk redirects the fourth column of task_stats.log to task_exe.log when the line contains the string "cmd_execution_time"
+awk '/cmd_execution_time/ {print $4 > "task_exe.log" }' task_stats.log
+
 #Calculates the runtime and puts the result in a header on the html file
 START=$(head -n2 wq-stats.log | tail -n1 | head -c16)
 FINISH=$(tail -n1 wq-stats.log | head -c16)
-
 DIFF=$(($FINISH - $START))
-
 SECS=$((DIFF/1000000))
 RESULT=$(
 printf "Time Elapsed (D:H:M:S): %02d:%02d:%02d:%02d\n" "$((SECS/86400))" "$((SECS/3600%24))" "$((SECS/60%60))" "$((SECS%60))")
@@ -28,9 +31,12 @@ cat > index.html << EOF
 		$RESULT
 	</h2>
         <div id="graphs">
-                <img src="workers.png"></img>
-                <img src="tasks.png"></img>
-                <img src="bytes.png"></img>
+                <img src="workers_utilized.png"></img>
+                <img src="tasks_utilized.png"></img>
+                <img src="network_transfer.png"></img>
+                <img src="task_exetime.png"></img>
+                <img src="task_histogram.png"></img>
+		
         </div>
         </body>
 
@@ -43,7 +49,7 @@ EOF
 gnuplot << EOF
 
 #GNUplot graphs for wq-stats data for workers,tasks,bytes
-#06/07/16
+#07/07/16
 set terminal png
 
 #set autoscale
@@ -61,30 +67,77 @@ set style line 3 lc rgb '#33cc33' lt 1 lw 2   # --- green
 
 #First path indicates directory where log file exists,by default we assume it is in same directory as this file
 #Second path is used to specify a different directory for the resulting .png files to be placed (instead of working directory), e.g."./debug/"
+
 wq_stats = "wq-stats.log"
 timestamp_path = ""
+task_stats = "task_stats.log"
+task_execution = "task_exe.log"
 
-set output timestamp_path."workers.png"
+set output timestamp_path."workers_utilized.png"
 set title "Total Workers Utilized in AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Worker Info"
 
 plot wq_stats using (\$1/1000000):4 title 'workers_idle' with lines ls 1, wq_stats using (\$1/1000000):5 title 'workers_busy' with lines ls 2, wq_stats using (\$1/1000000):2 title "total workers connected" with lines ls 3
 
-set output timestamp_path."tasks.png"
+#-----------------------------------------
+
+set output timestamp_path."tasks_utilized.png"
 set title "Total Task Utilized in AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Task Info"
 
 plot wq_stats using (\$1/1000000):8 title 'tasks_waiting' with lines ls 1, wq_stats using (\$1/1000000):9 title 'tasks_running' with lines ls 2, wq_stats using (\$1/1000000):12 title 'total_tasks_complete' with lines ls 3
 
-set output timestamp_path."bytes.png"
+#-----------------------------------------
+
+set output timestamp_path."network_transfer.png"
 set title "Network Transfer Information for AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Transfer Info (In Bytes)"
 
 
 plot wq_stats using (\$1/1000000):17 title 'bytes_sent' with lines ls 1, wq_stats using (\$1/1000000):18 title 'bytes_received' with lines ls 2
+
+#-----------------------------------------
+
+        set xdata; set format x
+        set size ratio 0.4
+        set key left top
+        set xtics font ",10"
+        set output timestamp_path."task_exetime.png"
+        set title "Task Execution Time (seconds)"
+        set xlabel "Task # (by completion time)"
+        set ylabel "Total Execute Time"
+        set style fill solid
+        set boxwidth 0.8
+        
+       plot task_execution using 0:1 with boxes title "cmd_execution_time" 
+        
+#-----------------------------------------
+
+        set title "Task Execution Time Frequency Plot"
+        set xlabel "Task Execution Time (seconds)"
+        set ylabel "Number of Occurences"
+        set output timestamp_path."task_histogram.png"
+        set xrange [0:*]
+        
+        set style fill pattern
+        width = 1
+        set boxwidth width
+        set yrange [0.1:*]
+
+        #use set table to generate a histogram with logscale y
+        set table "logy_task_histo"
+        plot task_execution using (width*(floor(column(1)/width))):(1.0) smooth frequency
+        unset table
+
+        set boxwidth 1
+        set logscale y
+        #the grep command prevents the generation of a meaningless bin over the first data bin  
+        plot "< grep -v u logy_task_histo" with boxes title "cmd execution time" 
+
+
 
 set term x11
 EOF
