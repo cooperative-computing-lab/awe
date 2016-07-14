@@ -467,6 +467,8 @@ class AWE(object):
     def _resubmit(self):
         invalid = self.system.filter_by_valid()
         while invalid != {}:
+            if self.verbose:
+                print("Resubmitting invalid models")
             for cid in invalid:
                 valid = self.system.get_valid_walker(cid)
                 if valid is None:
