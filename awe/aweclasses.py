@@ -790,7 +790,7 @@ class AWE(object):
 
     @typecheck(workqueue.WQ.Task)
     def mark_invalid_task(self, task):
-        tag_info = self.decode_from_task_tag(task)
+        tag_info = self.decode_from_task_tag(task.tag)
         walker = self.system.walker(tag_info["walkerid"])
         walker.mark_invalid()
 

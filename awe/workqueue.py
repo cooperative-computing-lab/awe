@@ -920,7 +920,7 @@ class WorkQueue(object):
 
             elif task and not task.result == 0:
                 # Check the task output for a bad model
-                if re.match(r'NaN', task.output):
+                if task.output.find('Exception: Particle coordinate is NaN'):
                     mark_invalid(task)
                     continue
                 # Kill the task if it cannot be restarted.
