@@ -541,7 +541,7 @@ class WorkQueue(object):
     """
 
     # @awe.typecheck(Config)
-    def __init__(self, cfg, statslogger=None, taskoutputlogger=None, log_it=False):
+    def __init__(self, cfg, statslogger=None, taskoutputlogger=None, verbose=False, log_it=False):
         """
         Initialize a new instance of WorkQueue for managing the cctools
         work_queue.WorkQueue object with the necessary parameters for running
@@ -579,6 +579,7 @@ class WorkQueue(object):
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
         self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
         self._log = log_it
+        self.verbose = verbose
 
     @property
     def empty(self):
@@ -920,7 +921,9 @@ class WorkQueue(object):
 
             elif task and not task.result == 0:
                 # Check the task output for a bad model
-                if re.match(r'NaN', task.output):
+                if task.output.find('Exception: Particle coordinate is NaN'):
+                    if self.verbose:
+                        print(''.join([task.tag, ': Particle coordinate is NaN']))
                     mark_invalid(task)
                     continue
                 # Kill the task if it cannot be restarted.
