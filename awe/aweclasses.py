@@ -15,7 +15,7 @@ import trax
 import numpy as np
 import pickle
 
-import os, time, shutil
+import os, time, shutil, random
 import tempfile
 from collections import defaultdict
 import ctypes
@@ -464,6 +464,20 @@ class AWE(object):
             task   = self._new_task(walker)
             self.wq.submit(task)
 
+    def _resubmit(self):
+        invalid = self.system.filter_by_valid()
+        while invalid != {}:
+            for cid in invalid:
+                valid = self.system.get_valid_walker(cid)
+                if valid is None:
+                    raise InvalidCellException
+                for w in invalid[cid]:
+                    w._start = numpy.array(valid.start())
+                    task = self._new_task(w)
+                    self.wq._submit(task)
+            self.recv()
+            invalid = self.system.filter_by_valid()
+
     def _recv(self):
         """
         Receive completed tasks and assign their results to the System.
@@ -485,7 +499,7 @@ class AWE(object):
         # Receive tasks until there are none left to receive
         while not self.wq.empty:
             # Get the walker results and store/save them
-            walker = self.wq.recv(self.marshal_from_task)
+            walker = self.wq.recv(self.marshal_from_task, self.mark_invalid_task)
             system.set_walker(walker)
             self.logwalker(walker)
 
@@ -1097,15 +1111,14 @@ class System(object):
         invalid = {}
         for c in self.cells:
             walkers = self.filter_by_cell(c)
-            invalid[c.id] = [w for w in walkers if not w.valid]
+            if len(walkers) > 0:
+                invalid[c.id] = [w for w in walkers if not w.valid]
         return invalid
 
     def get_valid_walker(self, cid):
         c = self.cell(cid)
-        walkers = self.filter_by_cell(c)
-        for w in walkers:
-            if w.valid:
-                return w
+        walkers = [w for w in self.filter_by_cell(c) if w.valid]
+        return walkers[random.randint(0,len(walkers))] if len(walkers) > 0 else None
 
     def clone(self, cells=True):
         """
