@@ -137,7 +137,7 @@ def save_state_centers(msm, clustering, clusterer, xyz, centers_dir):
                 label = clusterer.labels_[i][j]
                 center = msm.mapping_[label]
                 dist = np.linalg.norm(clustering[i][j] - centers[label])
-                if center != -1 and dist < dists[label]:
+                if center != -1 and dist < dists[center]:
                     dists[center] = dist
                     centermap[center] = (i, j)
             except KeyError:
