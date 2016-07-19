@@ -23,7 +23,7 @@ setup( author       = "Badi' Abdul-Wahid",
        name         = 'awe',
        packages     = ['awe'],
        scripts      = get_executables(),
-       data_files   = datafiles,
+       data_files   = [('share/awe', datafiles)],
        platforms    = ['Linux', 'Mac OS X'],
        description  = 'Accelerated Weighted Ensemble method for Molecular Dynamics using WorkQueue'
        )
