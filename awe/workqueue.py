@@ -11,7 +11,7 @@ import awe
 
 import work_queue as WQ
 
-import os, tarfile, tempfile, time, shutil, traceback, random
+import os, tarfile, tempfile, time, shutil, traceback, random, re
 from collections import defaultdict
 from functools import reduce
 
@@ -128,26 +128,26 @@ class WQFile(object):
 class Config(object):
     """
     Configuration options for a WorkQueue instance.
-    
+
     Fields:
         name            - the name of this run of AWE-WQ
         port            - the port on which the WorkQueue master listens
         schedule        - the task scheduling algorithm to use
         exclusive       - whether or not the WorkQueue instance is singleton
-        catalog         - 
+        catalog         -
         debug           - which information to include in logs
-        shutdown        - 
-        fastabort       - 
+        shutdown        -
+        fastabort       -
         restarts        - the number of times to restart a failed task
-        maxreps         - 
-        waittime        - 
+        maxreps         -
+        waittime        -
         wq_logfile      - the log file for WorkQueue debug information
         wqstats_logfile - the log file for WorkQueue statistical information
-        monitor         - 
+        monitor         -
         summaryfile     - the log file for WorkQueue run basic information
-        capacity        - 
+        capacity        -
         _executable     - the script or executable that the task should run
-        _cache          - 
+        _cache          -
 
     Methods:
         execute - add the main program to run to the task cached file list
@@ -181,7 +181,7 @@ class Config(object):
         self.waittime        = 10 # in seconds
         self.wq_logfile      = 'debug/wq.log'
         self.wqstats_logfile = 'debug/wq-stats.log'
-        self.monitor         = False	
+        self.monitor         = False
         self.summaryfile     = ''
         self.capacity        = False
         self.task_config     = {
@@ -219,7 +219,7 @@ class Config(object):
             kws   - a dictionary of keyword-mapped arguments
 
         Keyword Arguments:
-            base       - a boolean value representing whether to use the 
+            base       - a boolean value representing whether to use the
                          current directory
             remotepath - the remote filepath to look in for files
 
@@ -256,33 +256,33 @@ class Config(object):
                 # Set up debugging parameters for the cctools WorkQueue object.
                 # It has inbuilt debugging capabilities.
                 WQ.set_debug_flag(self.debug)
-                
+
                 if self.wq_logfile:
                      awe.util.makedirs_parent(self.wq_logfile)
                      WQ.cctools_debug_config_file(self.wq_logfile)
-                     WQ.cctools_debug_config_file_size(0) 
-            
+                     WQ.cctools_debug_config_file_size(0)
+
             if self.name:
                 self.catalog = True
-            
+
             # Create the cctools WorkQueue object
             wq = WQ.WorkQueue(name      = self.name,
                               port      = self.port,
                               shutdown  = self.shutdown,
                               catalog   = self.catalog,
                               exclusive = self.exclusive)
-            
+
             # Specify the task scheduling algorithm
             wq.specify_algorithm(self.schedule)
-            
+
             # Turn cctools WorkQueue object status monitoring on or off
-            if self.monitor: 
+            if self.monitor:
                 wq.enable_monitoring(self.summaryfile)
 
             if self.capacity:
                 # Determine the number of workers the WorkQueue object can handle
     	        wq.estimate_capacity()
- 
+
             # Display information about this run of AWE-WQ
             awe.log('Running on port %d...' % wq.port)
             if wq.name:
@@ -301,7 +301,7 @@ class Config(object):
         # Ensure that the singleton is logging to the correct files
         awe.util.makedirs_parent(self.wqstats_logfile)
         _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
-        
+
         # Return a reference to teh singleton
         return _AWE_WORK_QUEUE
 
@@ -455,15 +455,15 @@ class TagSet(object):
 
         if len(self) > 0:
             count  = 1
-            
+
             # Keys are ordinal (likely integers), so min(keys) is the tag set
             # representing tags with the least number of duplicates.
             minkey = min(self._tags.keys())
-            
+
             assert len(self._tags[minkey]) > 0, str(minkey) + ', ' + str(self._tags[minkey])
-            
+
             return random.sample(self._tags[minkey], count)[0]
-        
+
         else:
             return None
 
@@ -523,9 +523,9 @@ class WorkQueue(object):
 
     Methods:
         update_task_stats   -
-        new_task            - 
-        submit              - 
-        restart             - 
+        new_task            -
+        submit              -
+        restart             -
         wait                -
         taskoutput          -
         add_tag             -
@@ -536,12 +536,12 @@ class WorkQueue(object):
         clear               -
         tasks_in_queue      -
         active_workers      -
-        can_duplicate_tasks - 
+        can_duplicate_tasks -
         recv                -
     """
 
     # @awe.typecheck(Config)
-    def __init__(self, cfg, statslogger=None, taskoutputlogger=None, log_it=False):
+    def __init__(self, cfg, statslogger=None, taskoutputlogger=None, verbose=False, log_it=False):
         """
         Initialize a new instance of WorkQueue for managing the cctools
         work_queue.WorkQueue object with the necessary parameters for running
@@ -579,6 +579,7 @@ class WorkQueue(object):
         self.statslogger      = statslogger      or awe.stats.StatsLogger(buffersize=42)
         self.taskoutputlogger = taskoutputlogger or awe.stats.StatsLogger(path='debug/task_output.log.gz', buffersize=42)
         self._log = log_it
+        self.verbose = verbose
 
     @property
     def empty(self):
@@ -618,7 +619,7 @@ class WorkQueue(object):
         Returns:
             None
         """
-        
+
         import shutil
         shutil.rmtree(self.tmpdir)
 
@@ -706,7 +707,7 @@ class WorkQueue(object):
             self.submit(task)
             self.restarts[task.tag] += 1
             return True
-        
+
         # Otherwise, do not restart the task
         else:
             return False
@@ -715,7 +716,7 @@ class WorkQueue(object):
         """
         Set the cctools work_queue.WorkQueue instance to idle state (usually
         if no workers are available).
-        
+
         Parameters: (see the cctools module work_queue.py for more information)
             args - arguments for wq.wait
             kws  - keyword arguments for wq.wait
@@ -813,7 +814,7 @@ class WorkQueue(object):
     def clear(self):
         """
         Remove all tags from the internal tag set dictionary and all tasks from
-        the cctools work_queue.WorkQueue object instance. 
+        the cctools work_queue.WorkQueue object instance.
         """
 
         self.clear_tags()
@@ -825,7 +826,7 @@ class WorkQueue(object):
         """
         The number of tasks currently running and waiting in the queue.
 
-        Parameters: 
+        Parameters:
             None
 
         Returns:
@@ -845,7 +846,7 @@ class WorkQueue(object):
             An integer representing the number of workers not idle
         """
 
-        return self.wq.stats.workers_busy + self.wq.stats.workers_ready 
+        return self.wq.stats.workers_busy + self.wq.stats.workers_ready
 
     def can_duplicate_tasks(self):
         """
@@ -864,7 +865,7 @@ class WorkQueue(object):
             and self._tagset.can_duplicate()
 
 
-    def recv(self, marshall):
+    def recv(self, marshall, mark_invalid):
         """
         Deal with tasks as they return. Handle successes, errors, and restarts.
         Runs forever.
@@ -919,6 +920,12 @@ class WorkQueue(object):
                 return result
 
             elif task and not task.result == 0:
+                # Check the task output for a bad model
+                if task.output.find('Exception: Particle coordinate is NaN'):
+                    if self.verbose:
+                        print(''.join([task.tag, ': Particle coordinate is NaN']))
+                    mark_invalid(task)
+                    continue
                 # Kill the task if it cannot be restarted.
                 if not self.restart(task):
                     raise WorkQueueException('Task exceeded maximum number of resubmissions for %s\n\n%s' % \

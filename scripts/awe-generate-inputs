@@ -1,0 +1,496 @@
+#!/usr/bin/env python
+"""
+Extract AWE inputs from an existing MSM and corresponding clustering.
+
+Author: Jeff Kinnison <jkinniso@nd.edu>
+"""
+
+# Python Standard Library imports
+import argparse
+import copy
+import glob
+import os
+import os.path
+import subprocess
+
+# Third-Party imports
+import mdtraj
+from msmbuilder.dataset import dataset
+from msmbuilder.utils import load, draw_samples
+import numpy as np
+
+
+def parse_args(args=None):
+    parser = argparse.ArgumentParser()
+
+    # General Options
+    general = parser.add_argument_group('General Arguments')
+
+    general.add_argument('-i', '--input-trajectories',
+                        default='trajectories/*',
+                        type=str,
+                        help='path or glob to the input trajectories'
+                        )
+
+    general.add_argument('-t', '--topology',
+                        default='input.pdb',
+                        type=str,
+                        help='path to the trajectory topology file'
+                        )
+
+    general.add_argument('-r', '--reference',
+                        default='folded.pdb',
+                        type=str,
+                        help='path to the reference trajectory'
+                        )
+
+    # Featurization Options
+
+    featurize = parser.add_argument_group("Featurization Arguments")
+
+    featurize.add_argument('-f', '--featurizer',
+                           default='DihedralFeaturizer',
+                           type=str,
+                           help='MSMBuilder featurizer class to use',
+                           choices=['ContactFeaturizer',
+                                    'DRIDFeaturizer',
+                                    'DihedralFeaturizer',
+                                    'RMSDFeaturizer',
+                                    'RawPositionsFeaturizer']
+                           )
+
+    featurize.add_argument('--featurizer-out',
+                           default='feat.pkl',
+                           type=str,
+                           help='path to the file that will store the serialized featurizer',
+                           )
+
+    featurize.add_argument('--featurized-data',
+                           default='feats',
+                           type=str,
+                           help='path to the file that will store the featurized data'
+                           )
+
+    featurize.add_argument('--featurizer-args',
+                           default=None,
+                           type=str,
+                           help='a comma-delimited list of additional arguments to the featurizer (e.g. --arg1,val1,--arg2,val2)'
+                           )
+
+    # Decomposition Options
+
+    decomp = parser.add_argument_group('Decomposition Options')
+
+    decomp.add_argument('-d', '--decomposer',
+                        default='tICA',
+                        type=str,
+                        help='MSMBuilder decomposition class to use',
+                        choices=['PCA',
+                                 'SparseTICA',
+                                 'tICA']
+                        )
+
+    decomp.add_argument('--decomp-out',
+                        default='tica.pkl',
+                        type=str,
+                        help='path to the file that will store the serialized decomposer',
+                        )
+
+    decomp.add_argument('--decomp-data',
+                        default='ticas.h5',
+                        type=str,
+                        help='path to the file that will store the decomposed data'
+                        )
+
+    decomp.add_argument('--n-components',
+                        default=5,
+                        type=int,
+                        help='the number of components to find in the decomposition')
+
+    decomp.add_argument('--decomp-args',
+                        default=None,
+                        type=str,
+                        help='a comma-delimited list of additional arguments to the decomposer (e.g. --arg1,val1,--arg2,val2)'
+                        )
+
+    # Clustering Options
+
+    cluster = parser.add_argument_group('Clustering Options')
+
+    cluster.add_argument('-c', '--clusterer',
+                        default='MiniBatchKMeans',
+                        type=str,
+                        help='MSMBuilder clusterer class to use',
+                        choices=['AffinityPropagation',
+                                 'GMM',
+                                 'KCenters',
+                                 'KMeans',
+                                 'KMedoids',
+                                 'LandmarkAgglomerative',
+                                 'MeanShift',
+                                 'MiniBatchKMeans',
+                                 'MiniBatchKMedoids',
+                                 'RegularSpatial',
+                                 'SpectralClustering',
+                                 'Ward']
+                        )
+
+    cluster.add_argument('--clusterer-out',
+                         default='cluster.pkl',
+                         type=str,
+                         help='path to the file that will store the serialized clusterer',
+                         )
+
+    cluster.add_argument('--clustered-data',
+                         default='labeled-trajs.h5',
+                         type=str,
+                         help='path to the file that will store the clustered data'
+                         )
+
+    cluster.add_argument('--n-clusters',
+                         default=100,
+                         type=int,
+                         help='the target number of clusters to find'
+                         )
+
+    cluster.add_argument('--clusterer-args',
+                         default=None,
+                         type=str,
+                         help='a comma-delimited list of additional arguments to the clusterer (e.g. --arg1,val1,--arg2,val2)'
+                         )
+
+    # MSM Options
+
+    msm = parser.add_argument_group('MSM Options')
+
+    msm.add_argument('-m', '--msm',
+                     default='MarkovStateModel',
+                     type=str,
+                     help='MSMBuilder msmer class to use',
+                     choices=['BayesianMSM', 'MarkovStateModel']
+                     )
+
+    msm.add_argument('--msm-out',
+                     default='msm.pkl',
+                     type=str,
+                     help='path to the file that will store the serialized msmer',
+                     )
+
+    msm.add_argument('--lag-time',
+                     default=1,
+                     type=int,
+                     help='lag time for determinig MSM populations')
+
+    msm.add_argument('--msm-args',
+                     default=None,
+                     type=str,
+                     help='a comma-delimited list of additional arguments to the msmer (e.g. --arg1,val1,--arg2,val2)'
+                     )
+
+    # Sampling Options
+
+    sampling = parser.add_argument_group('Sampling Options')
+
+    sampling.add_argument('-n', '--n-samples',
+                          required=True,
+                          type=int,
+                          help='the number of samples to draw from each MSM state'
+                          )
+
+    sampling.add_argument('-a', '--atom-selection',
+                          default='backbone',
+                          type=str,
+                          help='MDTraj/VMD atom selection string'
+                          )
+
+    sampling.add_argument('--samples-out',
+                          default='samples',
+                          type=str,
+                          help='path to the cell sampling output directory'
+                          )
+
+    sampling.add_argument('--centers-out',
+                          default='centers',
+                          type=str,
+                          help='path to the cell centers output directory'
+                          )
+
+    sampling.add_argument('--folded-assignments',
+                          default=['folded.dat', 'unfolded.dat'],
+                          nargs=2,
+                          type=str,
+                          help='paths to the cell assignment output files'
+                          )
+
+    sampling.add_argument('--folded-threshold',
+                          default=3.0,
+                          type=float,
+                          help='RMSD to folded state threshold (AA)'
+                          )
+
+    sampling.add_argument('--cells-datafile',
+                          default='cells.dat',
+                          type=str,
+                          help='the cell data output file'
+                          )
+
+    sampling.add_argument('--weights-datafile',
+                          default='weights.dat',
+                          type=str,
+                          help='the cell weights data output file',
+                          )
+
+    return parser.parse_args(args)
+
+
+def featurize(args):
+    """
+
+    """
+    cmd = ['msmb', args.featurizer,
+           '--out', args.featurizer_out,
+           '--transformed', args.featurized_data,
+           '--top', args.topology,
+           '--trjs', args.input_trajectories]
+
+    if args.featurizer_args is not None:
+        cmd.extend(args.featurizer_args.split(','))
+
+    try:
+        if not os.path.isdir('logs'):
+            os.mkdir('logs')
+        out = open(os.path.join('logs', 'featurize.out'), 'w')
+        err = open(os.path.join('logs', 'featurize.err'), 'w')
+        p = subprocess.Popen(cmd, stdout=out, stderr=err)
+        p.wait()
+        out.close()
+        err.close()
+    except subprocess.CalledProcessError as e:
+        print("Error: Featurization failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def decompose(args):
+    """
+
+    """
+    cmd = ['msmb', args.decomposer,
+           '-i', args.featurized_data,
+           '--out', args.decomp_out,
+           '--transformed', args.decomp_data,
+           '--n_components', str(args.n_components)]
+
+    if args.decomp_args is not None:
+        cmd.extend(args.decomp_args.split(','))
+
+    try:
+        if not os.path.isdir('logs'):
+            os.mkdir('logs')
+        out = open(os.path.join('logs', 'decomp.out'), 'w')
+        err = open(os.path.join('logs', 'decomp.err'), 'w')
+        p = subprocess.Popen(cmd, stdout=out, stderr=err)
+        p.wait()
+        out.close()
+        err.close()
+    except subprocess.CalledProcessError as e:
+        print("Error: Decomposition failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def cluster(args):
+    """
+
+    """
+    cmd = ['msmb', args.clusterer,
+           '-i', args.decomp_data,
+           '--out', args.clusterer_out,
+           '--transformed', args.clustered_data,
+           '--n_clusters', str(args.n_clusters)]
+
+    if args.clusterer_args is not None:
+        cmd.extend(args.clusterer_args.split(','))
+
+    try:
+        if not os.path.isdir('logs'):
+            os.mkdir('logs')
+        out = open(os.path.join('logs', 'cluster.out'), 'w')
+        err = open(os.path.join('logs', 'cluster.err'), 'w')
+        p = subprocess.Popen(cmd, stdout=out, stderr=err)
+        p.wait()
+        out.close()
+        err.close()
+    except subprocess.CalledProcessError as e:
+        print("Error: Clustering failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def build_msm(args):
+    """
+
+    """
+    cmd = ['msmb', args.msm,
+           '-i', args.clustered_data,
+           '--out', args.msm_out,
+           '--lag_time', str(args.lag_time)]
+
+    if args.msm_args is not None:
+        cmd.extend(args.msm_args.split(','))
+
+    try:
+        if not os.path.isdir('logs'):
+            os.mkdir('logs')
+        out = open(os.path.join('logs', 'msm.out'), 'w')
+        err = open(os.path.join('logs', 'msm.err'), 'w')
+        p = subprocess.Popen(cmd, stdout=out, stderr=err)
+        p.wait()
+        out.close()
+        err.close()
+    except subprocess.CalledProcessError as e:
+        print("Error: MSM Building failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def save_samples(msm, labels, xyz, n_samples, samples_dir):
+    """
+    Extract samples from each state in the MSM and save each as an individual PDB.
+
+
+    """
+
+    state_count = {val: 0 for key, val in msm.mapping_.items()}
+
+    for i in range(0, len(labels)):
+        for j in range(0, len(labels[i])):
+            try:
+                state = msm.mapping_[labels[i][j]]
+                if state_count[state] < n_samples:
+                    num = state_count[state]
+                    filename = ''.join(['State', str(state), '-', str(num), '.pdb'])
+                    xyz[i][j].save(os.path.join(samples_dir, filename))
+                    state_count[state] += 1
+            except KeyError:
+                continue
+
+    print("Creating duplicates for low-population states...")
+    for key, val in state_count.items():
+        if val == 0:
+            print("Warning: No samples found in state %s" % (key))
+        elif key < n_samples:
+            print("Creating duplicates for state %s" % (key))
+            filename = ''.join(['State', str(key), '-0.pdb'])
+            traj = mdtraj.load(os.path.join(samples_dir, filename))
+            while val < n_samples:
+                outname = ''.join(['State', str(key), '-', str(val), '.pdb'])
+                traj.save(os.path.join(samples_dir, outname))
+                val += 1
+
+
+def save_state_centers(msm, clustering, clusterer, decomp, xyz, centers_dir):
+    """
+
+    """
+    dists = {val: float('inf') for key, val in msm.mapping_.items()}
+    centermap = {val: (-1, -1) for key, val in msm.mapping_.items()}
+
+    if not os.path.isdir(centers_dir):
+        os.mkdir(centers_dir)
+
+    for i in range(0, len(clustering)):
+        for j in range(0, len(clustering[i])):
+            try:
+                label = clustering[i][j]
+                center = msm.mapping_[label]
+                dist = np.linalg.norm(decomp[i][j] - clusterer.cluster_centers_[label])
+                if center != -1 and dist < dists[center]:
+                    dists[center] = dist
+                    centermap[center] = (i, j)
+            except KeyError:
+                continue
+
+    if not os.path.isdir(centers_dir):
+        os.mkdir(centers_dir)
+
+    for key, val in centermap.items():
+        fname = ''.join(['Center', str(key), '.pdb'])
+        traj = xyz[val[0]].slice([val[1]])
+        traj.save(os.path.join(centers_dir, fname))
+
+
+def save_cell_assignments(centers_dir, reference, threshold, atom_selection,
+                          folded_out, unfolded_out, cells_out):
+    """
+
+    """
+    ref = mdtraj.load(reference)
+
+    n_cells = len(glob.glob(os.path.join(centers_dir, '*.pdb')))
+
+    folded = open(folded_out, 'w')
+    unfolded = open(unfolded_out, 'w')
+    cells = open(cells_out, 'w')
+
+    cells.write(''.join(['ncells: ', str(n_cells),
+                         '\nncoords: ', str(ref.n_atoms),
+                         '\nndims: ', str(3), '\n\n']))
+
+    for i in range(0, n_cells):
+        fname = ''.join(['Center', str(i), '.pdb'])
+        traj = mdtraj.load(os.path.join(centers_dir, fname))
+        rmsd = mdtraj.rmsd(traj, ref,
+                           atom_indices=traj.topology.select(atom_selection))
+        if rmsd[0] < threshold:
+            folded.write(''.join([str(i), '\n']))
+        else:
+            unfolded.write(''.join([str(j), '\n']))
+
+        for atom in traj.xyz[0]:
+            cells.write(''.join([str(atom[0]), '\n',
+                                 str(atom[1]), '\n',
+                                 str(atom[2]), '\n']))
+
+    folded.close()
+    unfolded.close()
+    cells.close()
+
+
+def save_weights(msm, weights_out):
+    """
+
+    """
+    np.savetxt(weights_out, msm.populations_)
+
+
+if __name__ == "__main__":
+    args = parse_args(None)
+
+    print("Featurizing...")
+    featurize(args)
+    print("Generating decomposition...")
+    decompose(args)
+    print("Clustering...")
+    cluster(args)
+    print("Building MSM...")
+    build_msm(args)
+
+    msm = load(args.msm_out)
+    clustering = dataset(args.clustered_data)
+    clusterer = load(args.clusterer_out)
+    xyz = dataset(args.input_trajectories, topology=args.topology)
+
+    print("Saving %s samples per cell..." % (args.n_samples))
+    save_samples(msm, clustering, xyz, args.n_samples, args.samples_out)
+    print("Saving state centers...")
+    ticas = dataset(args.decomp_data)
+    save_state_centers(msm, clustering, clusterer, ticas, xyz, args.centers_out)
+    print("Saving cell weights...")
+    save_weights(msm, args.weights_datafile)
+    del msm
+    del clustering
+    del clusterer
+    del xyz
+    del ticas
+    print("Saving cell color assignments and cell definitions...")
+    save_cell_assignments(args.centers_out, args.reference, args.folded_threshold,
+                          args.atom_selection, args.folded_assignments[0],
+                          args.folded_assignments[1], args.cells_datafile)
+    print("Done!")

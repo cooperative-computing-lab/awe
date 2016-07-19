@@ -150,7 +150,7 @@ def config(opts):
     else:
         # This branch performs setup for OpenMM
         cfg.cache(opts.openmm_script, remotepath='simulate.py')
-        cfg.cache(INSTANCE_ROOT, 'openmm', env.sh)
+        cfg.cache(os.path.join(INSTANCE_ROOT, 'openmm', 'env.sh'))
 
     cfg.cache(opts.cells, remotepath='cells.dat')
 
