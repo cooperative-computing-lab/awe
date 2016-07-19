@@ -389,8 +389,8 @@ def save_state_centers(msm, clustering, clusterer, decomp, xyz, centers_dir):
     """
 
     """
-    dists = {}
-    centermap = {}
+    dists = {val: float('inf') for key, val in msm.mapping_.items}
+    centermap = {val: (-1, -1) for key, val in msm.mapping_.items}
 
     if not os.path.isdir(centers_dir):
         os.mkdir(centers_dir)
