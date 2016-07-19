@@ -434,7 +434,7 @@ def save_cell_assignments(centers_dir, reference, threshold, atom_selection,
                          '\nndims: ', str(3), '\n\n']))
 
     for i in range(0, n_cells):
-        fname = ''.join('Center', str(i), '.pdb')
+        fname = ''.join(['Center', str(i), '.pdb'])
         traj = mdtraj.load(os.path.join(centers_dir, fname))
         rmsd = mdtraj.rmsd(traj, ref,
                            atom_indices=traj.topology.select(atom_selection))
