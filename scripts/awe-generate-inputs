@@ -5,11 +5,15 @@ Extract AWE inputs from an existing MSM and corresponding clustering.
 Author: Jeff Kinnison <jkinniso@nd.edu>
 """
 
+# Python Standard Library imports
 import argparse
 import copy
 import glob
 import os
 import os.path
+import subprocess
+
+# Third-Party imports
 import mdtraj
 from msmbuilder.dataset import dataset
 from msmbuilder.utils import load, draw_samples
@@ -19,96 +23,294 @@ import numpy as np
 def parse_args(args=None):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-n', '--n-samples',
-                        required=True,
-                        type=int,
-                        help='the number of samples to draw from each MSM state'
-                        )
+    # General Options
+    general = parser.add_group('General Arguments')
 
-    parser.add_argument('-m', '--msm',
-                        default='msm.pkl',
+    general.add_argument('-i', '--input-trajectories',
+                        default='trajectories/*',
                         type=str,
-                        help='path to the serialized MSMBuilder msm object'
+                        help='path or glob to the input trajectories'
                         )
 
-    parser.add_argument('-c', '--clustering',
-                        default='clustering/',
-                        type=str,
-                        help='path to the clustered data'
-                        )
-
-    parser.add_argument('-C', '--clusterer',
-                        default='clusterer.pkl',
-                        type=str,
-                        help='path to serialized clusterer fit to clustering'
-                        )
-
-    parser.add_argument('-i', '--input-trajectories',
-                        default='trajectories',
-                        type=str,
-                        help='path to the input trajectories'
-                        )
-
-    parser.add_argument('-t', '--topology',
+    general.add_argument('-t', '--topology',
                         default='input.pdb',
                         type=str,
                         help='path to the trajectory topology file'
                         )
 
-    parser.add_argument('-r', '--reference',
+    general.add_argument('-r', '--reference',
                         default='folded.pdb',
                         type=str,
                         help='path to the reference trajectory'
                         )
 
-    parser.add_argument('-a', '--atom-selection',
-                        default='backbone',
+    # Featurization Options
+
+    featurize = parser.add_group("Featurization Arguments")
+
+    featurize.add_argument('-f', '--featurizer',
+                           default='DihedralFeaturizer',
+                           type=str,
+                           help='MSMBuilder featurizer class to use'
+                           choices=['ContactFeaturizer',
+                                    'DRIDFeaturizer',
+                                    'DihedralFeaturizer',
+                                    'RMSDFeaturizer',
+                                    'RawPositionsFeaturizer']
+                           )
+
+    featurize.add_argument('--featurizer-out',
+                           default='feat.pkl',
+                           type=str,
+                           help='path to the file that will store the serialized featurizer',
+                           )
+
+    featurize.add_argument('--featurized-data',
+                           default='feats.h5',
+                           type=str,
+                           help='path to the file that will store the featurized data'
+                           )
+
+    featurize.add_argument('--featurizer-args',
+                           default='',
+                           type=str,
+                           help='a comma-delimited list of additional arguments to the featurizer (e.g. --arg1,val1,--arg2,val2)'
+                           )
+
+    # Decomposition Options
+
+    decomp = parser.add_group('Decomposition Options')
+
+    decomp.add_argument('-d', '--decomposer',
+                        default='tICA',
                         type=str,
-                        help='MDTraj/VMD atom selection string'
+                        help='MSMBuilder decomposition class to use',
+                        choices=['PCA',
+                                 'SparseTICA',
+                                 'tICA']
                         )
 
-    parser.add_argument('--samples-out',
-                        default='samples',
+    decomp.add_argument('--decomp-out',
+                        default='tica.pkl',
                         type=str,
-                        help='path to the cell sampling output directory'
+                        help='path to the file that will store the serialized decomposer',
                         )
 
-    parser.add_argument('--centers-out',
-                        default='centers',
+    decomp.add_argument('--decomp-data',
+                        default='ticas.h5',
                         type=str,
-                        help='path to the cell centers output directory'
+                        help='path to the file that will store the decomposed data'
                         )
 
-    parser.add_argument('--folded-assignments',
-                        default=['folded.dat', 'unfolded.dat']
-                        nargs=2,
+    decomp.add_argument('--n-components',
+                        default=5,
+                        type=int,
+                        help='the number of components to find in the decomposition')
+
+    decomp.add_argument('--decomp-args',
+                        default='',
                         type=str,
-                        help='paths to the cell assignment output files'
+                        help='a comma-delimited list of additional arguments to the decomposer (e.g. --arg1,val1,--arg2,val2)'
                         )
 
-    parser.add_argument('--folded-threshold',
-                        default=3.0,
-                        type=float,
-                        help='RMSD to folded state threshold (AA)'
+    # Clustering Options
+
+    cluster = parser.add_group('Clustering Options')
+
+    cluster.add_argument('-c', '--clusterer',
+                        default='MiniBatchKMeans',
+                        type=str,
+                        help='MSMBuilder clusterer class to use',
+                        choices=['AffinityPropagation',
+                                 'GMM',
+                                 'KCenters',
+                                 'KMeans',
+                                 'KMedoids',
+                                 'LandmarkAgglomerative',
+                                 'MeanShift',
+                                 'MiniBatchKMeans',
+                                 'MiniBatchKMedoids',
+                                 'RegularSpatial',
+                                 'SpectralClustering',
+                                 'Ward']
                         )
 
-    parser.add_argument('--cells-datafile',
-                        default='cells.dat',
-                        type=str,
-                        help='the cell data output file'
-                        )
+    cluster.add_argument('--clusterer-out',
+                         default='cluster.pkl',
+                         type=str,
+                         help='path to the file that will store the serialized clusterer',
+                         )
 
-    parser.add_argument('--weights-datafile',
-                        default='weights.dat',
-                        type=str,
-                        help='the cell weights data output file',
-                        )
+    cluster.add_argument('--clustered-data',
+                         default='labeled-trajs.h5',
+                         type=str,
+                         help='path to the file that will store the clustered data'
+                         )
+
+    cluster.add_argument('--n-clusters',
+                         default=100,
+                         type=int,
+                         help='the target number of clusters to find'
+                         )
+
+    cluster.add_argument('--clusterer-args',
+                         default='',
+                         type=str,
+                         help='a comma-delimited list of additional arguments to the clusterer (e.g. --arg1,val1,--arg2,val2)'
+                         )
+
+    # MSM Options
+
+    msm = parser.add_group('MSM Options')
+
+    msm.add_argument('-m', '--msm',
+                     default='tICA',
+                     type=str,
+                     help='MSMBuilder msmer class to use',
+                     choices=['BayesianMSM', 'MSM']
+                     )
+
+    msm.add_argument('--msm-out',
+                     default='msm.pkl',
+                     type=str,
+                     help='path to the file that will store the serialized msmer',
+                     )
+
+    msm.add_argument('--lag-time',
+                     default=1,
+                     type=int,
+                     help='lag time for determinig MSM populations')
+
+    msm.add_argument('--msm-args',
+                     default='',
+                     type=str,
+                     help='a comma-delimited list of additional arguments to the msmer (e.g. --arg1,val1,--arg2,val2)'
+                     )
+
+    # Sampling Options
+
+    sampling = parser.add_group('Sampling Options')
+
+    sampling.add_argument('-n', '--n-samples',
+                          required=True,
+                          type=int,
+                          help='the number of samples to draw from each MSM state'
+                          )
+
+    sampling.add_argument('-a', '--atom-selection',
+                          default='backbone',
+                          type=str,
+                          help='MDTraj/VMD atom selection string'
+                          )
+
+    sampling.add_argument('--samples-out',
+                          default='samples',
+                          type=str,
+                          help='path to the cell sampling output directory'
+                          )
+
+    sampling.add_argument('--centers-out',
+                          default='centers',
+                          type=str,
+                          help='path to the cell centers output directory'
+                          )
+
+    sampling.add_argument('--folded-assignments',
+                          default=['folded.dat', 'unfolded.dat']
+                          nargs=2,
+                          type=str,
+                          help='paths to the cell assignment output files'
+                          )
+
+    sampling.add_argument('--folded-threshold',
+                          default=3.0,
+                          type=float,
+                          help='RMSD to folded state threshold (AA)'
+                          )
+
+    sampling.add_argument('--cells-datafile',
+                          default='cells.dat',
+                          type=str,
+                          help='the cell data output file'
+                          )
+
+    sampling.add_argument('--weights-datafile',
+                          default='weights.dat',
+                          type=str,
+                          help='the cell weights data output file',
+                          )
 
     return parser.parse_args(args)
 
 
+def featurize(args):
+    """
+
+    """
+    cmd = ['msmb', args.featurizer,
+           '--out', args.featurizer_out,
+           '--transformed', args.featurized_data,
+           '--top', args.topology,
+           '--trjs', args.input_trajectories].extend(args.featurizer_args.split(','))
+    try:
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+    except subprocess.CalledProcessError as e:
+        print("Error: Featurization failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def decompose(args):
+    """
+
+    """
+    cmd = ['msmb', args.decomposer,
+           '-i', args.featurized_data,
+           '--out', args.decomposer_out,
+           '--transformed', args.decomposed_data,
+           '--n_components', str(args.n_components)].extend(args.decomposer_args.split(','))
+    try:
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+    except subprocess.CalledProcessError as e:
+        print("Error: Decomposition failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def cluster(args):
+    """
+
+    """
+    cmd = ['msmb', args.clusterer,
+           '-i', args.decomposed_data,
+           '--out', args.clusterer_out,
+           '--transformed', args.clustered_data,
+           '--n_clusters', str(args.n_clusters)].extend(args.clusterer_args.split(','))
+    try:
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+    except subprocess.CalledProcessError as e:
+        print("Error: Clustering failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
+def build_msm():
+    """
+
+    """
+    cmd = ['msmb', args.msm,
+           '-i', args.clustered_data,
+           '--out', args.msm_out,
+           '--lag_time', str(args.lag_time)].extend(args.decomposer_args.split(','))
+    try:
+        subprocess.run('msmb MarkovStateModel -i labeled-trajs.h5 --out msm.pkl --lag_time 1',
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+    except subprocess.CalledProcessError as e:
+        print("Error: MSM Building failed")
+        print("Caused by %s\n\n%s\n\n%s" % (e.cmd, e.stdout, e.stderr))
+
+
 def save_samples(msm, clustering, xyz, n_samples, samples_dir):
     """
+    Extract samples from each state in the MSM and save each as an individual PDB.
+
 
     """
     samples = msm.draw_samples(clustering, n_samples)
@@ -184,9 +386,9 @@ def save_cell_assignments(centers_dir, reference, threshold, atom_selection,
                                  str(atom[1]), '\n',
                                  str(atom[2]), '\n']))
 
-        folded.close()
-        unfolded.close()
-        cells.close()
+    folded.close()
+    unfolded.close()
+    cells.close()
 
 
 def save_weights(msm, weights_out):
@@ -199,8 +401,13 @@ def save_weights(msm, weights_out):
 if __name__ == "__main__":
     args = parse_args(None)
 
+    featurize(args)
+    decompose(args)
+    cluster(args)
+    build_msm(args)
+
     msm = load(args.msm)
-    clustering = dataset(args.clustering)
+    clustering = dataset(args.clustered_data)
     clusterer = load(args.clusterer)
     xyz = dataset(args.input_trajectories, args.topology)
 
