@@ -35,8 +35,8 @@ cat > index.html << EOF
                 <img src="tasks_utilized.png"></img>
                 <img src="network_transfer.png"></img>
                 <img src="task_exetime.png"></img>
-                <img src="task_histogram.png"></img>
-		
+                <img src="task_histogram.png"></img>	
+                <img src="cores_capacity.png"></img>
         </div>
         </body>
 
@@ -64,6 +64,7 @@ set format x "%H:%M"
 set style line 1 lc rgb '#0060ad' lt 1 lw 1   # --- blue
 set style line 2 lc rgb '#dd181f' lt 1 lw 1   # --- red
 set style line 3 lc rgb '#33cc33' lt 1 lw 2   # --- green
+set style line 4 lc rgb '#ba58f9' lt 1 lw 1   # --- violet
 
 #First path indicates directory where log file exists,by default we assume it is in same directory as this file
 #Second path is used to specify a different directory for the resulting .png files to be placed (instead of working directory), e.g."./debug/"
@@ -78,6 +79,8 @@ set title "Total Workers Utilized in AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Worker Info"
 
+
+#Use below command for deprecated wq-stats and cctools 5.4.13 wq-stats
 plot wq_stats using (\$1/1000000):4 title 'workers_idle' with lines ls 1, wq_stats using (\$1/1000000):5 title 'workers_busy' with lines ls 2, wq_stats using (\$1/1000000):2 title "total workers connected" with lines ls 3
 
 #-----------------------------------------
@@ -87,7 +90,10 @@ set title "Total Task Utilized in AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Task Info"
 
-plot wq_stats using (\$1/1000000):8 title 'tasks_waiting' with lines ls 1, wq_stats using (\$1/1000000):9 title 'tasks_running' with lines ls 2, wq_stats using (\$1/1000000):12 title 'total_tasks_complete' with lines ls 3
+plot wq_stats using (\$1/1000000):14 title 'tasks_waiting' with lines ls 1, wq_stats using (\$1/1000000):16 title 'tasks_running' with lines ls 2, wq_stats using (\$1/1000000):20 title 'total_tasks_complete' with lines ls 3
+
+#Use below command for deprecated wq-stats (before v.5.4)
+#plot wq_stats using (\$1/1000000):8 title 'tasks_waiting' with lines ls 1, wq_stats using (\$1/1000000):9 title 'tasks_running' with lines ls 2, wq_stats using (\$1/1000000):12 title 'total_tasks_complete' with lines ls 3
 
 #-----------------------------------------
 
@@ -96,8 +102,10 @@ set title "Network Transfer Information for AWE-WQ Run"
 set xlabel "Timestamp"
 set ylabel "Transfer Info (In Bytes)"
 
+plot wq_stats using (\$1/1000000):36 title 'bytes_sent' with lines ls 1, wq_stats using (\$1/1000000):37 title 'bytes_received'   with lines ls 2
 
-plot wq_stats using (\$1/1000000):17 title 'bytes_sent' with lines ls 1, wq_stats using (\$1/1000000):18 title 'bytes_received' with lines ls 2
+#Use below command for deprecated wq-stats (before v.5.4)
+#plot wq_stats using (\$1/1000000):17 title 'bytes_sent' with lines ls 1, wq_stats using (\$1/1000000):18 title 'bytes_received' with lines ls 2
 
 #-----------------------------------------
 
@@ -113,7 +121,17 @@ plot wq_stats using (\$1/1000000):17 title 'bytes_sent' with lines ls 1, wq_stat
         set boxwidth 0.8
         
        plot task_execution using 0:1 with boxes title "cmd_execution_time" 
+
+#--------------------------------------------
         
+        set output timestamp_path."cores_capacity.png"
+        set title "capacity vs. connected workers"
+        set xlabel "Timestamp"
+        set ylabel "Cores Capacity Information"
+
+        #below command for newer wq-stats, cctools v.5.4
+        plot wq_stats using (\$1/1000000):40 title "capacity_cores" with lines ls 1, wq_stats using (\$1/1000000):2 title "workers_connected" with lines ls 3, wq_stats using (\$1/1000000):46 title "committed_cores" with lines ls 2, wq_stats using (\$1/    1000000):43 title "total_cores" with lines ls 4
+
 #-----------------------------------------
 
         set title "Task Execution Time Frequency Plot"

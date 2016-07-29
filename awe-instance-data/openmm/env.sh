@@ -46,15 +46,12 @@ check-initial() {
 
 run-md() {
 	puts "Running simulation"
-	echo $GMXLIB
-	python simulate.py
+	python simulate.py -s 100000
 	echo
 }
 
 assign() {
-	puts "Assigning trajectory"
-	./awe-assign cells.dat CellIndices.dat traj.xtc StructureIndices.dat $ASSIGNMENT
-	echo
+    echo "Running assignment"
 }
 
 check-result() {
@@ -74,7 +71,7 @@ package() {
 
 cleanup() {
 	puts "Cleaning up"
-	rm -rv $CLEANUP
+	#rm -rv $CLEANUP
 	echo
 }
 

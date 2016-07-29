@@ -46,8 +46,10 @@ def getopts(args=None):
     g.add_option('-p', '--port', help='Port to run the master on (random|<int>) [%default]')
     g.add_option('--fast-abort', type=float, help='Use this fastabort multiplier [%default]')
     g.add_option('--debug',      action='store_true', help='Write WorkQueue debug information [%default]')
-    g.add_option('--cores', type=int, help='Use this to specify number of cores for each worker [%default]')
-
+    g.add_option('--task-cores', type=int, help='Use this to specify number of cores for each task [%default]')
+    g.add_option('--task-disk', type=int, help='Use this to specify disk usage for each task [%default]')
+    g.add_option('--task-memory', type=int, help='Use this to specify memory usage for each task [%default]')
+    
     p.add_option_group(g)
 
     ### OpenMM parameters
@@ -75,12 +77,16 @@ def getopts(args=None):
             name         = None,
             port         = 'random',
             fast_abort   = False,
-            debug        = False,
+            debug        = True,
 
             ### OpenMM params
             enable_openmm = False,
+            openmm_script = os.path.join('awe-instance-data', 'openmm', 'simulation.py'),
 
-	        cores	 = 1,
+            ### Cores params
+	        task_cores	     = 1,
+            task_disk        = 250,
+            task_memory      = 250,
             )
 
 
@@ -128,7 +134,9 @@ def config(opts):
     if opts.debug:
         cfg.debug = opts.debug
 
-    cfg.cores = opts.cores
+    cfg.task_config["cores"] = opts.task_cores
+    cfg.task_config["disk"] = opts.task_disk
+    cfg.task_config["memory"] = opts.task_memory
 
     # the "main" function of the worker
     cfg.execute(os.path.join(INSTANCE_ROOT, 'execute-task.sh'))
@@ -207,7 +215,8 @@ def main(opts):
                             system         = system,
                             iterations     = opts.iterations,
                             resample       = resampler,
-                            checkpointfreq = 1
+                            checkpointfreq = 1,
+                            log_it         = True,
                             )
         resampler.traxlogger._picklemode = 2
         resampler.traxlogger._pickleprotocol = 2

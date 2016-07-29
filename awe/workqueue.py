@@ -181,11 +181,14 @@ class Config(object):
         self.waittime        = 10 # in seconds
         self.wq_logfile      = 'debug/wq.log'
         self.wqstats_logfile = 'debug/wq-stats.log'
-        self.monitor         = False
-        self.summaryfile     = ''
+        self.wqtransactions_logfile = 'debug/wq-transactions.log'
+        self.monitor         = True	
+        self.summaryfile     = 'debug/monitor-summaries'
         self.capacity        = False
         self.task_config     = {
                                    "cores": 1,
+                                   "memory": 250,
+                                   "disk": 250,
                                }
         self._executable = None
         self._cache = set()
@@ -278,6 +281,7 @@ class Config(object):
             # Turn cctools WorkQueue object status monitoring on or off
             if self.monitor:
                 wq.enable_monitoring(self.summaryfile)
+                wq.specify_transactions_log(self.wqtransactions_logfile)
 
             if self.capacity:
                 # Determine the number of workers the WorkQueue object can handle
@@ -302,7 +306,7 @@ class Config(object):
         awe.util.makedirs_parent(self.wqstats_logfile)
         _AWE_WORK_QUEUE.specify_log(self.wqstats_logfile)
 
-        # Return a reference to teh singleton
+        # Return a reference to the singleton
         return _AWE_WORK_QUEUE
 
 
@@ -655,6 +659,8 @@ class WorkQueue(object):
         cmd = self.cfg.executable.remotepath
         task = WQ.Task('./' + cmd)
         task.specify_cores(self.cfg.task_config["cores"])
+        task.specify_memory(self.cfg.task_config["memory"])
+        task.specify_disk(self.cfg.task_config["disk"])
         ### executable
         self.cfg.executable.add_to_task(task)
 
